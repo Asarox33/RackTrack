@@ -1,2 +1,70 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# ==========================================================================
+# .gitattributes — RackTrack
+# Enforces consistent line endings (LF) and sane diff/merge behavior
+# across all contributors and OSes.
+# ==========================================================================
+
+# Default: normalize everything to LF in the repo, let Git handle
+# checkout conversion based on the platform (safe default for text files).
+* text=auto eol=lf
+
+# ---------------------------------------------------------------------
+# Explicit text files — always LF, never CRLF, regardless of platform
+# ---------------------------------------------------------------------
+*.kt              text eol=lf
+*.kts             text eol=lf
+*.java             text eol=lf
+*.xml              text eol=lf
+*.md               text eol=lf
+*.json             text eol=lf
+*.yml              text eol=lf
+*.yaml             text eol=lf
+*.toml             text eol=lf
+*.properties       text eol=lf
+*.gradle           text eol=lf
+*.pro              text eol=lf
+*.txt              text eol=lf
+.gitattributes     text eol=lf
+.gitignore         text eol=lf
+.editorconfig      text eol=lf
+
+# ---------------------------------------------------------------------
+# Windows-specific scripts must keep CRLF, Unix scripts must keep LF
+# ---------------------------------------------------------------------
+*.bat              text eol=crlf
+*.cmd              text eol=crlf
+gradlew            text eol=lf
+gradlew.bat        text eol=crlf
+
+# ---------------------------------------------------------------------
+# Binary files — never touched by line-ending normalization or diff
+# ---------------------------------------------------------------------
+*.png              binary
+*.jpg              binary
+*.jpeg              binary
+*.gif              binary
+*.webp             binary
+*.ico              binary
+*.pdf              binary
+*.jar              binary
+*.aar              binary
+*.apk              binary
+*.aab              binary
+*.keystore         binary
+*.jks              binary
+*.so               binary
+*.ttf              binary
+*.otf              binary
+
+# ---------------------------------------------------------------------
+# Generated / vendored files — excluded from GitHub diff view and
+# language statistics, to keep PR reviews focused on real changes.
+# ---------------------------------------------------------------------
+*.lock             linguist-generated=true
+gradle/wrapper/**  linguist-vendored=true
+
+# ---------------------------------------------------------------------
+# Ensure Room-generated schema JSON files are treated as generated
+# (adjust the path if the schema export location changes).
+# ---------------------------------------------------------------------
+schemas/**         linguist-generated=true text eol=lf

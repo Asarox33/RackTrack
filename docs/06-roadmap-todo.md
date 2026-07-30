@@ -1,54 +1,56 @@
 # Roadmap & TODO — MVP v1 (10-ball)
 
-Statut global : 🚧 Pas encore commencé (cadrage terminé, code à démarrer)
+Overall status: 🚧 Not started (framing complete, code to be started)
 
-Légende : ⬜ à faire · 🟨 en cours · ✅ fait
+Legend: ⬜ to do · 🟨 in progress · ✅ done
 
-## Étape 0 — Setup projet
-- ⬜ `#SETUP-1` Créer le projet Android (Kotlin + Compose), package name, min SDK
-- ⬜ `#SETUP-2` Configurer Git, `.gitignore` Android standard
-- ⬜ `#SETUP-3` Ajouter les dépendances de base (Compose, Room, tests) — voir `docs/04-architecture.md`
-- ⬜ `#ARCH-1` Décider Hilt vs DI manuelle (trancher selon simplicité pour un débutant Kotlin)
+## Step 0 — Project setup
+- ⬜ `#SETUP-1` Create the Android project (Kotlin + Compose), package name (`com.racktrack`), min SDK
+- ⬜ `#SETUP-2` Configure Git, standard Android `.gitignore`
+- ⬜ `#SETUP-3` Add Gradle Version Catalog (`libs.versions.toml`) with base dependencies (Compose, Room, Hilt, tests)
+- ⬜ `#SETUP-4` Configure ktlint + detekt, wire them into a Gradle task
+- ⬜ `#SETUP-5` Add GitHub Actions CI workflow (lint + detekt + unit tests) — see `.github/workflows/ci.yml`
 
-## Étape 1 — Domaine (priorité absolue, avant toute UI)
-- ⬜ `#DOM-1` Modéliser `Player`, `Match`, `Rack`, `Shot`, `FoulType`, `ShotOutcome` (cf. `docs/03-domain-model.md`)
-- ⬜ `#DOM-2` Implémenter la logique de casse (régulière / irrégulière)
-- ⬜ `#DOM-3` Implémenter le push-out
-- ⬜ `#DOM-4` Implémenter le déroulement normal d'un coup (annonce, ordre croissant, empoche)
-- ⬜ `#DOM-5` Implémenter le cas particulier de la bille 10 (respot)
-- ⬜ `#DOM-6` Implémenter le compteur de fautes consécutives + perte de manche
-- ⬜ `#DOM-7` Implémenter la détection de fin de manche / fin de match
-- ⬜ `#DOM-TEST` Couvrir chaque règle ci-dessus d'au moins 1 test nominal + 1 test de faute
+## Step 1 — Domain (top priority, before any UI)
+- ⬜ `#DOM-1` Model `Player`, `Match`, `Rack`, `Shot`, `FoulType`, `ShotOutcome` (see `docs/03-domain-model.md`)
+- ⬜ `#DOM-2` Implement break logic (legal / illegal)
+- ⬜ `#DOM-3` Implement push-out
+- ⬜ `#DOM-4` Implement normal shot flow (call shot, ascending order, pot)
+- ⬜ `#DOM-5` Implement the 10-ball special case (respot)
+- ⬜ `#DOM-6` Implement the consecutive foul counter + rack loss
+- ⬜ `#DOM-7` Implement end-of-rack / end-of-match detection
+- ⬜ `#DOM-TEST` Cover each rule above with at least 1 nominal test + 1 foul test
 
-## Étape 2 — Persistance
-- ⬜ `#DATA-1` Modéliser les entités Room (Match, Rack, Shot historisé)
-- ⬜ `#DATA-2` Implémenter les repositories (interfaces définies dans `domain/`, implémentation dans `data/`)
-- ⬜ `#DATA-3` Mapper entités Room ↔ modèles domain
+## Step 2 — Persistence
+- ⬜ `#DATA-1` Model Room entities (Match, Rack, historized Shot)
+- ⬜ `#DATA-2` Implement repositories (interfaces defined in `domain/`, implementation in `data/`)
+- ⬜ `#DATA-3` Map Room entities ↔ domain models
 
-## Étape 3 — UI (après que le domaine est testé et fiable)
-- ⬜ `#UI-1` Écran Accueil (Nouvelle partie / Historique / Statistiques)
-- ⬜ `#UI-2` Écran Configuration de partie (joueurs, nombre de manches)
-- ⬜ `#UI-3` Écran Casse (bouton "casse régulière/irrégulière", choix adversaire si irrégulière)
-- ⬜ `#UI-4` Écran Match — scoreboard principal (score, bille en cours la plus basse, annonce)
-- ⬜ `#UI-5` Écran Match — saisie d'un coup (bille+poche annoncées, résultat)
-- ⬜ `#UI-6` Bandeau d'alerte "2 fautes consécutives" / fin de manche
-- ⬜ `#UI-7` Écran Résultat de manche / de match
-- ⬜ `#UI-8` Écran Historique des matchs
-- ⬜ `#UI-9` Écran Statistiques simples
+## Step 3 — UI (after the domain layer is tested and reliable)
+- ⬜ `#UI-1` Home screen (New match / History / Statistics)
+- ⬜ `#UI-2` Match setup screen (players, number of racks)
+- ⬜ `#UI-3` Break screen ("legal/illegal break" button, opponent choice on illegal break)
+- ⬜ `#UI-4` Match screen — main scoreboard (score, current lowest ball, call shot)
+- ⬜ `#UI-5` Match screen — shot input (called ball+pocket, outcome)
+- ⬜ `#UI-6` Alert banner "2 consecutive fouls" / end of rack
+- ⬜ `#UI-7` Rack/match result screen
+- ⬜ `#UI-8` Match history screen
+- ⬜ `#UI-9` Simple statistics screen
 
-## Étape 4 — Finitions MVP
-- ⬜ `#POLISH-1` Gros boutons / ergonomie une main (usage debout à côté de la table)
-- ⬜ `#POLISH-2` Undo du dernier coup (erreur de saisie fréquente en usage réel)
-- ⬜ `#POLISH-3` Icône et nom d'app définitifs
+## Step 4 — MVP polish
+- ⬜ `#POLISH-1` Large buttons / one-handed ergonomics (standing next to the table)
+- ⬜ `#POLISH-2` Undo last shot (common input mistake in real usage)
+- ⬜ `#POLISH-3` Final app icon and name
 
-## V2 — Après validation du MVP par l'usage réel
-- ⬜ Ajouter le mode 9-ball (règles proches, réutiliser le moteur commun)
-- ⬜ Ajouter le mode 8-ball
-- ⬜ Évaluer besoin réel de cloud/sync avant de l'implémenter
-- ⬜ Évaluer le 14/1 continu (scoring nettement plus complexe — reformation du rack, replacement de billes)
+## V2 — After real-world MVP validation
+- ⬜ Add 9-ball mode (similar rules, reuse the shared engine)
+- ⬜ Add 8-ball mode
+- ⬜ Evaluate actual need for cloud/sync before implementing
+- ⬜ Evaluate 14.1 continuous (significantly more complex scoring — rack reformation, ball respotting)
 
-## Notes de suivi
+## Progress notes
 
-_Ajouter ici au fil de l'eau les décisions prises, les blocages rencontrés, les questions posées à trancher plus tard._
+_Log decisions, blockers, and open questions here as the project moves forward._
 
-- (exemple) 2026-07-30 : choix du 10-ball comme mode MVP, cadrage produit et architecture posés avant tout code.
+- (example) 2026-07-30: chose 10-ball as the MVP mode, product and architecture framing done before any code.
+- 2026-07-31: renamed project to RackTrack; all docs and code standardized to English; enforced modern Kotlin/Compose best practices (ktlint, detekt, CI, no `!!`, Hilt DI decided).

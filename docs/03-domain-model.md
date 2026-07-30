@@ -1,160 +1,160 @@
-# Modèle de domaine — Jeu de la 10
+# Domain Model — 10-Ball
 
-Ce document est la référence à donner à Cursor **avant** de générer la couche `domain`. Toute génération de code métier doit s'appuyer sur ces entités et cette machine à états, pas sur une réinterprétation libre des règles.
+This document is the reference to give Cursor **before** generating anything in the `domain` layer. All business logic generation must be based on these entities and this state machine, not on a free reinterpretation of the rules.
 
-## 1. Entités principales
+## 1. Core entities
 
 ### `Player`
-```
-Player(
-  id: PlayerId,
-  name: String
+```kotlin
+data class Player(
+    val id: PlayerId,
+    val name: String,
 )
 ```
 
 ### `Match`
-Un match = plusieurs manches (`Rack`) entre 2 joueurs, jusqu'à ce qu'un joueur atteigne le nombre de manches requis.
-```
-Match(
-  id: MatchId,
-  player1: Player,
-  player2: Player,
-  racksToWin: Int,
-  racks: List<Rack>,
-  status: MatchStatus // NOT_STARTED, IN_PROGRESS, COMPLETED
+A match consists of several racks between 2 players, until one player reaches the required number of racks won.
+```kotlin
+data class Match(
+    val id: MatchId,
+    val player1: Player,
+    val player2: Player,
+    val racksToWin: Int,
+    val racks: List<Rack>,
+    val status: MatchStatus, // NOT_STARTED, IN_PROGRESS, COMPLETED
 )
 ```
 
-### `Rack` (une manche de 10-ball)
-```
-Rack(
-  id: RackId,
-  breakingPlayer: PlayerId,
-  currentPlayer: PlayerId,
-  ballsOnTable: Set<BallNumber>, // 1..10, décroît au fil du jeu
-  consecutiveFouls: Map<PlayerId, Int>,
-  phase: RackPhase, // voir machine à états
-  winner: PlayerId?
+### `Rack` (a single 10-ball game)
+```kotlin
+data class Rack(
+    val id: RackId,
+    val breakingPlayer: PlayerId,
+    val currentPlayer: PlayerId,
+    val ballsOnTable: Set<Int>, // 1..10, shrinks as the rack progresses
+    val consecutiveFouls: Map<PlayerId, Int>,
+    val phase: RackPhase, // see state machine below
+    val winner: PlayerId?,
 )
 ```
 
 ### `Ball`
+```kotlin
+typealias BallNumber = Int // 1..10
 ```
-BallNumber = Int (1..10)
-```
-Pas besoin d'entité riche pour la bille en MVP — un simple set d'entiers suffit pour représenter "encore sur la table".
+No need for a rich entity in the MVP — a simple set of integers is enough to represent "still on the table".
 
-### `Shot` (un coup)
-```
-Shot(
-  playerId: PlayerId,
-  calledBall: BallNumber?,      // null si "Défense" ou push-out
-  calledPocket: Pocket?,
-  isPushOut: Boolean,
-  isSafety: Boolean,
-  outcome: ShotOutcome
+### `Shot`
+```kotlin
+data class Shot(
+    val playerId: PlayerId,
+    val calledBall: BallNumber?,      // null if "Safety" or push-out
+    val calledPocket: Pocket?,
+    val isPushOut: Boolean,
+    val isSafety: Boolean,
+    val outcome: ShotOutcome,
 )
 ```
 
-### `ShotOutcome` (résultat d'un coup, calculé par le domaine à partir de la saisie utilisateur)
-```
-sealed class ShotOutcome {
-  data class LegalPot(pottedBalls: Set<BallNumber>) : ShotOutcome()
-  data class IllegalPot(pottedBalls: Set<BallNumber>, foul: FoulType) : ShotOutcome()
-  data class Miss(safety: Boolean) : ShotOutcome()
-  data class Foul(foul: FoulType) : ShotOutcome()
-  object RackWon : ShotOutcome()
+### `ShotOutcome` (result of a shot, computed by the domain layer from user input)
+```kotlin
+sealed interface ShotOutcome {
+    data class LegalPot(val pottedBalls: Set<BallNumber>) : ShotOutcome
+    data class IllegalPot(val pottedBalls: Set<BallNumber>, val foul: FoulType) : ShotOutcome
+    data class Miss(val safety: Boolean) : ShotOutcome
+    data class Foul(val foul: FoulType) : ShotOutcome
+    object RackWon : ShotOutcome
 }
 ```
 
 ### `FoulType`
-```
+```kotlin
 enum class FoulType {
-  CUE_BALL_POCKETED_OR_OFF_TABLE,
-  WRONG_BALL_FIRST,
-  NO_RAIL_AFTER_CONTACT,
-  FOOT_OFF_FLOOR,
-  OBJECT_BALL_OFF_TABLE,
-  BALL_TOUCHED_MOVED,
-  BALLS_STILL_MOVING,
-  BALL_IN_HAND_MISPLACED,
-  OUT_OF_TURN,
-  WRONG_CUE_BALL,
-  ILLEGAL_BREAK,
-  TEN_BALL_EARLY_OR_WRONG_POCKET
+    CUE_BALL_POCKETED_OR_OFF_TABLE,
+    WRONG_BALL_FIRST,
+    NO_RAIL_AFTER_CONTACT,
+    FOOT_OFF_FLOOR,
+    OBJECT_BALL_OFF_TABLE,
+    BALL_TOUCHED_MOVED,
+    BALLS_STILL_MOVING,
+    BALL_IN_HAND_MISPLACED,
+    OUT_OF_TURN,
+    WRONG_CUE_BALL,
+    ILLEGAL_BREAK,
+    TEN_BALL_EARLY_OR_WRONG_POCKET,
 }
 ```
 
-## 2. Machine à états d'une manche (`RackPhase`)
+## 2. Rack state machine (`RackPhase`)
 
 ```mermaid
 stateDiagram-v2
     [*] --> AWAITING_BREAK
-    AWAITING_BREAK --> BREAK_SHOT : joueur casse
-    BREAK_SHOT --> AWAITING_PUSHOUT_DECISION : casse régulière
-    BREAK_SHOT --> OPEN_TABLE_AFTER_FOUL_BREAK : casse irrégulière (foul)
+    AWAITING_BREAK --> BREAK_SHOT : player breaks
+    BREAK_SHOT --> AWAITING_PUSHOUT_DECISION : legal break
+    BREAK_SHOT --> OPEN_TABLE_AFTER_FOUL_BREAK : illegal break (foul)
 
-    OPEN_TABLE_AFTER_FOUL_BREAK --> IN_PROGRESS : adversaire prend bille en main
+    OPEN_TABLE_AFTER_FOUL_BREAK --> IN_PROGRESS : opponent takes ball-in-hand
 
-    AWAITING_PUSHOUT_DECISION --> PUSHOUT_SHOT : le joueur annonce push-out
-    AWAITING_PUSHOUT_DECISION --> IN_PROGRESS : le joueur joue normalement
+    AWAITING_PUSHOUT_DECISION --> PUSHOUT_SHOT : player calls push-out
+    AWAITING_PUSHOUT_DECISION --> IN_PROGRESS : player plays a normal shot
 
-    PUSHOUT_SHOT --> OPPONENT_CHOICE : push-out réussi (sans faute)
-    PUSHOUT_SHOT --> IN_PROGRESS : push-out fauté (adversaire bille en main)
+    PUSHOUT_SHOT --> OPPONENT_CHOICE : push-out successful (no foul)
+    PUSHOUT_SHOT --> IN_PROGRESS : push-out fouled (opponent gets ball-in-hand)
 
-    OPPONENT_CHOICE --> IN_PROGRESS : adversaire choisit table ou rejoue
+    OPPONENT_CHOICE --> IN_PROGRESS : opponent chooses table or replay
 
-    IN_PROGRESS --> IN_PROGRESS : coup régulier, tour continue
-    IN_PROGRESS --> IN_PROGRESS : coup manqué / défense, main passe
-    IN_PROGRESS --> IN_PROGRESS : faute simple (1re ou 2e faute consécutive)
-    IN_PROGRESS --> RACK_LOST_THREE_FOULS : 3e faute consécutive
-    IN_PROGRESS --> RACK_WON : bille 10 empochée régulièrement en dernier
+    IN_PROGRESS --> IN_PROGRESS : legal shot, turn continues
+    IN_PROGRESS --> IN_PROGRESS : missed shot / safety, turn passes
+    IN_PROGRESS --> IN_PROGRESS : simple foul (1st or 2nd consecutive)
+    IN_PROGRESS --> RACK_LOST_THREE_FOULS : 3rd consecutive foul
+    IN_PROGRESS --> RACK_WON : 10-ball legally pocketed last
 
     RACK_LOST_THREE_FOULS --> [*]
     RACK_WON --> [*]
 ```
 
-## 3. Règles d'enchaînement à encoder (résumé exécutable)
+## 3. Sequencing rules to encode (executable summary)
 
-1. **Casse** :
-   - Contact bille n°1 non respecté → faute → bille en main adversaire (sur toute la table).
-   - Aucune bille empochée + moins de 4 billes en bande → faute (casse irrégulière) → bille en main adversaire.
-   - Casse régulière → le joueur qui casse peut annoncer un push-out avant son prochain coup.
+1. **Break**:
+   - Ball 1 not contacted first → foul → opponent ball-in-hand (anywhere on the table).
+   - No ball pocketed + fewer than 4 balls hit a rail → foul (illegal break) → opponent ball-in-hand.
+   - Legal break → the breaking player may call a push-out before their next shot.
 
-2. **Push-out** :
-   - Coup spécial, une fois par manche, réservé au joueur qui vient de faire une casse régulière.
-   - Résultat sans faute → l'**adversaire** choisit qui joue le coup suivant.
-   - Résultat avec faute → adversaire bille en main.
+2. **Push-out**:
+   - Special shot, once per rack, reserved for the player who just made a legal break.
+   - Result without a foul → the **opponent** chooses who plays the next shot.
+   - Result with a foul → opponent gets ball-in-hand.
 
-3. **Coup normal** :
-   - Vérifier que la bille annoncée est bien la plus petite bille encore sur la table, ou qu'elle a été touchée en premier par carambolage légal (simplification MVP : on peut se contenter de demander "quelle bille avez-vous touchée en premier" + "quelle bille avez-vous empochée" et comparer au set `ballsOnTable`).
-   - Bille 10 empochée alors que ce n'est pas la dernière bille, ou hors annonce → **respot** de la bille 10, pas de foul en soi *sauf* si les conditions de foul générales sont par ailleurs réunies.
-   - Bille annoncée empochée correctement → le joueur continue.
-   - Bille non annoncée empochée / mauvaise poche → main passe, aucune pénalité de faute (pas de foul), billes restent empochées (sauf la 10, cf. §6 du doc règles).
+3. **Normal shot**:
+   - Verify the called ball is the lowest-numbered ball still on the table, or was legally contacted first via a valid combination (MVP simplification: ask "which ball did you contact first" + "which ball did you pocket" and compare against `ballsOnTable`).
+   - 10-ball pocketed while it isn't the last ball, or uncalled → **respot** the 10-ball; this is not a foul by itself *unless* general foul conditions are otherwise met.
+   - Called ball pocketed correctly → the player continues.
+   - Non-called ball pocketed / wrong pocket → turn passes, no foul penalty, balls stay pocketed (except the 10-ball, see §6 of the rules doc).
 
-4. **Fautes consécutives** :
-   - Incrémenter `consecutiveFouls[playerId]` à chaque faute.
-   - Remettre à 0 dès que ce joueur joue un coup régulier (empoche ou défense valide sans faute).
-   - Sur la 3e faute consécutive → perte immédiate de la manche.
+4. **Consecutive fouls**:
+   - Increment `consecutiveFouls[playerId]` on every foul.
+   - Reset to 0 as soon as that player plays a legal shot (pot or valid safety, without a foul).
+   - On the 3rd consecutive foul → immediate loss of the rack.
 
-5. **Fin de manche** :
-   - Bille 10 empochée régulièrement, en dernier, dans la poche annoncée → `RACK_WON`.
-   - 3 fautes consécutives → `RACK_LOST_THREE_FOULS`.
+5. **End of rack**:
+   - 10-ball legally pocketed last, in the called pocket → `RACK_WON`.
+   - Three consecutive fouls → `RACK_LOST_THREE_FOULS`.
 
-## 4. Use cases (couche `domain/usecases`)
+## 4. Use cases (`domain/usecase`)
 
 - `StartMatchUseCase`
 - `StartRackUseCase`
 - `RecordBreakShotUseCase`
 - `DeclarePushOutUseCase`
-- `RecordShotUseCase` (coeur du moteur de règles — reçoit la saisie du coup, retourne un `ShotOutcome` et met à jour le `Rack`)
+- `RecordShotUseCase` (core rules engine — receives shot input, returns a `ShotOutcome` and updates the `Rack`)
 - `ResolveRackEndUseCase`
 - `GetMatchHistoryUseCase`
 
-## 5. Ce qui n'est volontairement pas modélisé en v1
+## 5. Deliberately not modeled in v1
 
-- Position réelle des billes sur la table (l'app ne simule pas la physique, uniquement le score et l'état "empochée / sur la table").
-- Arbitrage assisté / détection automatique de faute par caméra.
-- Les règles spécifiques Masters (break box).
+- Actual ball positions on the table (the app doesn't simulate physics, only score and "pocketed / on table" state).
+- Camera-assisted foul detection / automated refereeing.
+- Masters-specific rules (break box).
 
-Pour toute règle absente de ce document, se référer à `docs/02-regles-jeu-de-la-10.md`, puis en dernier recours au PDF source.
+For any rule missing from this document, refer to `docs/02-game-rules-10-ball.md`, then, as a last resort, the source PDF.
