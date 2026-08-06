@@ -1,0 +1,35 @@
+config:
+  validation: true
+
+naming:
+  FunctionNaming:
+    active: true
+    # Jetpack Compose uses PascalCase for @Composable functions.
+    ignoreAnnotated: ['Composable']
+
+complexity:
+  LongMethod:
+    active: true
+    allowedLines: 120
+  TooManyFunctions:
+    active: false
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers: ['-1', '0', '1', '2', '3', '5', '6', '7', '9', '10', '12', '16', '20', '24', '32', '40', '48', '52', '56', '64', '88', '96']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreNamedArgument: true
+  WildcardImport:
+    active: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+  UnusedPrivateFunction:
+    active: true
+    ignoreAnnotated: ['Preview']
+  ReturnCount:
+    active: true
+    max: 4

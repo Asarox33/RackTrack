@@ -1,54 +1,48 @@
-# RackTrack — American pool match scorer (MVP: 10-ball, FFB rules)
+# RackTrack — American pool match scorer (MVP: 10-ball race board)
 
-Native Android app (Kotlin + Jetpack Compose) to track and score American pool matches, starting with **10-ball**, following the FFB (French Billiards Federation) sporting code for the 2026-2027 season.
-
-## Why this project
-
-Scoring American pool by hand (points, fouls, break, push-out) is tedious and error-prone. The goal is a fast, simple app to use club-side or in casual play, that correctly encodes the official FFB rules to avoid common refereeing mistakes (call shots, three consecutive fouls, early 10-ball pocketed, etc.).
+Native Android app (Kotlin + Jetpack Compose) to follow a **10-ball race** at the table
+without slowing the game down.
 
 ## Project status
 
-🚧 Framing phase — no code written yet. See [docs/06-roadmap-todo.md](docs/06-roadmap-todo.md) for actual progress.
+MVP v0.1 — landscape race board (split screen, +1 / Run out / Foul, break indicator).
 
 ## MVP scope (v1)
 
-- **One game mode only: 10-ball**, FFB rules (see [docs/02-game-rules-10-ball.md](docs/02-game-rules-10-ball.md))
-- Local scoring only — no user account, no cloud, no networking
-- Android only (Kotlin + Jetpack Compose)
-- Simple local persistence (Room), match history
+- **Landscape only** (designed for Samsung S22 FHD+ 2340×1080 and similar)
+- Split screen: both players always visible on blue billiard cloth
+- Per player: **+1**, **Run out**, **Foul**
+- Choose race length + who breaks first
+- Alternate break after each rack; undo last action
+- Local only — no accounts, no cloud, no per-shot ball/pocket entry
 
-Out of scope for v1: 8-ball, 9-ball, 14.1 continuous, blackball, snooker, user accounts, sync, iOS.
-Full scope rationale in [docs/01-product-specification.md](docs/01-product-specification.md).
+Out of scope for v1: shot-by-shot call/pocket scoring, camera/AI, 8-ball/9-ball, iOS, sync.
+Detailed FFB rules remain documented for a future deeper mode.
 
-## Project documentation
+## Run / build
+
+```bash
+./gradlew testDebugUnitTest
+./gradlew :app:assembleDebug
+```
+
+Open in Android Studio (Ladybug+ / recent) or install the debug APK on a device locked to landscape.
+
+## Docs
 
 | Document | Content |
 |---|---|
-| [docs/01-product-specification.md](docs/01-product-specification.md) | Product goal, target users, MVP vs V2+ scope |
-| [docs/02-game-rules-10-ball.md](docs/02-game-rules-10-ball.md) | 10-ball FFB rules, rewritten for modeling purposes (not the official legal text — see `resources/`) |
-| [docs/03-domain-model.md](docs/03-domain-model.md) | Domain entities, rack state machine, encoded foul rules |
-| [docs/04-architecture.md](docs/04-architecture.md) | Tech stack, Clean Architecture, folder structure |
-| [docs/05-conventions.md](docs/05-conventions.md) | Code conventions, tooling, and modern best practices — enforced, not optional |
-| [docs/06-roadmap-todo.md](docs/06-roadmap-todo.md) | MVP backlog, broken down into tasks |
-| `resources/code-sportif-americain-2026-2027.pdf` | Official FFB text (source of truth in case of doubt) |
+| [docs/01-product-specification.md](docs/01-product-specification.md) | Product goal / scope |
+| [docs/02-game-rules-10-ball.md](docs/02-game-rules-10-ball.md) | FFB 10-ball rules (future deep mode) |
+| [docs/03-domain-model.md](docs/03-domain-model.md) | Domain notes (race MVP + future) |
+| [docs/04-architecture.md](docs/04-architecture.md) | Stack & layers |
+| [docs/05-conventions.md](docs/05-conventions.md) | Conventions |
+| [docs/06-roadmap-todo.md](docs/06-roadmap-todo.md) | Backlog |
+| `resources/code-sportif-americain-2026-2027.pdf` | Official FFB text |
 
-## Using this repo with Cursor
+## Tech stack
 
-1. Open the repo in Cursor.
-2. `.cursor/rules.md` is automatically read by Cursor and defines the code generation rules (architecture, conventions, allowed scope). **Do not delete or bypass it.**
-3. Always reference `docs/03-domain-model.md` before generating anything in the `domain` layer.
-4. When in doubt about a game rule, the source of truth is `resources/code-sportif-americain-2026-2027.pdf`, not the model's memory.
-
-## Tech stack (summary)
-
-- Kotlin, Jetpack Compose, Material 3
-- Clean Architecture (domain / data / presentation)
-- Room (local persistence)
-- No backend in v1
-- Enforced tooling: ktlint, detekt, GitHub Actions CI (see [docs/05-conventions.md](docs/05-conventions.md))
-
-Full details: [docs/04-architecture.md](docs/04-architecture.md)
-
-## License
-
-To be defined by the project owner.
+- Kotlin 2.4, Jetpack Compose, Material 3
+- AGP 9.3 (built-in Kotlin), Gradle 9.6, compileSdk/targetSdk 36
+- JDK 25 for builds; clean `domain/` with JVM unit tests
+- ktlint + detekt + GitHub Actions CI

@@ -1,42 +1,32 @@
 # Code Generation Rules — RackTrack
 
-You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) for scoring American pool matches, 10-ball mode only for the MVP.
+You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) for scoring American pool **10-ball races**.
+
+## MVP v0.1 product shape (current)
+
+- Landscape-only split-screen race board on blue billiard cloth
+- Per player: **+1**, **Run out**, **Foul**; break indicator; who breaks first; undo
+- No per-shot ball + pocket entry (too slow at the table; camera/AI is future)
 
 ## Before generating anything
 
-1. If the task touches scope, features, or "should we build X" questions: read `docs/01-product-specification.md` first. It defines what's in and out of the MVP.
-2. If the task touches `domain/` (game rules, entities, use cases): read `docs/03-domain-model.md` in full first. Do not code a game rule from memory.
-3. If the task touches project structure or dependency choices: read `docs/04-architecture.md`.
-4. Always follow `docs/05-conventions.md` (naming, commits, tests, enforced modern practices).
-5. If a game rule seems ambiguous or missing from `docs/02-game-rules-10-ball.md` and `docs/03-domain-model.md`: **ask, don't guess**. The PDF `resources/code-sportif-americain-2026-2027.pdf` is the final authority.
+1. Scope/features: read `docs/01-product-specification.md`.
+2. Domain race logic: keep `domain/` pure Kotlin (no Android imports).
+3. Structure/deps: `docs/04-architecture.md` + `gradle/libs.versions.toml`.
+4. Conventions: `docs/05-conventions.md`.
+5. Ambiguous FFB rules for a future deep mode: ask; PDF in `resources/` is authority.
 
-## Hard constraints (never cross without explicit confirmation)
+## Hard constraints
 
-- Scope: 10-ball only. Do not add 8-ball/9-ball/14.1/snooker/blackball "to future-proof", even if it looks easy to generalize.
-- No backend, no networking, no authentication in v1.
-- Compose only, never XML layouts.
-- `domain/` must never import `android.*`, `androidx.*`, Room, or Compose. Zero exceptions.
-- No new external dependency without flagging it explicitly in the response, even if it seems convenient.
+- Do not add 8-ball/9-ball/14.1 without explicit ask.
+- No backend, networking, or auth in v1.
+- Compose only; activity stays landscape.
+- `domain/` never imports `android.*` / `androidx.*` / Room / Compose.
+- No new external dependency without flagging it.
+- AGP 9 has built-in Kotlin — do not apply `org.jetbrains.kotlin.android`.
 
-## Enforced code quality (from `docs/05-conventions.md`, repeated here because it matters)
+## Enforced quality
 
-- No `!!` (non-null assertion).
-- No mutable public state, no global singletons outside Hilt-managed scopes.
-- Coroutines + Flow only for async/reactive code — no callbacks, no RxJava.
-- Sealed interfaces/classes for finite result types (e.g. `ShotOutcome`), not boolean flags.
-- Immutable `data class` for all domain models.
-- No business logic inside `@Composable` functions.
-- Code must be written as if ktlint and detekt will run on it immediately — because they will.
-
-## Developer experience level
-
-The person driving this project is starting out in native Android/Kotlin development. As a result:
-- Briefly explain (2-3 lines) the "why" of a non-trivial technical choice when introducing it, not just the "what".
-- Prefer the simplest, most standard solution over the most elegant/abstract one, unless `docs/04-architecture.md` explicitly asks for the opposite.
-- Break work into small, testable steps rather than generating one large block of code, following the breakdown in `docs/06-roadmap-todo.md`.
-
-## Tests
-
-Every new rule added to `domain/rule` must ship with at least:
-- 1 nominal case test (rule respected)
-- 1 corresponding foul case test
+- No `!!`, no mutable public state, Coroutines/Flow only, sealed results, immutable domain models.
+- No business logic inside `@Composable`.
+- ktlint + detekt must pass.

@@ -1,56 +1,31 @@
-# Roadmap & TODO — MVP v1 (10-ball)
+# Roadmap & TODO — MVP v1 (10-ball race board)
 
-Overall status: 🚧 Not started (framing complete, code to be started)
+Overall status: 🟨 MVP v0.1 in progress (landscape race board)
 
 Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Step 0 — Project setup
-- ⬜ `#SETUP-1` Create the Android project (Kotlin + Compose), package name (`com.racktrack`), min SDK
-- ⬜ `#SETUP-2` Configure Git, standard Android `.gitignore`
-- ⬜ `#SETUP-3` Add Gradle Version Catalog (`libs.versions.toml`) with base dependencies (Compose, Room, Hilt, tests)
-- ⬜ `#SETUP-4` Configure ktlint + detekt, wire them into a Gradle task
-- ⬜ `#SETUP-5` Add GitHub Actions CI workflow (lint + detekt + unit tests) — see `.github/workflows/ci.yml`
+- ✅ `#SETUP-1` Create Android project (Kotlin + Compose), `com.racktrack`, min SDK 26
+- ✅ `#SETUP-2` Android `.gitignore`
+- ✅ `#SETUP-3` Gradle Version Catalog
+- ✅ `#SETUP-4` ktlint + detekt wired
+- ✅ `#SETUP-5` GitHub Actions CI (JDK 25 + lint + tests)
 
-## Step 1 — Domain (top priority, before any UI)
-- ⬜ `#DOM-1` Model `Player`, `Match`, `Rack`, `Shot`, `FoulType`, `ShotOutcome` (see `docs/03-domain-model.md`)
-- ⬜ `#DOM-2` Implement break logic (legal / illegal)
-- ⬜ `#DOM-3` Implement push-out
-- ⬜ `#DOM-4` Implement normal shot flow (call shot, ascending order, pot)
-- ⬜ `#DOM-5` Implement the 10-ball special case (respot)
-- ⬜ `#DOM-6` Implement the consecutive foul counter + rack loss
-- ⬜ `#DOM-7` Implement end-of-rack / end-of-match detection
-- ⬜ `#DOM-TEST` Cover each rule above with at least 1 nominal test + 1 foul test
+## Step 1 — Race domain (current MVP)
+- ✅ `#DOM-RACE-1` `Match` / scores / breaker / foul counts
+- ✅ `#DOM-RACE-2` +1, run-out, foul, undo, race completion
+- ✅ `#DOM-RACE-TEST` Unit tests for award / foul / undo / completion
 
-## Step 2 — Persistence
-- ⬜ `#DATA-1` Model Room entities (Match, Rack, historized Shot)
-- ⬜ `#DATA-2` Implement repositories (interfaces defined in `domain/`, implementation in `data/`)
-- ⬜ `#DATA-3` Map Room entities ↔ domain models
+## Step 2 — Landscape UI
+- ✅ `#UI-SETUP` Setup screen (names, race to N, who breaks)
+- ✅ `#UI-BOARD` Split scoreboard on blue cloth (+1 / Run out / Foul / BREAK / undo)
+- ⬜ `#UI-HISTORY` Match history (Room) — next
 
-## Step 3 — UI (after the domain layer is tested and reliable)
-- ⬜ `#UI-1` Home screen (New match / History / Statistics)
-- ⬜ `#UI-2` Match setup screen (players, number of racks)
-- ⬜ `#UI-3` Break screen ("legal/illegal break" button, opponent choice on illegal break)
-- ⬜ `#UI-4` Match screen — main scoreboard (score, current lowest ball, call shot)
-- ⬜ `#UI-5` Match screen — shot input (called ball+pocket, outcome)
-- ⬜ `#UI-6` Alert banner "2 consecutive fouls" / end of rack
-- ⬜ `#UI-7` Rack/match result screen
-- ⬜ `#UI-8` Match history screen
-- ⬜ `#UI-9` Simple statistics screen
-
-## Step 4 — MVP polish
-- ⬜ `#POLISH-1` Large buttons / one-handed ergonomics (standing next to the table)
-- ⬜ `#POLISH-2` Undo last shot (common input mistake in real usage)
-- ⬜ `#POLISH-3` Final app icon and name
-
-## V2 — After real-world MVP validation
-- ⬜ Add 9-ball mode (similar rules, reuse the shared engine)
-- ⬜ Add 8-ball mode
-- ⬜ Evaluate actual need for cloud/sync before implementing
-- ⬜ Evaluate 14.1 continuous (significantly more complex scoring — rack reformation, ball respotting)
+## Step 3 — Deferred deep rules (old shot-by-shot backlog)
+- ⬜ Per-shot call / pocket / push-out / 10-ball respot / 3-foul rack loss
+- ⬜ Camera / AI assistance
 
 ## Progress notes
 
-_Log decisions, blockers, and open questions here as the project moves forward._
-
-- (example) 2026-07-30: chose 10-ball as the MVP mode, product and architecture framing done before any code.
-- 2026-07-31: renamed project to RackTrack; all docs and code standardized to English; enforced modern Kotlin/Compose best practices (ktlint, detekt, CI, no `!!`, Hilt DI decided).
+- 2026-08-06: Pivoted MVP from shot-by-shot entry to landscape race board (too slow at the table).
+- 2026-07-31: renamed project to RackTrack; docs in English; ktlint/detekt/CI direction set.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.RackTrack" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:statusBarColor">#0C3E8C</item>
+        <item name="android:navigationBarColor">#082A60</item>
+    </style>
+</resources>
