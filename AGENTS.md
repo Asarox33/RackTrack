@@ -4,10 +4,12 @@ Project-wide guidance for AI agents. Also read `.cursor/rules.md` and `docs/`.
 
 ## Cursor Cloud specific instructions
 
-### Product (MVP v0.1)
+### Product (current MVP)
 
-Landscape-only **10-ball race board**: split screen, blue cloth, per-player **+1 / Run out / Foul**,
-break indicator, who breaks first, undo. No per-shot ball/pocket entry.
+American pool **race board** (8 / 9 / 10) + **14/1 continuous**:
+split screen, multi-felt cloth, per-mode actions, break/hand indicator, undo,
+end-of-match summary, settings (felt, screen on, haptics, defaults, FFB link).
+Orientation: `fullSensor` (landscape + portrait). No per-shot ball/pocket entry.
 
 ### Toolchain
 
@@ -24,4 +26,3 @@ break indicator, who breaks first, undo. No per-shot ball/pocket entry.
 ```
 
 No emulator/GUI in this VM — validate with unit tests + APK assemble/`apkanalyzer`.
-Activity is locked to `sensorLandscape`.

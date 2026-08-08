@@ -1,6 +1,12 @@
 # 10-Ball Game Rules (FFB, 2026-2027 season) — Rewritten for Modeling
 
-> ⚠️ This document is a **rewritten technical specification**, not the official regulatory text. In case of dispute or ambiguity, the only authoritative source is `resources/code-sportif-americain-2026-2027.pdf` (Chapter 5, articles 1.5.01 to 1.5.07, complemented by the general rules of Chapter 2, articles 1.2.01 to 1.2.20).
+> ⚠️ **Not the current MVP domain.** The shipped app is a race / 14/1 scoreboard
+> (`docs/03-domain-model.md`). This file is a **future deep-mode** reference for call-ball /
+> push-out modeling.
+>
+> Rewritten technical specification, not the official regulatory text. Authority:
+> `resources/code-sportif-americain-2026-2027.pdf` (Chapter 5, arts 1.5.01–1.5.07; general
+> Chapter 2, arts 1.2.01–1.2.20).
 
 ## 1. Objective
 

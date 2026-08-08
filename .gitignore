@@ -12,3 +12,9 @@ captures/
 *.ap_
 *.aab
 *.kotlin_module
+
+# Local icon drafts (keep script + final sources under assets/)
+assets/choix-*.png
+assets/icon-*.png
+assets/*-draft*.png
+assets/*-v2*.png

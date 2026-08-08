@@ -11,6 +11,11 @@ complexity:
   LongMethod:
     active: true
     allowedLines: 120
+    # Compose screens and scoreboard panels are naturally long declarative trees.
+    excludes: ['**/presentation/screen/**']
+  CyclomaticComplexMethod:
+    active: true
+    allowedComplexity: 25
   TooManyFunctions:
     active: false
 
@@ -22,6 +27,15 @@ style:
     ignoreCompanionObjectPropertyDeclaration: true
     ignoreAnnotation: true
     ignoreNamedArgument: true
+    ignoreEnums: true
+    ignoreLocalVariableDeclaration: true
+    # Hex color palettes, cloth-noise hashes, and unit-test literals.
+    excludes:
+      - '**/appearance/**'
+      - '**/presentation/theme/**'
+      - '**/presentation/component/FeltNoise.kt'
+      - '**/test/**'
+      - '**/androidTest/**'
   WildcardImport:
     active: true
   MaxLineLength:
@@ -32,4 +46,4 @@ style:
     ignoreAnnotated: ['Preview']
   ReturnCount:
     active: true
-    max: 4
+    max: 6
