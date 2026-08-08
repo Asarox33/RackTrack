@@ -26,10 +26,15 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ End-of-match summary modal
 - ✅ Launcher icon (adaptive + round)
 
-## Step 4 — Optional next
+## Step 4 — Quality (pragmatic)
+- ✅ Domain JaCoCo on CI + PR comment
+- ✅ `MatchCoordinator` unit tests (no screenshot / UI golden tests)
+
+## Step 5 — Optional next
 - ⬜ Match history persistence (Room) if still wanted after table use
 - ⬜ Deeper FFB shot-by-shot mode (call/pocket/push-out) — only if product asks
 - ⬜ Camera / AI assistance
+- ⬜ Screenshot tests only if UI stabilizes and visual regressions appear in the wild
 
 ## Progress notes
 

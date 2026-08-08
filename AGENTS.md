@@ -26,4 +26,6 @@ Orientation: `fullSensor` (landscape + portrait). No per-shot ball/pocket entry.
 ./gradlew :app:assembleDebug
 ```
 
+Prefer domain + `MatchCoordinator` unit tests. No Compose screenshot / golden tests for this MVP.
+
 No emulator/GUI in this VM — validate with unit tests + APK assemble/`apkanalyzer`.

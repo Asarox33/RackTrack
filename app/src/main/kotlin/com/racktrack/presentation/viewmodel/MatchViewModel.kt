@@ -2,18 +2,13 @@ package com.racktrack.presentation.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.racktrack.appearance.FeltTone
 import com.racktrack.data.AppPreferences
 import com.racktrack.data.UserSettings
-import com.racktrack.domain.FourteenOneEngine
-import com.racktrack.domain.MatchEngine
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.PlayerId
-import com.racktrack.appearance.FeltTone
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
 data class SetupUiState(
     val player1Name: String = "",
@@ -31,181 +26,70 @@ sealed interface AppScreen {
     data class MatchBoard(val match: Match) : AppScreen
 }
 
+/** Thin Android shell: preferences + [MatchCoordinator]. */
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences = AppPreferences(application)
+    private val coordinator = MatchCoordinator(
+        initialSettings = preferences.load(),
+        persistSettings = preferences::save,
+    )
 
-    private val _settings = MutableStateFlow(preferences.load())
-    val settings: StateFlow<UserSettings> = _settings.asStateFlow()
+    val settings: StateFlow<UserSettings> = coordinator.settings
+    val setup: StateFlow<SetupUiState> = coordinator.setup
+    val screen: StateFlow<AppScreen> = coordinator.screen
+    val settingsOpen: StateFlow<Boolean> = coordinator.settingsOpen
 
-    private val _setup = MutableStateFlow(setupFromPreferences(_settings.value))
-    val setup: StateFlow<SetupUiState> = _setup.asStateFlow()
+    fun openSettings() = coordinator.openSettings()
 
-    private val _screen = MutableStateFlow<AppScreen>(AppScreen.Setup)
-    val screen: StateFlow<AppScreen> = _screen.asStateFlow()
+    fun closeSettings() = coordinator.closeSettings()
 
-    private val _settingsOpen = MutableStateFlow(false)
-    val settingsOpen: StateFlow<Boolean> = _settingsOpen.asStateFlow()
+    fun setFeltTone(tone: FeltTone) = coordinator.setFeltTone(tone)
 
-    fun openSettings() {
-        _settingsOpen.value = true
-    }
+    fun setKeepScreenOn(enabled: Boolean) = coordinator.setKeepScreenOn(enabled)
 
-    fun closeSettings() {
-        _settingsOpen.value = false
-    }
+    fun setHapticsEnabled(enabled: Boolean) = coordinator.setHapticsEnabled(enabled)
 
-    fun setFeltTone(tone: FeltTone) {
-        updateSettings { it.copy(feltTone = tone) }
-    }
+    fun setDefaultRacksToWin(value: Int) = coordinator.setDefaultRacksToWin(value)
 
-    fun setKeepScreenOn(enabled: Boolean) {
-        updateSettings { it.copy(keepScreenOn = enabled) }
-    }
+    fun setDefaultPointsToWin(value: Int) = coordinator.setDefaultPointsToWin(value)
 
-    fun setHapticsEnabled(enabled: Boolean) {
-        updateSettings { it.copy(hapticsEnabled = enabled) }
-    }
+    fun setDefaultInningsLimit(value: Int?) = coordinator.setDefaultInningsLimit(value)
 
-    fun setDefaultRacksToWin(value: Int) {
-        updateSettings { it.copy(defaultRacksToWin = value) }
-        _setup.update { it.copy(racksToWin = value) }
-    }
+    fun updatePlayer1Name(value: String) = coordinator.updatePlayer1Name(value)
 
-    fun setDefaultPointsToWin(value: Int) {
-        updateSettings { it.copy(defaultPointsToWin = value) }
-        _setup.update { it.copy(pointsToWin = value) }
-    }
+    fun updatePlayer2Name(value: String) = coordinator.updatePlayer2Name(value)
 
-    fun setDefaultInningsLimit(value: Int?) {
-        updateSettings { it.copy(defaultInningsLimit = value) }
-        _setup.update { it.copy(inningsLimit = value) }
-    }
+    fun updateGameMode(value: GameMode) = coordinator.updateGameMode(value)
 
-    fun updatePlayer1Name(value: String) {
-        _setup.update { it.copy(player1Name = value) }
-    }
+    fun updateRacksToWin(value: Int) = coordinator.updateRacksToWin(value)
 
-    fun updatePlayer2Name(value: String) {
-        _setup.update { it.copy(player2Name = value) }
-    }
+    fun updatePointsToWin(value: Int) = coordinator.updatePointsToWin(value)
 
-    fun updateGameMode(value: GameMode) {
-        _setup.update { it.copy(gameMode = value) }
-    }
+    fun updateInningsLimit(value: Int?) = coordinator.updateInningsLimit(value)
 
-    fun updateRacksToWin(value: Int) {
-        _setup.update { it.copy(racksToWin = value) }
-    }
+    fun setPlayer1BreaksFirst(value: Boolean) = coordinator.setPlayer1BreaksFirst(value)
 
-    fun updatePointsToWin(value: Int) {
-        _setup.update { it.copy(pointsToWin = value) }
-    }
+    fun startMatch() = coordinator.startMatch()
 
-    fun updateInningsLimit(value: Int?) {
-        _setup.update { it.copy(inningsLimit = value) }
-    }
+    fun plusOne(playerId: PlayerId) = coordinator.plusOne(playerId)
 
-    fun setPlayer1BreaksFirst(value: Boolean) {
-        _setup.update { it.copy(player1BreaksFirst = value) }
-    }
+    fun runOut(playerId: PlayerId) = coordinator.runOut(playerId)
 
-    fun startMatch() {
-        val s = _setup.value
-        val match = if (s.gameMode.isPointScoring) {
-            Match.start(
-                player1Name = s.player1Name,
-                player2Name = s.player2Name,
-                racksToWin = 1,
-                initialBreakerIsPlayer1 = s.player1BreaksFirst,
-                startedAtMillis = System.currentTimeMillis(),
-                gameMode = s.gameMode,
-                pointsToWin = s.pointsToWin,
-                inningsLimit = s.inningsLimit,
-            )
-        } else {
-            Match.start(
-                player1Name = s.player1Name,
-                player2Name = s.player2Name,
-                racksToWin = s.racksToWin,
-                initialBreakerIsPlayer1 = s.player1BreaksFirst,
-                startedAtMillis = System.currentTimeMillis(),
-                gameMode = s.gameMode,
-            )
-        }
-        _screen.value = AppScreen.MatchBoard(match)
-    }
+    fun goldenBreak(playerId: PlayerId) = coordinator.goldenBreak(playerId)
 
-    fun plusOne(playerId: PlayerId) = mutateMatch {
-        MatchEngine.recordPlusOne(it, playerId, System.currentTimeMillis())
-    }
+    fun dryBreak(playerId: PlayerId) = coordinator.dryBreak(playerId)
 
-    fun runOut(playerId: PlayerId) = mutateMatch {
-        MatchEngine.recordRunOut(it, playerId, System.currentTimeMillis())
-    }
+    fun eightBallLoss(playerId: PlayerId) = coordinator.eightBallLoss(playerId)
 
-    fun goldenBreak(playerId: PlayerId) = mutateMatch {
-        MatchEngine.recordGoldenBreak(it, playerId, System.currentTimeMillis())
-    }
+    fun foul(playerId: PlayerId) = coordinator.foul(playerId)
 
-    fun dryBreak(playerId: PlayerId) = mutateMatch {
-        MatchEngine.recordDryBreak(it, playerId, System.currentTimeMillis())
-    }
+    fun addPoints(playerId: PlayerId, points: Int) = coordinator.addPoints(playerId, points)
 
-    fun eightBallLoss(playerId: PlayerId) = mutateMatch {
-        MatchEngine.recordEightBallLoss(it, playerId, System.currentTimeMillis())
-    }
+    fun pass(playerId: PlayerId) = coordinator.pass(playerId)
 
-    fun foul(playerId: PlayerId) = mutateMatch {
-        if (it.gameMode.isPointScoring) {
-            FourteenOneEngine.foul(it, playerId, System.currentTimeMillis())
-        } else {
-            MatchEngine.recordFoul(it, playerId, System.currentTimeMillis())
-        }
-    }
+    fun breakFoul(playerId: PlayerId) = coordinator.breakFoul(playerId)
 
-    fun addPoints(playerId: PlayerId, points: Int) = mutateMatch {
-        FourteenOneEngine.addPoints(it, playerId, points, System.currentTimeMillis())
-    }
+    fun undo() = coordinator.undo()
 
-    fun pass(playerId: PlayerId) = mutateMatch {
-        FourteenOneEngine.pass(it, playerId, System.currentTimeMillis())
-    }
-
-    fun breakFoul(playerId: PlayerId) = mutateMatch {
-        FourteenOneEngine.breakFoul(it, playerId, System.currentTimeMillis())
-    }
-
-    fun undo() = mutateMatch {
-        if (it.gameMode.isPointScoring) {
-            FourteenOneEngine.undoLast(it)
-        } else {
-            MatchEngine.undoLast(it)
-        }
-    }
-
-    fun newMatch() {
-        _screen.value = AppScreen.Setup
-    }
-
-    private fun updateSettings(transform: (UserSettings) -> UserSettings) {
-        val next = transform(_settings.value)
-        preferences.save(next)
-        _settings.value = next
-    }
-
-    private fun mutateMatch(transform: (Match) -> Match) {
-        val current = _screen.value
-        if (current is AppScreen.MatchBoard) {
-            _screen.value = AppScreen.MatchBoard(transform(current.match))
-        }
-    }
-
-    private companion object {
-        fun setupFromPreferences(settings: UserSettings): SetupUiState =
-            SetupUiState(
-                racksToWin = settings.defaultRacksToWin,
-                pointsToWin = settings.defaultPointsToWin,
-                inningsLimit = settings.defaultInningsLimit,
-            )
-    }
+    fun newMatch() = coordinator.newMatch()
 }

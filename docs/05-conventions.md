@@ -60,8 +60,10 @@ docs(readme): reflect multi-mode MVP
 ## 7. Testing
 
 - **Highest priority: `domain/` engines** (`MatchEngine`, `FourteenOneEngine`, `MatchStats`).
+- **Next: `MatchCoordinator`** (setup → board routing, engine dispatch, settings mirrors). Keep it Android-free.
+- **Not for this MVP:** Compose screenshot / golden-image tests (high maintenance while UI moves).
 - Test naming: `` `given X, when Y, then Z` `` (JUnit 5 backticks).
-- No E2E required for this MVP; domain unit tests first.
+- No E2E required for this MVP.
 
 ## 8. In-code documentation
 
