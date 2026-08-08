@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v6
 
       - name: ktlint check
         run: ./gradlew ktlintCheck
@@ -30,7 +30,3 @@ jobs:
 
       - name: Unit tests (domain first)
         run: ./gradlew testDebugUnitTest
-
-      # NOTE: this workflow assumes ktlint and detekt Gradle plugins are configured
-      # as part of #SETUP-4 in docs/06-roadmap-todo.md. Until that setup task is done,
-      # this workflow will fail — that failure is expected and intentional, not a bug.
