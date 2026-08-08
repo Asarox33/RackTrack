@@ -1,4 +1,4 @@
-# Product Specification — RackTrack v0.1
+# Product Specification — RackTrack
 
 ## 1. Project name
 
@@ -6,60 +6,54 @@ RackTrack
 
 ## 2. Goal
 
-Provide a simple, reliable Android app to score American pool matches, following official FFB rules, starting with 10-ball.
+Provide a simple, reliable Android app to follow American pool **races (8 / 9 / 10)** and
+**14/1 continuous** at the table without interrupting play. Deep FFB shot-by-shot refereeing
+is deferred (possible later with camera/AI).
 
 ## 3. Target users
 
-- Amateur or FFB-licensed player who wants to track their score in a casual or club match
-- Eventually, a club referee/scorekeeper in amateur tournaments (out of scope for v1)
+Amateur or club players who want a fast scoreboard next to the table (phone/tablet, any orientation).
 
 ## 4. Problem solved
 
-Manually tracking score, fouls, and edge cases (illegal break, push-out, early 10-ball, three consecutive fouls) is error-prone and a common source of disputes. The app encodes the rules to make scoring reliable and keep the game flowing.
+Typing every shot (ball + pocket) breaks game flow. Players need fast taps for rack wins / fouls /
+14/1 points, a clear **break / hand indicator**, and both scores visible at a glance.
 
 ## 5. Game modes
 
-### V1 (MVP)
-- **10-ball** (FFB rules, 2026-2027 season)
+### Current MVP
+- **8-ball race** — +1, Run out, Foul, Early 8, Dry break
+- **9-ball race** — +1, Run out, Foul, Golden break, Dry break; 3 consecutive fouls = rack loss
+- **10-ball race** — +1, Run out, Foul; 3 consecutive fouls = rack loss
+- **14/1 continuous** — +1/+5/+14, PASS, FOUL (−1), BREAK −2, 3-foul −15; distance + optional innings
 
-### V2 (after MVP validation)
-- 9-ball
-- 8-ball
-- (14.1 continuous and Artistic pool: evaluated later, significantly higher scoring complexity)
+### Later
+- Deeper FFB shot rules (call ball/pocket, push-out, respot), optional camera/AI assistance
 
 ## 6. MVP features
 
-- Create a match (2 players, player names)
-- Choose the format (number of racks needed to win)
-- Handle the break (legal / illegal, opponent's choice on illegal break)
-- Handle the push-out after a legal break
-- Call shot (ball + pocket) on every shot
-- Pocket a ball (+1 point), enforce ascending ball order
-- Handle fouls (FFB list), with ball-in-hand for the opponent
-- Handle the 10-ball special case (pocketed early / uncalled / knocked off table → respotted)
-- Consecutive foul counter (3 consecutive fouls = loss of rack)
-- End of rack / end of match (best of N racks)
-- Match history
-- Simple statistics (racks won/lost per player, basic average)
+- Create a match (2 names, mode, race length or 14/1 distance/innings, who starts)
+- Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink)
+- Landscape and portrait (`fullSensor`)
+- Break / shooter indicator; alternate break after each race rack
+- Undo last action; end-of-match summary
+- Settings: felt, keep screen on, haptics, default race/distance/innings, open FFB PDF rules link
 
-## 7. Explicitly out of scope for v1
+## 7. Explicitly out of scope for now
 
-- User accounts, authentication
-- Cloud, multi-device sync
-- Network / remote multiplayer mode
-- Any game mode other than 10-ball
-- Shot clock / timing (FFB code article 1.2.13 — too complex for MVP)
-- Disciplinary card/penalty management (article 1.2.17)
-- Anything related to federal competitions (Title III of the sporting code: categories, leagues, national rankings) — out of scope for a match-scoring app
-- iOS
+- Per-shot call ball + pocket entry
+- Push-out UI, full illegal-break geometry checks
+- User accounts, cloud, sync, iOS
+- Shot clock / disciplinary / federal competition machinery
+- Match history persistence (Room) — not required for table play
 
 ## 8. Constraints
 
-- The project owner is starting from zero in native Android development. The development pace must stay realistic; the MVP must be achievable through short, testable iterations.
-- Rules must stay faithful to the FFB sporting code for 10-ball (see `docs/02-game-rules-10-ball.md` and the source PDF in `resources/`).
+- Owner is learning native Android — keep iterations short and testable
+- Domain logic stays pure Kotlin (no Android deps) for fast JVM tests
 
-## 9. MVP success criteria
+## 9. Success criteria
 
-- A full 10-ball rack can be scored end-to-end following core FFB rules (excluding timing and disciplinary matters, explicitly out of scope).
-- The app correctly handles at minimum: legal/illegal break, push-out, ascending ball order, the 10-ball special case, three consecutive fouls, ball-in-hand.
-- Smooth one-handed use in real playing conditions (large buttons, minimal text to read).
+Standing at a table, two players can run an 8/9/10 race or a 14/1 to a set distance with the
+relevant taps, see who breaks / has the hand, finish, and review a short summary — without
+entering shot details.

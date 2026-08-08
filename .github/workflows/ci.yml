@@ -9,18 +9,21 @@ on:
 jobs:
   quality-and-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v6
 
       - name: ktlint check
         run: ./gradlew ktlintCheck
@@ -28,9 +31,58 @@ jobs:
       - name: detekt
         run: ./gradlew detekt
 
-      - name: Unit tests (domain first)
-        run: ./gradlew testDebugUnitTest
+      - name: Unit tests + domain coverage
+        run: ./gradlew :app:domainCoverage
 
-      # NOTE: this workflow assumes ktlint and detekt Gradle plugins are configured
-      # as part of #SETUP-4 in docs/06-roadmap-todo.md. Until that setup task is done,
-      # this workflow will fail — that failure is expected and intentional, not a bug.
+      - name: Coverage report on PR
+        if: github.event_name == 'pull_request'
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.8.0
+        with:
+          paths: ${{ github.workspace }}/app/build/reports/jacoco/domainCoverage/domainCoverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Domain coverage
+          update-comment: true
+          # Madrapps uses instruction coverage (not line %). Domain overall ~85%.
+          min-coverage-overall: 80
+          min-coverage-changed-files: 0
+
+      - name: Coverage summary
+        if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
+        run: |
+          python3 <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          xml_path = Path("app/build/reports/jacoco/domainCoverage/domainCoverage.xml")
+          root = ET.parse(xml_path).getroot()
+          counters = {c.get("type"): c for c in root.findall("counter")}
+          line = counters.get("LINE")
+          if line is None:
+              raise SystemExit("No LINE counter in JaCoCo report")
+          missed = int(line.get("missed", 0))
+          covered = int(line.get("covered", 0))
+          total = missed + covered
+          pct = (100.0 * covered / total) if total else 0.0
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          body = (
+              "## Domain coverage\n\n"
+              f"- **Line coverage:** {pct:.1f}% ({covered}/{total})\n"
+              f"- HTML report uploaded as CI artifact `domain-coverage`\n"
+              f"- Local: `./gradlew :app:domainCoverage` → "
+              "`app/build/reports/jacoco/domainCoverage/html/index.html`\n"
+          )
+          print(body)
+          if summary:
+              with open(summary, "a", encoding="utf-8") as fh:
+                  fh.write(body)
+          PY
+
+      - name: Upload coverage HTML
+        if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/html/**') != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: domain-coverage
+          path: app/build/reports/jacoco/domainCoverage/html
+          if-no-files-found: ignore

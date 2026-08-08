@@ -1,56 +1,43 @@
-# Roadmap & TODO — MVP v1 (10-ball)
+# Roadmap & TODO
 
-Overall status: 🚧 Not started (framing complete, code to be started)
+Overall status: ✅ MVP ready for table testing (8/9/10 races + 14/1)
 
 Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Step 0 — Project setup
-- ⬜ `#SETUP-1` Create the Android project (Kotlin + Compose), package name (`com.racktrack`), min SDK
-- ⬜ `#SETUP-2` Configure Git, standard Android `.gitignore`
-- ⬜ `#SETUP-3` Add Gradle Version Catalog (`libs.versions.toml`) with base dependencies (Compose, Room, Hilt, tests)
-- ⬜ `#SETUP-4` Configure ktlint + detekt, wire them into a Gradle task
-- ⬜ `#SETUP-5` Add GitHub Actions CI workflow (lint + detekt + unit tests) — see `.github/workflows/ci.yml`
+- ✅ Android project (Kotlin + Compose), `com.racktrack`, min SDK 26
+- ✅ Gradle Version Catalog, ktlint, detekt, GitHub Actions CI
 
-## Step 1 — Domain (top priority, before any UI)
-- ⬜ `#DOM-1` Model `Player`, `Match`, `Rack`, `Shot`, `FoulType`, `ShotOutcome` (see `docs/03-domain-model.md`)
-- ⬜ `#DOM-2` Implement break logic (legal / illegal)
-- ⬜ `#DOM-3` Implement push-out
-- ⬜ `#DOM-4` Implement normal shot flow (call shot, ascending order, pot)
-- ⬜ `#DOM-5` Implement the 10-ball special case (respot)
-- ⬜ `#DOM-6` Implement the consecutive foul counter + rack loss
-- ⬜ `#DOM-7` Implement end-of-rack / end-of-match detection
-- ⬜ `#DOM-TEST` Cover each rule above with at least 1 nominal test + 1 foul test
+## Step 1 — Race domain
+- ✅ Match / scores / breaker / foul counts
+- ✅ +1, run-out, foul, undo, race completion
+- ✅ 8-ball Early 8 / Dry; 9-ball Golden / Dry; 3-foul rack loss (9/10)
+- ✅ Unit tests
 
-## Step 2 — Persistence
-- ⬜ `#DATA-1` Model Room entities (Match, Rack, historized Shot)
-- ⬜ `#DATA-2` Implement repositories (interfaces defined in `domain/`, implementation in `data/`)
-- ⬜ `#DATA-3` Map Room entities ↔ domain models
+## Step 2 — 14/1 domain + UI
+- ✅ Points engine (PASS, fouls, break foul, 3-foul −15, innings/overtime)
+- ✅ FourteenOne board + summary (net points per inning)
+- ✅ Unit tests
 
-## Step 3 — UI (after the domain layer is tested and reliable)
-- ⬜ `#UI-1` Home screen (New match / History / Statistics)
-- ⬜ `#UI-2` Match setup screen (players, number of racks)
-- ⬜ `#UI-3` Break screen ("legal/illegal break" button, opponent choice on illegal break)
-- ⬜ `#UI-4` Match screen — main scoreboard (score, current lowest ball, call shot)
-- ⬜ `#UI-5` Match screen — shot input (called ball+pocket, outcome)
-- ⬜ `#UI-6` Alert banner "2 consecutive fouls" / end of rack
-- ⬜ `#UI-7` Rack/match result screen
-- ⬜ `#UI-8` Match history screen
-- ⬜ `#UI-9` Simple statistics screen
+## Step 3 — Boards & settings
+- ✅ Setup (modes, race/distance/innings, who starts)
+- ✅ Split boards (landscape + portrait), felt tones, cloth grain
+- ✅ Settings (felt, screen on, haptics, defaults, FFB link)
+- ✅ End-of-match summary modal
+- ✅ Launcher icon (adaptive + round)
 
-## Step 4 — MVP polish
-- ⬜ `#POLISH-1` Large buttons / one-handed ergonomics (standing next to the table)
-- ⬜ `#POLISH-2` Undo last shot (common input mistake in real usage)
-- ⬜ `#POLISH-3` Final app icon and name
+## Step 4 — Quality (pragmatic)
+- ✅ Domain JaCoCo on CI + PR comment
+- ✅ `MatchCoordinator` unit tests (no screenshot / UI golden tests)
 
-## V2 — After real-world MVP validation
-- ⬜ Add 9-ball mode (similar rules, reuse the shared engine)
-- ⬜ Add 8-ball mode
-- ⬜ Evaluate actual need for cloud/sync before implementing
-- ⬜ Evaluate 14.1 continuous (significantly more complex scoring — rack reformation, ball respotting)
+## Step 5 — Optional next
+- ⬜ Match history persistence (Room) if still wanted after table use
+- ⬜ Deeper FFB shot-by-shot mode (call/pocket/push-out) — only if product asks
+- ⬜ Camera / AI assistance
+- ⬜ Screenshot tests only if UI stabilizes and visual regressions appear in the wild
 
 ## Progress notes
 
-_Log decisions, blockers, and open questions here as the project moves forward._
-
-- (example) 2026-07-30: chose 10-ball as the MVP mode, product and architecture framing done before any code.
-- 2026-07-31: renamed project to RackTrack; all docs and code standardized to English; enforced modern Kotlin/Compose best practices (ktlint, detekt, CI, no `!!`, Hilt DI decided).
+- 2026-08-08: Cleanup pass — dead APIs, assets, `appearance/` for felt, docs aligned to multi-mode MVP.
+- 2026-08: Expanded beyond 10-ball-only landscape board to 8/9/10 + 14/1 and settings.
+- 2026-08-06: Pivoted MVP from shot-by-shot entry to race board (too slow at the table).
