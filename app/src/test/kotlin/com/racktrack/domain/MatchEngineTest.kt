@@ -5,6 +5,7 @@ import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -381,5 +382,94 @@ class MatchEngineTest {
         assertEquals(0, undone.eightBallLoss1)
         assertEquals(match.player1.id, undone.currentBreakerId)
         assertTrue(undone.history.isEmpty())
+    }
+
+    @Test
+    fun `given 9-ball, canRecord helpers match UI enablement rules`() {
+        val match = freshMatch(GameMode.NINE_BALL)
+        val p1 = match.player1.id
+        val p2 = match.player2.id
+
+        assertTrue(MatchEngine.canRecordGoldenBreak(match, p1))
+        assertTrue(MatchEngine.canRecordDryBreak(match, p1))
+        assertFalse(MatchEngine.canRecordGoldenBreak(match, p2))
+        assertFalse(MatchEngine.canRecordDryBreak(match, p2))
+        assertFalse(MatchEngine.canRecordEightBallLoss(match, p1))
+    }
+
+    @Test
+    fun `given 8-ball, canRecordEightBallLoss is true for both players`() {
+        val match = freshMatch(GameMode.EIGHT_BALL)
+
+        assertTrue(MatchEngine.canRecordEightBallLoss(match, match.player1.id))
+        assertTrue(MatchEngine.canRecordEightBallLoss(match, match.player2.id))
+        assertTrue(MatchEngine.canRecordDryBreak(match, match.player1.id))
+        assertFalse(MatchEngine.canRecordGoldenBreak(match, match.player1.id))
+    }
+
+    @Test
+    fun `given player2 has the break, when run out golden dry and early 8, then player2 counters update`() {
+        fun start(mode: GameMode, player1Breaks: Boolean): Match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 6,
+                initialBreakerIsPlayer1 = player1Breaks,
+                startedAtMillis = clock,
+                gameMode = mode,
+            )
+
+        val nine = start(GameMode.NINE_BALL, player1Breaks = false)
+        val runOut = MatchEngine.recordRunOut(nine, nine.player2.id, now())
+        assertEquals(1, runOut.score2)
+        assertEquals(1, runOut.runOut2)
+
+        val goldenBase = start(GameMode.NINE_BALL, player1Breaks = false)
+        val afterGolden = MatchEngine.recordGoldenBreak(goldenBase, goldenBase.player2.id, now())
+        assertEquals(1, afterGolden.goldenBreak2)
+
+        val dryBase = start(GameMode.NINE_BALL, player1Breaks = false)
+        val afterDry = MatchEngine.recordDryBreak(dryBase, dryBase.player2.id, now())
+        assertEquals(1, afterDry.dryBreak2)
+
+        val eight = start(GameMode.EIGHT_BALL, player1Breaks = true)
+        val afterEarly8 = MatchEngine.recordEightBallLoss(eight, eight.player2.id, now())
+        assertEquals(1, afterEarly8.score1)
+        assertEquals(1, afterEarly8.eightBallLoss2)
+
+        val undone = MatchEngine.undoLast(afterEarly8)
+        assertEquals(0, undone.eightBallLoss2)
+        assertEquals(0, undone.score1)
+    }
+
+    @Test
+    fun `given dry-break guards, when completed fouled or duplicate, then match is unchanged`() {
+        val match = freshMatch(GameMode.NINE_BALL)
+        val dry = MatchEngine.recordDryBreak(match, match.player1.id, now())
+        val duplicate = MatchEngine.recordDryBreak(dry, match.player1.id, now())
+        assertEquals(1, duplicate.dryBreak1)
+        assertEquals(1, duplicate.history.size)
+
+        val fouled = MatchEngine.recordFoul(match, match.player1.id, now())
+        val afterFoul = MatchEngine.recordDryBreak(fouled, match.player1.id, now())
+        assertEquals(0, afterFoul.dryBreak1)
+
+        var race = freshMatch(GameMode.NINE_BALL)
+        repeat(6) {
+            race = MatchEngine.recordPlusOne(race, race.player1.id, now())
+        }
+        assertEquals(MatchStatus.COMPLETED, race.status)
+        assertFalse(MatchEngine.canRecordDryBreak(race, race.player1.id))
+        assertFalse(MatchEngine.canRecordEightBallLoss(race, race.player1.id))
+        val afterCompleted = MatchEngine.recordDryBreak(race, race.player1.id, now())
+        assertEquals(race.history.size, afterCompleted.history.size)
+    }
+
+    @Test
+    fun `given empty history, when undo, then match is unchanged`() {
+        val match = freshMatch()
+        val undone = MatchEngine.undoLast(match)
+        assertTrue(undone.history.isEmpty())
+        assertEquals(0, undone.score1)
     }
 }

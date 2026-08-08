@@ -43,8 +43,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Domain coverage
           update-comment: true
+          # Madrapps uses instruction coverage (not line %). Domain overall ~79%.
           min-coverage-overall: 70
-          min-coverage-changed-lines: 0
+          min-coverage-changed-files: 0
 
       - name: Coverage summary
         if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
