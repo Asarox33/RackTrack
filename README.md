@@ -24,9 +24,12 @@ Detailed FFB rules live in `docs/02-game-rules-10-ball.md` and the official PDF 
 
 ```bash
 ./gradlew testDebugUnitTest
+./gradlew :app:domainCoverage   # domain JaCoCo → app/build/reports/jacoco/domainCoverage/
 ./gradlew ktlintCheck detekt
 ./gradlew :app:assembleDebug
 ```
+
+On pull requests to `main`, CI posts a **Domain coverage** comment (JaCoCo) and uploads the HTML report as an artifact.
 
 Open in Android Studio (recent) or install the debug APK on a phone/tablet.
 

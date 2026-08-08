@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    jacoco
 }
 
 android {
@@ -19,6 +20,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -70,6 +74,53 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    extensions.configure(JacocoTaskExtension::class) {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+/**
+ * Domain-focused JaCoCo report (race / 14.1 engines). UI is mostly untested Compose.
+ * HTML: app/build/reports/jacoco/domainCoverage/html/index.html
+ * XML:  app/build/reports/jacoco/domainCoverage/domainCoverage.xml
+ */
+tasks.register<JacocoReport>("domainCoverage") {
+    group = "verification"
+    description = "Generate JaCoCo coverage report for domain sources"
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+
+    // AGP 9 built-in Kotlin compiler output (not tmp/kotlin-classes).
+    val kotlinClasses =
+        layout.buildDirectory.dir(
+            "intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+        )
+    classDirectories.setFrom(
+        files(
+            fileTree(kotlinClasses) {
+                include("**/domain/**")
+                exclude(
+                    "**/*\$*",
+                    "**/BuildConfig.*",
+                    "**/R.class",
+                    "**/R\$*.class",
+                    "**/Manifest*.*",
+                )
+            },
+        ),
+    )
+    sourceDirectories.setFrom(files("src/main/kotlin"))
+    executionData.setFrom(
+        fileTree(layout.buildDirectory) {
+            include("outputs/unit_test_code_coverage/debugUnitTest/*.exec")
+        },
+    )
 }
 
 ktlint {

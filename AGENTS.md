@@ -21,6 +21,7 @@ Orientation: `fullSensor` (landscape + portrait). No per-shot ball/pocket entry.
 
 ```bash
 ./gradlew testDebugUnitTest
+./gradlew :app:domainCoverage   # JaCoCo HTML/XML for domain/
 ./gradlew ktlintCheck detekt
 ./gradlew :app:assembleDebug
 ```

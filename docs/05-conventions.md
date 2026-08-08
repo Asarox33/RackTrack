@@ -33,7 +33,9 @@ These are enforced rules for anyone (human or agent) writing code in this repo.
 
 - **ktlint** + **detekt** must pass (local + CI).
 - **Gradle Version Catalog** — no scattered inline versions for catalogued deps.
-- **CI**: ktlint, detekt, unit tests on every push/PR.
+- **CI**: ktlint, detekt, unit tests + domain JaCoCo on every push/PR to `main`.
+  PRs get a coverage comment (`madrapps/jacoco-report`); HTML is also a workflow artifact.
+  Local report: `./gradlew :app:domainCoverage`.
 
 ## 5. Git commit conventions
 
