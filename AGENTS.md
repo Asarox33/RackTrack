@@ -4,11 +4,13 @@ Project-wide guidance for AI agents. Also read `.cursor/rules.md` and `docs/`.
 
 ## Cursor Cloud specific instructions
 
-### Product (current MVP)
+### Product (current)
 
 American pool **race board** (8 / 9 / 10) + **14/1 continuous**:
 split screen, multi-felt cloth, per-mode actions, break/hand indicator, undo,
-end-of-match summary, settings (felt, screen on, haptics, defaults, FFB link).
+end-of-match summary (SHARE PDF + BACK), local match history (mode-scoped,
+player filters, delete, same stats), PDF share with start/end/duration,
+settings (felt, screen on, haptics, defaults, FFB link).
 Orientation: `fullSensor` (landscape + portrait). No per-shot ball/pocket entry.
 
 ### Toolchain
@@ -26,6 +28,6 @@ Orientation: `fullSensor` (landscape + portrait). No per-shot ball/pocket entry.
 ./gradlew :app:assembleDebug
 ```
 
-Prefer domain + `MatchCoordinator` unit tests. No Compose screenshot / golden tests for this MVP.
+Prefer domain + `MatchCoordinator` + history JSON/filter unit tests. No Compose screenshot tests.
 
 No emulator/GUI in this VM — validate with unit tests + APK assemble/`apkanalyzer`.

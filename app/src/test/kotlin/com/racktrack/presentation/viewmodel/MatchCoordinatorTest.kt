@@ -3,7 +3,9 @@ package com.racktrack.presentation.viewmodel
 import com.racktrack.appearance.FeltTone
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.GameMode
+import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEventType
+import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PlayerId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test
 class MatchCoordinatorTest {
     private var clock = 1_000_000L
     private val persisted = mutableListOf<UserSettings>()
+    private val completed = mutableListOf<Match>()
 
     private fun coordinator(
         settings: UserSettings = UserSettings(),
@@ -20,6 +23,7 @@ class MatchCoordinatorTest {
         MatchCoordinator(
             initialSettings = settings,
             persistSettings = { persisted += it },
+            onMatchCompleted = { completed += it },
             clock = {
                 clock += 1_000L
                 clock
@@ -140,6 +144,37 @@ class MatchCoordinatorTest {
 
         c.clearFouls(p1)
         assertEquals(0, c.board().match.foul1)
+    }
+
+    @Test
+    fun `given race completed, when last rack awarded, then onMatchCompleted fires once`() {
+        completed.clear()
+        val c = coordinator()
+        c.updateGameMode(GameMode.TEN_BALL)
+        c.updateRacksToWin(2)
+        c.updatePlayer1Name("Alex")
+        c.updatePlayer2Name("Sam")
+        c.startMatch()
+        val p1 = c.board().match.player1.id
+
+        c.plusOne(p1)
+        assertTrue(completed.isEmpty())
+        c.plusOne(p1)
+
+        assertEquals(MatchStatus.COMPLETED, c.board().match.status)
+        assertEquals(1, completed.size)
+        assertEquals("Alex", completed.single().player1.name)
+    }
+
+    @Test
+    fun `given history open, when openHistoryDetail then close, then returns to history list`() {
+        val c = coordinator()
+        c.openHistory()
+        assertEquals(AppScreen.History, c.screen.value)
+        c.openHistoryDetail("abc")
+        assertEquals(AppScreen.HistoryDetail("abc"), c.screen.value)
+        c.closeHistoryDetail()
+        assertEquals(AppScreen.History, c.screen.value)
     }
 
 }

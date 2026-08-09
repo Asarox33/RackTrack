@@ -2,13 +2,25 @@ package com.racktrack.presentation.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.racktrack.appearance.FeltTone
 import com.racktrack.data.AppPreferences
+import com.racktrack.data.JsonMatchHistoryStore
+import com.racktrack.data.MatchHistoryFilter
+import com.racktrack.data.MatchHistoryStore
+import com.racktrack.data.StoredMatch
 import com.racktrack.data.UserSettings
+import com.racktrack.domain.MatchStats
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.PlayerId
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class SetupUiState(
     val player1Name: String = "",
@@ -21,23 +33,65 @@ data class SetupUiState(
     val player1BreaksFirst: Boolean = true,
 )
 
+data class HistoryUiState(
+    val gameMode: GameMode = GameMode.TEN_BALL,
+    val playerFilter1: String = "",
+    val playerFilter2: String = "",
+    val matches: List<StoredMatch> = emptyList(),
+)
+
 sealed interface AppScreen {
     data object Setup : AppScreen
     data class MatchBoard(val match: Match) : AppScreen
+    data object History : AppScreen
+    data class HistoryDetail(val matchId: String) : AppScreen
 }
 
-/** Thin Android shell: preferences + [MatchCoordinator]. */
+/** Thin Android shell: preferences, history store, [MatchCoordinator]. */
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences = AppPreferences(application)
+    private val historyStore: MatchHistoryStore = JsonMatchHistoryStore(application)
+
     private val coordinator = MatchCoordinator(
         initialSettings = preferences.load(),
         persistSettings = preferences::save,
+        onMatchCompleted = ::persistCompletedMatch,
     )
+
+    private val _historyGameMode = MutableStateFlow(GameMode.TEN_BALL)
+    private val _playerFilter1 = MutableStateFlow("")
+    private val _playerFilter2 = MutableStateFlow("")
 
     val settings: StateFlow<UserSettings> = coordinator.settings
     val setup: StateFlow<SetupUiState> = coordinator.setup
     val screen: StateFlow<AppScreen> = coordinator.screen
     val settingsOpen: StateFlow<Boolean> = coordinator.settingsOpen
+
+    val history: StateFlow<HistoryUiState> = combine(
+        historyStore.matches,
+        _historyGameMode,
+        _playerFilter1,
+        _playerFilter2,
+    ) { matches, gameMode, filter1, filter2 ->
+        HistoryUiState(
+            gameMode = gameMode,
+            playerFilter1 = filter1,
+            playerFilter2 = filter2,
+            matches = MatchHistoryFilter.apply(
+                matches = matches,
+                playerQuery1 = filter1,
+                playerQuery2 = filter2,
+                gameMode = gameMode,
+            ),
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HistoryUiState(),
+    )
+
+    private val _selectedHistoryMatch = MutableStateFlow<StoredMatch?>(null)
+    val selectedHistoryMatch: StateFlow<StoredMatch?> = _selectedHistoryMatch
 
     fun openSettings() = coordinator.openSettings()
 
@@ -94,4 +148,56 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun undo() = coordinator.undo()
 
     fun newMatch() = coordinator.newMatch()
+
+    fun openHistory() {
+        _historyGameMode.value = coordinator.setup.value.gameMode
+        _playerFilter1.value = ""
+        _playerFilter2.value = ""
+        coordinator.openHistory()
+    }
+
+    fun setHistoryPlayerFilter1(value: String) {
+        _playerFilter1.value = value
+    }
+
+    fun setHistoryPlayerFilter2(value: String) {
+        _playerFilter2.value = value
+    }
+
+    fun openHistoryDetail(matchId: String) {
+        viewModelScope.launch {
+            _selectedHistoryMatch.value = historyStore.getById(matchId)
+            coordinator.openHistoryDetail(matchId)
+        }
+    }
+
+    fun closeHistoryDetail() {
+        _selectedHistoryMatch.value = null
+        coordinator.closeHistoryDetail()
+    }
+
+    fun closeHistory() {
+        _selectedHistoryMatch.value = null
+        _playerFilter1.value = ""
+        _playerFilter2.value = ""
+        coordinator.newMatch()
+    }
+
+    fun deleteHistoryMatch(matchId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyStore.deleteById(matchId)
+            if (_selectedHistoryMatch.value?.id == matchId) {
+                _selectedHistoryMatch.value = null
+            }
+        }
+    }
+
+    private fun persistCompletedMatch(match: Match) {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyStore.saveCompleted(
+                summary = MatchStats.summarize(match),
+                completedAtMillis = System.currentTimeMillis(),
+            )
+        }
+    }
 }

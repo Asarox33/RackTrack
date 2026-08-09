@@ -1,0 +1,102 @@
+package com.racktrack.data
+
+import com.racktrack.domain.InningStat
+import com.racktrack.domain.MatchSummary
+import com.racktrack.domain.RackStat
+import com.racktrack.domain.model.GameMode
+import com.racktrack.domain.model.MatchEventType
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class MatchSummaryJsonTest {
+    @Test
+    fun `round trip preserves race summary`() {
+        val summary = MatchSummary(
+            gameMode = GameMode.NINE_BALL,
+            winnerName = "Alex",
+            player1Name = "Alex",
+            player2Name = "Sam",
+            score1 = 5,
+            score2 = 2,
+            racksToWin = 5,
+            pointsToWin = 0,
+            inningsLimit = null,
+            innings1 = 0,
+            innings2 = 0,
+            totalFouls1 = 1,
+            totalFouls2 = 2,
+            runOuts1 = 1,
+            runOuts2 = 0,
+            goldenBreaks1 = 1,
+            goldenBreaks2 = 0,
+            dryBreaks1 = 0,
+            dryBreaks2 = 1,
+            eightBallLosses1 = 0,
+            eightBallLosses2 = 0,
+            highRun1 = 0,
+            highRun2 = 0,
+            average1 = 0.0,
+            average2 = 0.0,
+            inningScores1 = emptyList(),
+            inningScores2 = emptyList(),
+            racks = listOf(
+                RackStat(1, "Alex", 12_000L, MatchEventType.GOLDEN_BREAK),
+                RackStat(2, "Sam", 30_000L, MatchEventType.PLUS_ONE),
+            ),
+            totalDurationMillis = 42_000L,
+            startedAtMillis = 1_700_000_000_000L,
+            endedAtMillis = 1_700_000_047_000L,
+        )
+        val stored = StoredMatch("id-1", 99L, summary)
+        val decoded = MatchSummaryJson.decodeStoredList(
+            MatchSummaryJson.encodeStoredList(listOf(stored)),
+        )
+        assertEquals(listOf(stored), decoded)
+    }
+
+    @Test
+    fun `round trip preserves 14-1 innings and nullable end type`() {
+        val summary = MatchSummary(
+            gameMode = GameMode.FOURTEEN_ONE,
+            winnerName = "Sam",
+            player1Name = "Alex",
+            player2Name = "Sam",
+            score1 = 40,
+            score2 = 100,
+            racksToWin = 1,
+            pointsToWin = 100,
+            inningsLimit = 30,
+            innings1 = 2,
+            innings2 = 2,
+            totalFouls1 = 1,
+            totalFouls2 = 0,
+            runOuts1 = 0,
+            runOuts2 = 0,
+            goldenBreaks1 = 0,
+            goldenBreaks2 = 0,
+            dryBreaks1 = 0,
+            dryBreaks2 = 0,
+            eightBallLosses1 = 0,
+            eightBallLosses2 = 0,
+            highRun1 = 14,
+            highRun2 = 50,
+            average1 = 20.0,
+            average2 = 50.0,
+            inningScores1 = listOf(
+                InningStat(1, 14, MatchEventType.PASS),
+                InningStat(2, 26, MatchEventType.FOUL),
+            ),
+            inningScores2 = listOf(
+                InningStat(1, 50, MatchEventType.PASS),
+                InningStat(2, 50, null),
+            ),
+            racks = emptyList(),
+            totalDurationMillis = 90_000L,
+            startedAtMillis = 1_700_000_000_000L,
+            endedAtMillis = 1_700_000_047_000L,
+        )
+        val stored = StoredMatch("id-2", 100L, summary)
+        val decoded = MatchSummaryJson.decodeStored(MatchSummaryJson.encodeStored(stored))
+        assertEquals(stored, decoded)
+    }
+}

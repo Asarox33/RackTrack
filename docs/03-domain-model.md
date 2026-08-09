@@ -39,8 +39,8 @@ Status: `IN_PROGRESS` | `COMPLETED`. Winner from scores when completed.
 ### `MatchEvent` / `MatchEventType`
 Append-only log used for undo and summaries.
 
-Race-oriented types include: `PLUS_ONE`, `RUN_OUT`, `FOUL`, `GOLDEN_BREAK`, `DRY_BREAK`,
-`THREE_FOULS_LOSS`, `EIGHT_BALL_LOSS`.
+Race-oriented types include: `PLUS_ONE`, `RUN_OUT`, `FOUL`, `FOULS_CLEARED`, `GOLDEN_BREAK`,
+`DRY_BREAK`, `THREE_FOULS_LOSS`, `EIGHT_BALL_LOSS`.
 
 14/1 types include: `POINTS` (with `value`), `PASS`, `BREAK_FOUL`, `THREE_FOUL_PENALTY`.
 
@@ -56,14 +56,25 @@ reaches `racksToWin`; supports undo.
 tracks innings / high run / opening break; optional innings overtime; completes at distance
 or innings end; supports undo.
 
-### `MatchStats`
-Builds `MatchSummary` from a completed (or in-progress) match: duration, race rack lines,
-or 14/1 per-inning **net** points (includes penalties).
+### `MatchStats` / `MatchSummary`
+Builds `MatchSummary` from a completed (or in-progress) match: scores, counters, racks or
+14/1 reprises, `startedAtMillis` / `endedAtMillis` / `totalDurationMillis`.
 
-## 3. Deliberately not modeled
+### `MatchSummaryReport`
+Shared labels, duration formatting, and PDF filename stem
+(`racktrack_<mode>_<p1>_vs_<p2>_<yyyyMMdd_HHmm>` from match start).
+
+## 3. Persistence (outside `domain/`)
+
+- Settings: SharedPreferences (`data/AppPreferences`)
+- Completed matches: JSON file (`data/JsonMatchHistoryStore`) storing `MatchSummary` snapshots
+  so history can reopen the same stats as the end-of-match modal; delete supported
+- Filters: `MatchHistoryFilter` (game mode + order-free player name queries)
+
+## 4. Deliberately not modeled
 
 - Ball positions, call ball/pocket, push-out, 10-ball respot geometry
 - Camera / automated refereeing
-- Persistence of match history (settings only, via SharedPreferences outside `domain/`)
+- Deep FFB shot-by-shot referee UI (needs camera to be useful)
 
 For ambiguous FFB questions, prefer the PDF over inventing rules.

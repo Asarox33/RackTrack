@@ -51,6 +51,7 @@ fun SetupScreen(
     onInningsChange: (Int?) -> Unit,
     onBreakerChange: (Boolean) -> Unit,
     onStart: () -> Unit,
+    onOpenHistory: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     rootModifier: Modifier = Modifier,
 ) {
@@ -70,6 +71,7 @@ fun SetupScreen(
                     onInningsChange = onInningsChange,
                     onBreakerChange = onBreakerChange,
                     onStart = onStart,
+                    onOpenHistory = onOpenHistory,
                 )
             } else {
                 PortraitSetup(
@@ -82,6 +84,7 @@ fun SetupScreen(
                     onInningsChange = onInningsChange,
                     onBreakerChange = onBreakerChange,
                     onStart = onStart,
+                    onOpenHistory = onOpenHistory,
                 )
             }
             SettingsGearButton(
@@ -106,6 +109,7 @@ private fun LandscapeSetup(
     onInningsChange: (Int?) -> Unit,
     onBreakerChange: (Boolean) -> Unit,
     onStart: () -> Unit,
+    onOpenHistory: () -> Unit,
 ) {
     val felt = LocalFeltPalette.current
     Row(
@@ -171,6 +175,16 @@ private fun LandscapeSetup(
                 modifier = Modifier.widthIn(min = 240.dp),
                 height = 52.dp,
             )
+            TexturedActionButton(
+                label = "HISTORY",
+                base = felt.accent,
+                light = felt.accentLight,
+                dark = felt.accentDark,
+                enabled = true,
+                onClick = onOpenHistory,
+                modifier = Modifier.widthIn(min = 240.dp),
+                height = 48.dp,
+            )
         }
     }
 }
@@ -186,6 +200,7 @@ private fun PortraitSetup(
     onInningsChange: (Int?) -> Unit,
     onBreakerChange: (Boolean) -> Unit,
     onStart: () -> Unit,
+    onOpenHistory: () -> Unit,
 ) {
     val felt = LocalFeltPalette.current
     Column(
@@ -248,6 +263,16 @@ private fun PortraitSetup(
             onClick = onStart,
             modifier = Modifier.widthIn(min = 280.dp),
             height = 56.dp,
+        )
+        TexturedActionButton(
+            label = "HISTORY",
+            base = felt.accent,
+            light = felt.accentLight,
+            dark = felt.accentDark,
+            enabled = true,
+            onClick = onOpenHistory,
+            modifier = Modifier.widthIn(min = 280.dp),
+            height = 52.dp,
         )
     }
 }
