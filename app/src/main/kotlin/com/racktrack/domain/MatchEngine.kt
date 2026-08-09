@@ -89,6 +89,22 @@ object MatchEngine {
     }
 
     /**
+     * Clears consecutive fouls for [playerId] after a legal shot (9/10-ball only).
+     * Undoable via [MatchEventType.FOULS_CLEARED] in history. No-op for 8-ball / 14.1.
+     */
+    fun clearConsecutiveFouls(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+        if (match.status == MatchStatus.COMPLETED) return match
+        if (!match.gameMode.supportsThreeFoulRackLoss) return match
+        requireKnownPlayer(match, playerId)
+        if (match.foulsFor(playerId) == 0) return match
+        return match.copy(
+            foul1 = if (playerId == match.player1.id) 0 else match.foul1,
+            foul2 = if (playerId == match.player2.id) 0 else match.foul2,
+            history = match.history + MatchEvent(MatchEventType.FOULS_CLEARED, playerId, nowMillis),
+        )
+    }
+
+    /**
      * Records a foul for [playerId].
      * Consecutive fouls are tracked per player; a legal rack award resets them.
      * On the 3rd consecutive foul the fouling player loses the rack (FFB 9/10-ball only).
@@ -131,6 +147,11 @@ object MatchEngine {
             MatchEventType.BREAK_FOUL,
             MatchEventType.THREE_FOUL_PENALTY,
             -> match
+            MatchEventType.FOULS_CLEARED -> match.copy(
+                foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
+                foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
+                history = withoutLast,
+            )
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,
             MatchEventType.GOLDEN_BREAK,
@@ -307,6 +328,8 @@ object MatchEngine {
                 MatchEventType.BREAK_FOUL,
                 MatchEventType.THREE_FOUL_PENALTY,
                 -> return count
+                MatchEventType.FOULS_CLEARED ->
+                    if (event.playerId == playerId) return 0
                 MatchEventType.FOUL -> if (event.playerId == playerId) count++
                 MatchEventType.DRY_BREAK -> Unit
             }
@@ -328,7 +351,9 @@ object MatchEngine {
                 MatchEventType.THREE_FOUL_PENALTY,
                 -> return false
                 MatchEventType.DRY_BREAK -> if (event.playerId == playerId) return true
-                MatchEventType.FOUL -> Unit
+                MatchEventType.FOUL,
+                MatchEventType.FOULS_CLEARED,
+                -> Unit
             }
         }
         return false

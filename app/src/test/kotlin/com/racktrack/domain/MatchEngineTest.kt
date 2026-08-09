@@ -472,4 +472,44 @@ class MatchEngineTest {
         assertTrue(undone.history.isEmpty())
         assertEquals(0, undone.score1)
     }
+
+    @Test
+    fun `given two fouls on 10-ball, when clearConsecutiveFouls, then counter resets and undo restores`() {
+        val match = freshMatch(GameMode.TEN_BALL)
+        val fouled = MatchEngine.recordFoul(
+            MatchEngine.recordFoul(match, match.player1.id, now()),
+            match.player1.id,
+            now(),
+        )
+        assertEquals(2, fouled.foul1)
+
+        val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
+        assertEquals(0, cleared.foul1)
+        assertEquals(MatchEventType.FOULS_CLEARED, cleared.history.last().type)
+
+        val undone = MatchEngine.undoLast(cleared)
+        assertEquals(2, undone.foul1)
+    }
+
+    @Test
+    fun `given 8-ball fouls, when clearConsecutiveFouls, then match is unchanged`() {
+        val match = freshMatch(GameMode.EIGHT_BALL)
+        val fouled = MatchEngine.recordFoul(match, match.player1.id, now())
+        val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
+        assertEquals(1, cleared.foul1)
+        assertEquals(fouled.history.size, cleared.history.size)
+    }
+
+    @Test
+    fun `given cleared fouls then two more, third foul still loses the rack`() {
+        val match = freshMatch(GameMode.NINE_BALL)
+        var current = MatchEngine.recordFoul(match, match.player1.id, now())
+        current = MatchEngine.clearConsecutiveFouls(current, match.player1.id, now())
+        current = MatchEngine.recordFoul(current, match.player1.id, now())
+        current = MatchEngine.recordFoul(current, match.player1.id, now())
+        current = MatchEngine.recordFoul(current, match.player1.id, now())
+
+        assertEquals(1, current.score2)
+        assertEquals(MatchEventType.THREE_FOULS_LOSS, current.history.last().type)
+    }
 }

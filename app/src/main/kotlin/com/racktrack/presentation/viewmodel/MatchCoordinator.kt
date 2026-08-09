@@ -150,6 +150,10 @@ class MatchCoordinator(
         }
     }
 
+    fun clearFouls(playerId: PlayerId) = mutateMatch {
+        MatchEngine.clearConsecutiveFouls(it, playerId, clock())
+    }
+
     fun addPoints(playerId: PlayerId, points: Int) = mutateMatch {
         FourteenOneEngine.addPoints(it, playerId, points, clock())
     }

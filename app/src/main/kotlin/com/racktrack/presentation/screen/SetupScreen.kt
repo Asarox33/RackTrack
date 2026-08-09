@@ -1,6 +1,7 @@
 package com.racktrack.presentation.screen
 
 import android.content.res.Configuration
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -264,7 +265,10 @@ private fun FormatControls(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Distance", style = MaterialTheme.typography.titleLarge)
             if (!compact) Box(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 MatchFormatOptions.pointsToWin.forEach { n ->
                     TexturedChip(
                         label = n.toString(),
@@ -281,7 +285,10 @@ private fun FormatControls(
             Box(modifier = Modifier.height(if (compact) 6.dp else 10.dp))
             Text("Innings", style = MaterialTheme.typography.titleLarge)
             if (!compact) Box(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 MatchFormatOptions.inningsLimits.forEach { n ->
                     TexturedChip(
                         label = n.toString(),

@@ -5,6 +5,12 @@ enum class MatchEventType {
     RUN_OUT,
     FOUL,
 
+    /**
+     * Race board — consecutive fouls cleared after a legal shot (no shot-by-shot entry).
+     * Player identified by [MatchEvent.playerId].
+     */
+    FOULS_CLEARED,
+
     /** Player identified by [MatchEvent.playerId] lost the rack on a 3rd consecutive foul. */
     THREE_FOULS_LOSS,
 

@@ -158,4 +158,5 @@ class FourteenOneEngineTest {
         val afterFoul = FourteenOneEngine.undoLast(afterPenalty)
         assertEquals(-2, afterFoul.score1)
     }
+
 }

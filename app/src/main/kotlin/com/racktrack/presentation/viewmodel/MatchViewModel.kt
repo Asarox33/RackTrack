@@ -83,6 +83,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun foul(playerId: PlayerId) = coordinator.foul(playerId)
 
+    fun clearFouls(playerId: PlayerId) = coordinator.clearFouls(playerId)
+
     fun addPoints(playerId: PlayerId, points: Int) = coordinator.addPoints(playerId, points)
 
     fun pass(playerId: PlayerId) = coordinator.pass(playerId)

@@ -18,7 +18,7 @@ MVP ready for table testing — race + 14/1 boards, settings, end-of-match summa
 - Local only — no accounts, no cloud, no per-shot ball/pocket entry
 
 Out of scope for now: shot-by-shot call/pocket scoring, camera/AI, iOS, sync.
-Detailed FFB rules live in `docs/02-game-rules-10-ball.md` and the official PDF (future deep mode).
+FFB mode notes (rules + MVP coverage) live in `docs/02-game-rules-*.md`; official text in the PDF.
 
 ## Run / build
 
@@ -38,7 +38,10 @@ Open in Android Studio (recent) or install the debug APK on a phone/tablet.
 | Document | Content |
 |---|---|
 | [docs/01-product-specification.md](docs/01-product-specification.md) | Product goal / scope |
-| [docs/02-game-rules-10-ball.md](docs/02-game-rules-10-ball.md) | FFB 10-ball rules (deep mode reference) |
+| [docs/02-game-rules-8-ball.md](docs/02-game-rules-8-ball.md) | FFB 8-ball + MVP coverage |
+| [docs/02-game-rules-9-ball.md](docs/02-game-rules-9-ball.md) | FFB 9-ball + MVP coverage |
+| [docs/02-game-rules-10-ball.md](docs/02-game-rules-10-ball.md) | FFB 10-ball + MVP coverage |
+| [docs/02-game-rules-14-1.md](docs/02-game-rules-14-1.md) | FFB 14/1 + MVP coverage |
 | [docs/03-domain-model.md](docs/03-domain-model.md) | Domain model (race + 14/1) |
 | [docs/04-architecture.md](docs/04-architecture.md) | Stack & layers |
 | [docs/05-conventions.md](docs/05-conventions.md) | Conventions |

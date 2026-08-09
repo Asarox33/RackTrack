@@ -127,4 +127,19 @@ class MatchCoordinatorTest {
         c.newMatch()
         assertEquals(AppScreen.Setup, c.screen.value)
     }
+
+    @Test
+    fun `given race fouls, when clearFouls, then consecutive counter resets`() {
+        val c = coordinator()
+        c.updateGameMode(GameMode.TEN_BALL)
+        c.startMatch()
+        val p1 = c.board().match.player1.id
+        c.foul(p1)
+        c.foul(p1)
+        assertEquals(2, c.board().match.foul1)
+
+        c.clearFouls(p1)
+        assertEquals(0, c.board().match.foul1)
+    }
+
 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.racktrack.presentation.theme.OutlineWarm
@@ -125,10 +126,16 @@ fun TexturedChip(
                 performHaptic()
                 onClick()
             }
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = CHIP_PADDING_HORIZONTAL),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = label, style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Visible,
+        )
     }
 }
 
@@ -195,6 +202,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawFeltGrain(alpha
 
 private const val GRAIN_OVERLAY_ALPHA = 0.10f
 private const val CHIP_GRAIN_ALPHA = 0.08f
+private val CHIP_PADDING_HORIZONTAL = 12.dp
 private const val HIGHLIGHT_ALPHA = 0.14f
 private const val HIGHLIGHT_FADE_STOP = 0.35f
 private const val GRAIN_STEP_PX = 3.5f
