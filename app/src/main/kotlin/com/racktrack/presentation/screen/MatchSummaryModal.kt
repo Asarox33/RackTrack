@@ -465,6 +465,7 @@ private fun rackEndLabel(type: MatchEventType): String =
         MatchEventType.EIGHT_BALL_LOSS -> "Early 8"
         MatchEventType.THREE_FOULS_LOSS -> "3 fouls"
         MatchEventType.FOUL,
+        MatchEventType.FOULS_CLEARED,
         MatchEventType.DRY_BREAK,
         MatchEventType.POINTS,
         MatchEventType.PASS,

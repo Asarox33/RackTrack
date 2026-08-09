@@ -1,12 +1,29 @@
-# 10-Ball Game Rules (FFB, 2026-2027 season) — Rewritten for Modeling
+# 10-Ball Game Rules (FFB, 2026-2027) — Modeling + MVP status
 
-> ⚠️ **Not the current MVP domain.** The shipped app is a race / 14/1 scoreboard
-> (`docs/03-domain-model.md`). This file is a **future deep-mode** reference for call-ball /
-> push-out modeling.
->
 > Rewritten technical specification, not the official regulatory text. Authority:
-> `resources/code-sportif-americain-2026-2027.pdf` (Chapter 5, arts 1.5.01–1.5.07; general
-> Chapter 2, arts 1.2.01–1.2.20).
+> `resources/code-sportif-americain-2026-2027.pdf` (Chapter 5, arts 1.5.01–1.5.07;
+> general Chapter 2, arts 1.2.01–1.2.20).
+>
+> Domain: `MatchEngine` + `GameMode.TEN_BALL`. Product scope: `docs/01-product-specification.md`.
+
+## RackTrack MVP — what is implemented
+
+The shipped app is a **race scoreboard**, not a shot-by-shot referee. Players (or a
+table partner) judge legality; the app records outcomes.
+
+| FFB topic | MVP |
+|---|---|
+| Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
+| Alternating break indicator | **Yes** — cue on breaker panel |
+| Foul increments consecutive counter | **Yes** — `FOUL` |
+| 3 consecutive fouls → lose rack (1.5.07) | **Yes** — `THREE_FOULS_LOSS` |
+| Warning after 2 consecutive fouls | **Yes** — on-screen “1 MORE FOUL = RACK LOSS” |
+| Legal shot resets consecutive fouls | **Partial** — tap foul chip (`FOULS_CLEARED`); no auto “legal shot” |
+| Golden break / Dry break buttons | **No** — flags off for 10-ball |
+| Call ball + pocket, push-out, 10 respot, ball-in-hand, ball order | **No** — operator judgment |
+| Undo last event; match summary | **Yes** |
+
+---
 
 ## 1. Objective
 
@@ -26,7 +43,7 @@
 - Must contact ball 1 first, otherwise → **foul**.
 - If no ball is pocketed: at least 4 object balls must contact a rail, otherwise → **foul** ("illegal break").
 - On a foul break: the opponent gets ball-in-hand anywhere on the table.
-- *(Masters category only: "break box" rule — mandatory break from a defined zone. Out of MVP scope, ignore unless requested later.)*
+- *(Masters category only: "break box" rule — mandatory break from a defined zone. Out of MVP scope.)*
 
 ## 4. Push-out
 
@@ -50,7 +67,7 @@
 The 10-ball must only be pocketed last, legally, in the called pocket. In every other case where it is pocketed or leaves the table early:
 - It is **respotted** (on the foot spot, or just behind it if occupied).
 - Other balls pocketed on the same shot stay pocketed.
-- The turn passes to the opponent (unless it was legally pocketed as part of an otherwise valid, correctly called shot — see the general rule above).
+- Turn: if pocketed early on an otherwise **legal** called shot → shooter **continues**; if irregular / foul / unannounced → hand to opponent (art. 1.5.06).
 
 ## 7. Fouls (applicable to 10-ball)
 
@@ -68,22 +85,25 @@ Main fouls to model (see article 1.2.09 of the sporting code, full list in the P
 - Shooting out of turn
 - Shooting with an object ball instead of the cue ball
 
-*(MVP simplification: unsportsmanlike conduct, slow play/shot clock, and dispute cases requiring a human referee are not modeled — the app assumes trusted play between players or self-refereeing.)*
+*(MVP: unsportsmanlike conduct, slow play/shot clock, and dispute cases requiring a human referee are not modeled — trusted play / self-refereeing.)*
 
 ## 8. Three consecutive fouls rule
 
 - If a player commits 3 consecutive fouls (not interrupted by a legal shot), they **immediately lose the rack**.
-- After the 2nd consecutive foul, the app must warn the player on-screen that one more foul loses the rack.
+- After the 2nd consecutive foul, the opponent or referee **must** warn the player; if a 3rd foul occurs without that notification, FFB keeps the count at 2 (art. 1.5.07).
 - A legal shot resets the consecutive foul counter to zero.
+
+**MVP:** warning UI + auto rack loss on 3rd foul; clear via tap on foul chip. The “no warning → 3rd doesn’t count” exception is **not** modeled.
 
 ## 9. End of rack / end of match
 
 - A rack ends when the 10-ball is legally pocketed last, or when a player loses due to three consecutive fouls.
 - The match ends when a player reaches the required number of racks won.
 
-## 10. Deliberately not modeled in v1
+## 10. Deliberately not modeled (deep mode / later)
 
 - Shot clock / timing (article 1.2.13)
 - Disciplinary cards and sanctions (article 1.2.17)
 - Masters category specific rules (break box)
 - Federal context (leagues, rankings, official competitions — Title III of the sporting code)
+- Per-shot call/pocket entry, push-out UI, respot geometry, ball-in-hand state

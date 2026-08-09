@@ -1,8 +1,8 @@
 # Domain Model — Race board & 14/1
 
 Reference for the **current** `domain/` layer. This is a race / points scoreboard, not a
-shot-by-shot referee. Deep call-ball models remain in `docs/02-game-rules-10-ball.md` for a
-future mode.
+shot-by-shot referee. Per-mode FFB notes and MVP coverage:
+`docs/02-game-rules-8-ball.md`, `9-ball`, `10-ball`, `14-1`.
 
 Authority for mode-specific rules: `resources/code-sportif-americain-2026-2027.pdf`.
 

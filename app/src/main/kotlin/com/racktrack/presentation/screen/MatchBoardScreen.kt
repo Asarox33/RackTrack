@@ -82,6 +82,7 @@ fun MatchBoardScreen(
     onPass: (PlayerId) -> Unit = {},
     onBreakFoul: (PlayerId) -> Unit = {},
     onFoul: (PlayerId) -> Unit,
+    onClearFouls: (PlayerId) -> Unit = {},
     onUndo: () -> Unit,
     onNewMatch: () -> Unit,
     onOpenSettings: () -> Unit = {},
@@ -134,6 +135,7 @@ fun MatchBoardScreen(
                         onDryBreak = onDryBreak,
                         onEightBallLoss = onEightBallLoss,
                         onFoul = onFoul,
+                        onClearFouls = onClearFouls,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -147,6 +149,7 @@ fun MatchBoardScreen(
                         onDryBreak = onDryBreak,
                         onEightBallLoss = onEightBallLoss,
                         onFoul = onFoul,
+                        onClearFouls = onClearFouls,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -202,6 +205,7 @@ private fun LandscapeBoard(
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
     onFoul: (PlayerId) -> Unit,
+    onClearFouls: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
@@ -220,6 +224,7 @@ private fun LandscapeBoard(
             onDryBreak = { onDryBreak(match.player1.id) },
             onEightBallLoss = { onEightBallLoss(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
+            onClearFouls = { onClearFouls(match.player1.id) },
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -240,6 +245,7 @@ private fun LandscapeBoard(
             onDryBreak = { onDryBreak(match.player2.id) },
             onEightBallLoss = { onEightBallLoss(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
+            onClearFouls = { onClearFouls(match.player2.id) },
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -256,6 +262,7 @@ private fun PortraitBoard(
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
     onFoul: (PlayerId) -> Unit,
+    onClearFouls: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -274,6 +281,7 @@ private fun PortraitBoard(
             onDryBreak = { onDryBreak(match.player1.id) },
             onEightBallLoss = { onEightBallLoss(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
+            onClearFouls = { onClearFouls(match.player1.id) },
             compact = true,
             modifier = Modifier
                 .weight(1f)
@@ -295,6 +303,7 @@ private fun PortraitBoard(
             onDryBreak = { onDryBreak(match.player2.id) },
             onEightBallLoss = { onEightBallLoss(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
+            onClearFouls = { onClearFouls(match.player2.id) },
             compact = true,
             modifier = Modifier
                 .weight(1f)
@@ -348,6 +357,7 @@ private fun PlayerPanel(
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
     onFoul: () -> Unit,
+    onClearFouls: () -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
 ) {
@@ -421,6 +431,7 @@ private fun PlayerPanel(
                     } else {
                         0
                     },
+                    onClearFouls = if (enabled && showFoulWarning) onClearFouls else null,
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 val warnAlpha by animateFloatAsState(

@@ -70,6 +70,7 @@ class MainActivity : ComponentActivity() {
                         onPass = viewModel::pass,
                         onBreakFoul = viewModel::breakFoul,
                         onFoul = viewModel::foul,
+                        onClearFouls = viewModel::clearFouls,
                         onUndo = viewModel::undo,
                         onNewMatch = viewModel::newMatch,
                         onOpenSettings = viewModel::openSettings,

@@ -30,6 +30,8 @@ Typing every shot (ball + pocket) breaks game flow. Players need fast taps for r
 ### Later
 - Deeper FFB shot rules (call ball/pocket, push-out, respot), optional camera/AI assistance
 
+Mode-by-mode FFB summary vs what the MVP encodes: `docs/02-game-rules-*.md`.
+
 ## 6. MVP features
 
 - Create a match (2 names, mode, race length or 14/1 distance/innings, who starts)

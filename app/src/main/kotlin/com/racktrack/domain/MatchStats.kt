@@ -202,6 +202,7 @@ object MatchStats {
             MatchEventType.EIGHT_BALL_LOSS,
             -> match.otherPlayerId(event.playerId)
             MatchEventType.FOUL,
+            MatchEventType.FOULS_CLEARED,
             MatchEventType.DRY_BREAK,
             MatchEventType.POINTS,
             MatchEventType.PASS,
