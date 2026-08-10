@@ -54,6 +54,8 @@ data class MatchSummary(
     val inningScores2: List<InningStat>,
     val racks: List<RackStat>,
     val totalDurationMillis: Long,
+    val startedAtMillis: Long,
+    val endedAtMillis: Long,
 )
 
 object MatchStats {
@@ -69,6 +71,7 @@ object MatchStats {
         val inningsPlayed2 =
             if (match.gameMode.isPointScoring) inningScores2.size else match.innings2
         val endMillis = match.history.lastOrNull()?.atMillis ?: match.startedAtMillis
+        val startedAt = match.startedAtMillis
         return MatchSummary(
             gameMode = match.gameMode,
             winnerName = match.winner?.name.orEmpty(),
@@ -98,7 +101,9 @@ object MatchStats {
             inningScores1 = inningScores1,
             inningScores2 = inningScores2,
             racks = racks,
-            totalDurationMillis = (endMillis - match.startedAtMillis).coerceAtLeast(0L),
+            totalDurationMillis = (endMillis - startedAt).coerceAtLeast(0L),
+            startedAtMillis = startedAt,
+            endedAtMillis = endMillis.coerceAtLeast(startedAt),
         )
     }
 

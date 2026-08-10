@@ -8,7 +8,7 @@ RackTrack
 
 Provide a simple, reliable Android app to follow American pool **races (8 / 9 / 10)** and
 **14/1 continuous** at the table without interrupting play. Deep FFB shot-by-shot refereeing
-is deferred (possible later with camera/AI).
+is out of scope without camera/AI ball detection.
 
 ## 3. Target users
 
@@ -17,37 +17,44 @@ Amateur or club players who want a fast scoreboard next to the table (phone/tabl
 ## 4. Problem solved
 
 Typing every shot (ball + pocket) breaks game flow. Players need fast taps for rack wins / fouls /
-14/1 points, a clear **break / hand indicator**, and both scores visible at a glance.
+14/1 points, a clear **break / hand indicator**, both scores at a glance, and a way to revisit
+or share past match stats.
 
 ## 5. Game modes
 
-### Current MVP
+### Current
 - **8-ball race** — +1, Run out, Foul, Early 8, Dry break
 - **9-ball race** — +1, Run out, Foul, Golden break, Dry break; 3 consecutive fouls = rack loss
 - **10-ball race** — +1, Run out, Foul; 3 consecutive fouls = rack loss
 - **14/1 continuous** — +1/+5/+14, PASS, FOUL (−1), BREAK −2, 3-foul −15; distance + optional innings
 
-### Later
-- Deeper FFB shot rules (call ball/pocket, push-out, respot), optional camera/AI assistance
+### Later (only if product asks)
+- Camera / AI ball detection — prerequisite for any automatic shot scoring
 
-Mode-by-mode FFB summary vs what the MVP encodes: `docs/02-game-rules-*.md`.
+Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
-## 6. MVP features
+## 6. Current features
 
 - Create a match (2 names, mode, race length or 14/1 distance/innings, who starts)
 - Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink)
 - Landscape and portrait (`fullSensor`)
 - Break / shooter indicator; alternate break after each race rack
-- Undo last action; end-of-match summary
+- Undo last action; end-of-match summary (**SHARE PDF** + **BACK** to setup)
+- Local match history:
+  - Entry from setup (**HISTORY**, felt color), scoped to the selected game mode
+  - Filter by player names (either seat); reopen the same stats as end-of-match
+  - Delete with red ✕ + confirmation
+- Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
 - Settings: felt, keep screen on, haptics, default race/distance/innings, open FFB PDF rules link
 
-## 7. Explicitly out of scope for now
+## 7. Explicitly out of scope
 
-- Per-shot call ball + pocket entry
+- Per-shot call ball + pocket entry (and any deep FFB referee UI without camera)
 - Push-out UI, full illegal-break geometry checks
 - User accounts, cloud, sync, iOS
 - Shot clock / disciplinary / federal competition machinery
-- Match history persistence (Room) — not required for table play
+- Screenshot / UI golden tests
+- PNG export of match summary (PDF only)
 
 ## 8. Constraints
 
@@ -57,5 +64,5 @@ Mode-by-mode FFB summary vs what the MVP encodes: `docs/02-game-rules-*.md`.
 ## 9. Success criteria
 
 Standing at a table, two players can run an 8/9/10 race or a 14/1 to a set distance with the
-relevant taps, see who breaks / has the hand, finish, and review a short summary — without
-entering shot details.
+relevant taps, see who breaks / has the hand, finish, review or share a summary, and later
+find that match in history — without entering shot details.

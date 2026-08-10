@@ -6,6 +6,7 @@ import com.racktrack.domain.FourteenOneEngine
 import com.racktrack.domain.MatchEngine
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
+import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PlayerId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.update
 class MatchCoordinator(
     initialSettings: UserSettings,
     private val persistSettings: (UserSettings) -> Unit,
+    private val onMatchCompleted: (Match) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     private val _settings = MutableStateFlow(initialSettings)
@@ -178,6 +180,18 @@ class MatchCoordinator(
         _screen.value = AppScreen.Setup
     }
 
+    fun openHistory() {
+        _screen.value = AppScreen.History
+    }
+
+    fun openHistoryDetail(matchId: String) {
+        _screen.value = AppScreen.HistoryDetail(matchId)
+    }
+
+    fun closeHistoryDetail() {
+        _screen.value = AppScreen.History
+    }
+
     private fun updateSettings(transform: (UserSettings) -> UserSettings) {
         val next = transform(_settings.value)
         persistSettings(next)
@@ -187,7 +201,15 @@ class MatchCoordinator(
     private fun mutateMatch(transform: (Match) -> Match) {
         val current = _screen.value
         if (current is AppScreen.MatchBoard) {
-            _screen.value = AppScreen.MatchBoard(transform(current.match))
+            val previous = current.match
+            val next = transform(previous)
+            _screen.value = AppScreen.MatchBoard(next)
+            if (
+                previous.status != MatchStatus.COMPLETED &&
+                next.status == MatchStatus.COMPLETED
+            ) {
+                onMatchCompleted(next)
+            }
         }
     }
 

@@ -12,6 +12,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.racktrack.presentation.screen.HistoryDetailScreen
+import com.racktrack.presentation.screen.HistoryScreen
 import com.racktrack.presentation.screen.MatchBoardScreen
 import com.racktrack.presentation.screen.SettingsSheet
 import com.racktrack.presentation.screen.SetupScreen
@@ -45,6 +47,8 @@ class MainActivity : ComponentActivity() {
             ) {
                 val screen by viewModel.screen.collectAsStateWithLifecycle()
                 val setup by viewModel.setup.collectAsStateWithLifecycle()
+                val history by viewModel.history.collectAsStateWithLifecycle()
+                val selectedHistory by viewModel.selectedHistoryMatch.collectAsStateWithLifecycle()
 
                 when (val current = screen) {
                     AppScreen.Setup -> SetupScreen(
@@ -57,6 +61,7 @@ class MainActivity : ComponentActivity() {
                         onInningsChange = viewModel::updateInningsLimit,
                         onBreakerChange = viewModel::setPlayer1BreaksFirst,
                         onStart = viewModel::startMatch,
+                        onOpenHistory = viewModel::openHistory,
                         onOpenSettings = viewModel::openSettings,
                     )
                     is AppScreen.MatchBoard -> MatchBoardScreen(
@@ -74,6 +79,18 @@ class MainActivity : ComponentActivity() {
                         onUndo = viewModel::undo,
                         onNewMatch = viewModel::newMatch,
                         onOpenSettings = viewModel::openSettings,
+                    )
+                    AppScreen.History -> HistoryScreen(
+                        state = history,
+                        onPlayerFilter1Change = viewModel::setHistoryPlayerFilter1,
+                        onPlayerFilter2Change = viewModel::setHistoryPlayerFilter2,
+                        onOpenMatch = viewModel::openHistoryDetail,
+                        onDeleteMatch = viewModel::deleteHistoryMatch,
+                        onBack = viewModel::closeHistory,
+                    )
+                    is AppScreen.HistoryDetail -> HistoryDetailScreen(
+                        match = selectedHistory,
+                        onBack = viewModel::closeHistoryDetail,
                     )
                 }
 

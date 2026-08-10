@@ -1,6 +1,6 @@
 # Roadmap & TODO
 
-Overall status: ✅ MVP ready for table testing (8/9/10 races + 14/1)
+Overall status: ✅ Table scoreboard + local history + PDF share
 
 Legend: ⬜ to do · 🟨 in progress · ✅ done
 
@@ -12,6 +12,7 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ Match / scores / breaker / foul counts
 - ✅ +1, run-out, foul, undo, race completion
 - ✅ 8-ball Early 8 / Dry; 9-ball Golden / Dry; 3-foul rack loss (9/10)
+- ✅ Tap-to-clear consecutive fouls (9/10 only)
 - ✅ Unit tests
 
 ## Step 2 — 14/1 domain + UI
@@ -23,21 +24,30 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ Setup (modes, race/distance/innings, who starts)
 - ✅ Split boards (landscape + portrait), felt tones, cloth grain
 - ✅ Settings (felt, screen on, haptics, defaults, FFB link)
-- ✅ End-of-match summary modal
+- ✅ End-of-match summary modal (SHARE PDF + BACK to setup)
 - ✅ Launcher icon (adaptive + round)
 
 ## Step 4 — Quality (pragmatic)
 - ✅ Domain JaCoCo on CI + PR comment
 - ✅ `MatchCoordinator` unit tests (no screenshot / UI golden tests)
 
-## Step 5 — Optional next
-- ⬜ Match history persistence (Room) if still wanted after table use
-- ⬜ Deeper FFB shot-by-shot mode (call/pocket/push-out) — only if product asks
-- ⬜ Camera / AI assistance
-- ⬜ Screenshot tests only if UI stabilizes and visual regressions appear in the wild
+## Step 5 — Match history & share
+- ✅ Persist completed matches locally (JSON `MatchSummary` snapshots)
+- ✅ History scoped to the selected game mode on setup
+- ✅ Player-name filters (order-free) + reopen full end-of-match stats
+- ✅ Delete match (red ✕ + confirmation dialog)
+- ✅ Share styled PDF (start / end / duration; filename includes start date-time)
+- ✅ Felt-colored HISTORY / BACK actions
+
+## Explicitly dropped
+- ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
+- ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
+- ~~PNG share of match summary~~ — PDF only
+- Camera / AI assistance — only if product revisits automatic ball detection later
 
 ## Progress notes
 
-- 2026-08-08: Cleanup pass — dead APIs, assets, `appearance/` for felt, docs aligned to multi-mode MVP.
+- 2026-08-09: History (mode-scoped, filters, delete), styled PDF share, BACK labels; dropped deep FFB / screenshots / PNG share.
+- 2026-08-08: Cleanup pass — dead APIs, assets, `appearance/` for felt, docs aligned to multi-mode board.
 - 2026-08: Expanded beyond 10-ball-only landscape board to 8/9/10 + 14/1 and settings.
-- 2026-08-06: Pivoted MVP from shot-by-shot entry to race board (too slow at the table).
+- 2026-08-06: Pivoted from shot-by-shot entry to race board (too slow at the table).
