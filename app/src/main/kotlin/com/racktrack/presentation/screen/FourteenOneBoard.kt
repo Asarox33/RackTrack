@@ -39,6 +39,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
@@ -226,29 +228,16 @@ private fun FourteenOnePlayerPanel(
     compact: Boolean = false,
 ) {
     val enabled = match.status == MatchStatus.IN_PROGRESS && hasHand
-    val scoreSize = if (compact) 56.sp else 76.sp
     val actionHeight = if (compact) 40.dp else 44.dp
-    val cueSize = if (compact) 36.dp else 44.dp
-    val visitStatSize = if (compact) 18.sp else 22.sp
     val actionGap = if (compact) 6.dp else 8.dp
     val showBreakFoul = enabled && match.awaitingOpeningBreak
-    val foulWarn = fouls == FourteenOneEngine.CONSECUTIVE_FOULS_TO_PENALTY - 1
     // Continuous clear: pocket until keyball alone → re-rack to 15 (= onTable - 1).
     val clearRackPoints = (match.objectBallsOnTable - 1).coerceAtLeast(1)
-    val felt = LocalFeltPalette.current
-    val handAlpha by animateFloatAsState(
-        targetValue = if (hasHand) 1f else 0f,
-        label = "hand-alpha",
-    )
-    val warnAlpha by animateFloatAsState(
-        targetValue = if (foulWarn && hasHand) 1f else 0f,
-        label = "fourteen-foul-warn",
-    )
 
     Column(
         modifier = modifier.padding(
             horizontal = if (compact) 8.dp else 10.dp,
-            vertical = if (compact) 4.dp else 4.dp,
+            vertical = 4.dp,
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -265,147 +254,228 @@ private fun FourteenOnePlayerPanel(
             Spacer(modifier = Modifier.height(6.dp))
         }
 
-        // Score + visit stats share the flexible zone so portrait doesn't leave a large empty gap.
-        Box(
+        FourteenOneScoreCluster(
+            match = match,
+            score = score,
+            innings = innings,
+            fouls = fouls,
+            highRun = highRun,
+            hasHand = hasHand,
+            handTowardEnd = handTowardEnd,
+            compact = compact,
             modifier = Modifier
                 .weight(1f, fill = true)
                 .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AnimatedContent(
-                        targetState = score,
-                        transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        label = "fourteen-score",
-                    ) { value ->
-                        Text(
-                            text = value.toString(),
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
-                        )
-                    }
-                    CueBallBreakIndicator(
-                        modifier = Modifier
-                            .align(if (handTowardEnd) Alignment.CenterEnd else Alignment.CenterStart)
-                            .padding(
-                                if (handTowardEnd) {
-                                    PaddingValues(end = if (compact) 20.dp else 28.dp)
-                                } else {
-                                    PaddingValues(start = if (compact) 20.dp else 28.dp)
-                                },
-                            )
-                            .alpha(handAlpha),
-                        size = cueSize,
-                    )
-                }
-                Text(
-                    text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = ScoreWhite.copy(alpha = 0.78f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
-                )
-                if (hasHand) {
-                    Row(
-                        modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "On Table : ${match.objectBallsOnTable}",
-                            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                            color = felt.accentLight,
-                        )
-                        if (match.currentRun > 0) {
-                            Text(
-                                text = "  ·  ",
-                                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                                color = ScoreWhite.copy(alpha = 0.45f),
-                            )
-                            Text(
-                                text = "RUN ${match.currentRun}",
-                                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                                color = ButtonRunOutLight,
-                            )
-                        }
-                    }
-                }
-                if (foulWarn && hasHand) {
-                    Text(
-                        text = "NEXT FOUL = −15",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = ButtonFoulLight.copy(alpha = warnAlpha),
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .alpha(warnAlpha),
-                    )
-                }
-            }
-        }
+        )
 
         Spacer(modifier = Modifier.height(if (compact) 8.dp else 6.dp))
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(actionGap),
-        ) {
-            Row(
+        FourteenOneActionButtons(
+            enabled = enabled,
+            showBreakFoul = showBreakFoul,
+            clearRackPoints = clearRackPoints,
+            actionHeight = actionHeight,
+            actionGap = actionGap,
+            onAddPoints = { onAddPoints(player.id, clearRackPoints) },
+            onRequestPass = onRequestPass,
+            onRequestFoul = onRequestFoul,
+            onBreakFoul = { onBreakFoul(player.id) },
+        )
+    }
+}
+
+@Composable
+private fun FourteenOneScoreCluster(
+    match: Match,
+    score: Int,
+    innings: Int,
+    fouls: Int,
+    highRun: Int,
+    hasHand: Boolean,
+    handTowardEnd: Boolean,
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val scoreSize = if (compact) 56.sp else 76.sp
+    val cueSize = if (compact) 36.dp else 44.dp
+    val visitStatSize = if (compact) 18.sp else 22.sp
+    val foulWarn = fouls == FourteenOneEngine.CONSECUTIVE_FOULS_TO_PENALTY - 1
+    val felt = LocalFeltPalette.current
+    val handAlpha by animateFloatAsState(
+        targetValue = if (hasHand) 1f else 0f,
+        label = "hand-alpha",
+    )
+    val warnAlpha by animateFloatAsState(
+        targetValue = if (foulWarn && hasHand) 1f else 0f,
+        label = "fourteen-foul-warn",
+    )
+    val cueInset = if (compact) 20.dp else 28.dp
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(actionGap),
+                contentAlignment = Alignment.Center,
             ) {
-                TexturedActionButton(
-                    label = "+$clearRackPoints",
-                    base = ButtonPlus,
-                    light = ButtonPlusLight,
-                    dark = ButtonPlusDark,
-                    enabled = enabled,
-                    onClick = { onAddPoints(player.id, clearRackPoints) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "PASS",
-                    base = ButtonRunOut,
-                    light = ButtonRunOutLight,
-                    dark = ButtonRunOutDark,
-                    enabled = enabled,
-                    onClick = onRequestPass,
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "FOUL",
-                    base = ButtonFoul,
-                    light = ButtonFoulLight,
-                    dark = ButtonFoulDark,
-                    enabled = enabled,
-                    onClick = onRequestFoul,
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
+                AnimatedContent(
+                    targetState = score,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "fourteen-score",
+                ) { value ->
+                    Text(
+                        text = value.toString(),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
+                    )
+                }
+                CueBallBreakIndicator(
+                    modifier = Modifier
+                        .align(if (handTowardEnd) Alignment.CenterEnd else Alignment.CenterStart)
+                        .padding(
+                            if (handTowardEnd) {
+                                PaddingValues(end = cueInset)
+                            } else {
+                                PaddingValues(start = cueInset)
+                            },
+                        )
+                        .alpha(handAlpha),
+                    size = cueSize,
                 )
             }
-            if (showBreakFoul) {
-                TexturedActionButton(
-                    label = "BREAK −2",
-                    base = ButtonFoul,
-                    light = ButtonFoulLight,
-                    dark = ButtonFoulDark,
-                    enabled = true,
-                    onClick = { onBreakFoul(player.id) },
-                    modifier = Modifier.fillMaxWidth(),
-                    height = actionHeight,
+            Text(
+                text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
+                style = MaterialTheme.typography.bodyLarge,
+                color = ScoreWhite.copy(alpha = 0.78f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
+            )
+            if (hasHand) {
+                FourteenOneVisitStats(
+                    objectBallsOnTable = match.objectBallsOnTable,
+                    currentRun = match.currentRun,
+                    visitStatSize = visitStatSize,
+                    accent = felt.accentLight,
+                    modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
                 )
+            }
+            if (foulWarn && hasHand) {
                 Text(
-                    text = "Opening break",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = OutlineWarm,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
+                    text = "NEXT FOUL = −15",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = ButtonFoulLight.copy(alpha = warnAlpha),
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .alpha(warnAlpha),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun FourteenOneVisitStats(
+    objectBallsOnTable: Int,
+    currentRun: Int,
+    visitStatSize: TextUnit,
+    accent: Color,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "On Table : $objectBallsOnTable",
+            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+            color = accent,
+        )
+        if (currentRun > 0) {
+            Text(
+                text = "  ·  ",
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                color = ScoreWhite.copy(alpha = 0.45f),
+            )
+            Text(
+                text = "RUN $currentRun",
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                color = ButtonRunOutLight,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FourteenOneActionButtons(
+    enabled: Boolean,
+    showBreakFoul: Boolean,
+    clearRackPoints: Int,
+    actionHeight: Dp,
+    actionGap: Dp,
+    onAddPoints: () -> Unit,
+    onRequestPass: () -> Unit,
+    onRequestFoul: () -> Unit,
+    onBreakFoul: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(actionGap),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(actionGap),
+        ) {
+            TexturedActionButton(
+                label = "+$clearRackPoints",
+                base = ButtonPlus,
+                light = ButtonPlusLight,
+                dark = ButtonPlusDark,
+                enabled = enabled,
+                onClick = onAddPoints,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+            TexturedActionButton(
+                label = "PASS",
+                base = ButtonRunOut,
+                light = ButtonRunOutLight,
+                dark = ButtonRunOutDark,
+                enabled = enabled,
+                onClick = onRequestPass,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+            TexturedActionButton(
+                label = "FOUL",
+                base = ButtonFoul,
+                light = ButtonFoulLight,
+                dark = ButtonFoulDark,
+                enabled = enabled,
+                onClick = onRequestFoul,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+        }
+        if (showBreakFoul) {
+            TexturedActionButton(
+                label = "BREAK −2",
+                base = ButtonFoul,
+                light = ButtonFoulLight,
+                dark = ButtonFoulDark,
+                enabled = true,
+                onClick = onBreakFoul,
+                modifier = Modifier.fillMaxWidth(),
+                height = actionHeight,
+            )
+            Text(
+                text = "Opening break",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
@@ -483,7 +553,7 @@ private fun VisitEndBallsModal(
         Column(
             modifier = Modifier
                 .widthIn(max = 420.dp)
-                .fillMaxWidth(0.92f)
+                .fillMaxWidth(MODAL_CONTENT_WIDTH_FRACTION)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.verticalGradient(
@@ -544,7 +614,7 @@ private fun VisitEndBallsModal(
                 dark = ButtonPlusDark,
                 enabled = true,
                 onClick = { tapPlusFourteen() },
-                modifier = Modifier.fillMaxWidth(0.55f),
+                modifier = Modifier.fillMaxWidth(MODAL_PLUS_FOURTEEN_WIDTH_FRACTION),
                 height = 44.dp,
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -687,6 +757,9 @@ private fun FourteenMedianDivider(landscape: Boolean) {
 
 private val PortraitMedianInset = 16.dp
 private val PortraitNameTopInset = 8.dp
+private const val MODAL_CONTENT_WIDTH_FRACTION = 0.92f
+private const val MODAL_PLUS_FOURTEEN_WIDTH_FRACTION = 0.55f
+private const val POINTS_FOURTEEN = 14
 
 /** Full continuous racks (+14) already scored in the current unfinished visit. */
 private fun fullRacksInCurrentVisit(match: Match): Int {
@@ -709,5 +782,3 @@ private fun fullRacksInCurrentVisit(match: Match): Int {
     }
     return racks
 }
-
-private const val POINTS_FOURTEEN = 14
