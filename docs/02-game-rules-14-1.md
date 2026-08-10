@@ -1,4 +1,4 @@
-# 14/1 Continuous Game Rules (FFB, 2026-2027) — Modeling + MVP status
+# 14/1 Continuous Game Rules (FFB, 2026-2027) — Modeling + v1 coverage
 
 > Rewritten technical specification, not the official regulatory text. Authority:
 > `resources/code-sportif-americain-2026-2027.pdf` (Chapter 6, arts 1.6.01–1.6.07;
@@ -6,13 +6,13 @@
 >
 > Domain: `FourteenOneEngine` + `GameMode.FOURTEEN_ONE`. Product scope: `docs/01-product-specification.md`.
 
-## RackTrack MVP — what is implemented
+## RackTrack v1 — what is implemented
 
 Points scoreboard with hand indicator (current shooter). Approximate object-ball count
 (`objectBallsOnTable` / UI **TABLE n**) tracks continuous re-rack for the scoreboard;
 geometry and call-shot are **not** enforced — players enter points in chunks.
 
-| FFB topic | MVP |
+| FFB topic | v1 |
 |---|---|
 | Race to distance (points to win) | **Yes** — setup `pointsToWin` |
 | Optional innings (reprises) limit + +5 OT on tie (1.6.05) | **Yes** |
@@ -72,7 +72,7 @@ Only the **current shooter**’s actions are enabled (unlike the race board).
 - **Three consecutive fouls:** −1 per foul (so −3 from the three fouls) **plus** extra **−15** (−18 total from the sequence as written in FFB). Count resets; **fifteen-ball** re-rack; the fouling player must **open-break** again.
 - Unsportsmanlike: extra −15 + warning (art. 1.2.17) — not modeled.
 
-**MVP scoring note:** each FOUL applies −1 immediately; on the 3rd consecutive FOUL the engine also applies −15 in the same sequence (`FOUL` then `THREE_FOUL_PENALTY`). Opening illegal break is a separate **BREAK −2**.
+**v1 scoring note:** each FOUL applies −1 immediately; on the 3rd consecutive FOUL the engine also applies −15 in the same sequence (`FOUL` then `THREE_FOUL_PENALTY`). Opening illegal break is a separate **BREAK −2**.
 
 ## 7. End of match
 

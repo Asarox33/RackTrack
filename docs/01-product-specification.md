@@ -30,6 +30,10 @@ or share past match stats.
 
 ### Later (only if product asks)
 - Camera / AI ball detection — prerequisite for any automatic shot scoring
+- Optional **accounts / player identity** so each player can find others and **retrieve
+  stats for matches they played**, even when the scoreboard run was on someone else’s
+  phone — **still one device scores the live match** (never remote two-table play)
+- **Player timeouts / match pauses** (FFB art. 1.2.16) — see roadmap post-v1; not a per-shot timer
 
 Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
@@ -48,15 +52,22 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
   - Delete with red ✕ + confirmation
 - Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
 - Settings: felt, keep screen on, haptics, default race/distance/innings/break rule, open FFB PDF rules link
+- About (in Settings): version, build type/time, GitHub repo link
 
 ## 7. Explicitly out of scope
 
+- **Remote / distant live scoring** (two players on two tables or two phones driving
+  one match) — forever out of product sense; **one device is the scoreboard of record**
 - Per-shot call ball + pocket entry (and any deep FFB referee UI without camera)
 - Push-out UI, full illegal-break geometry checks
-- User accounts, cloud, sync, iOS
-- Shot clock / disciplinary / federal competition machinery
+- iOS
+- Shot clock / per-shot timing (art. 1.2.13) and disciplinary / federal competition machinery
+  (player **match pauses / timeouts** are a separate optional backlog item — art. 1.2.16)
 - Screenshot / UI golden tests
 - PNG export of match summary (PDF only)
+
+Accounts + cloud history sync are **not in v1**; they may appear later only for
+identity / find-players / shared post-match stats (see §5 Later) — not for remote play.
 
 ## 8. Constraints
 
@@ -68,3 +79,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 Standing at a table, two players can run an 8/9/10 race or a 14/1 to a set distance with the
 relevant taps, see who breaks / has the hand, finish, review or share a summary, and later
 find that match in history — without entering shot details.
+
+## 10. Product version
+
+**1.0.0** — first table-ready product cut. Versioning and GitHub Releases:
+`docs/07-versioning-and-releases.md`.

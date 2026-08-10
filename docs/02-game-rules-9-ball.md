@@ -1,4 +1,4 @@
-# 9-Ball Game Rules (FFB, 2026-2027) — Modeling + MVP status
+# 9-Ball Game Rules (FFB, 2026-2027) — Modeling + v1 coverage
 
 > Rewritten technical specification, not the official regulatory text. Authority:
 > `resources/code-sportif-americain-2026-2027.pdf` (Chapter 4, arts 1.4.01–1.4.07;
@@ -6,11 +6,11 @@
 >
 > Domain: `MatchEngine` + `GameMode.NINE_BALL`. Product scope: `docs/01-product-specification.md`.
 
-## RackTrack MVP — what is implemented
+## RackTrack v1 — what is implemented
 
 Race scoreboard. Richest race mode in the app (golden + dry + three-foul loss).
 
-| FFB topic | MVP |
+| FFB topic | v1 |
 |---|---|
 | Race-to-N racks; +1 / Run out | **Yes** — `PLUS_ONE` / `RUN_OUT` |
 | Alternating / winner break | **Yes** — setup `BreakRule` |
@@ -78,7 +78,7 @@ Unlike 10-ball, FFB 9-ball is generally **without call**, except special cases (
 - After the 2nd consecutive foul, opponent/referee **must** clearly warn the player; without warning, a further foul does not count as the third (art. 1.4.07).
 - A legal shot resets the counter.
 
-**MVP:** banner + auto loss on 3rd FOUL; manual clear via foul chip. The “unwarned 3rd doesn’t count” exception is **not** modeled.
+**v1:** banner + auto loss on 3rd FOUL; manual clear via foul chip. The “unwarned 3rd doesn’t count” exception is **not** modeled.
 
 ## 9. End of rack / end of match
 

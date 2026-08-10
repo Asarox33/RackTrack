@@ -7,7 +7,7 @@ import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PlayerId
 
-/** Pure rules for the landscape race MVP — no Android dependencies. */
+/** Pure rules for race scoreboard modes — no Android dependencies. */
 object MatchEngine {
     const val CONSECUTIVE_FOULS_TO_LOSE_RACK = 3
 

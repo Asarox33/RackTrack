@@ -1,4 +1,4 @@
-# 8-Ball Game Rules (FFB, 2026-2027) — Modeling + MVP status
+# 8-Ball Game Rules (FFB, 2026-2027) — Modeling + v1 coverage
 
 > Rewritten technical specification, not the official regulatory text. Authority:
 > `resources/code-sportif-americain-2026-2027.pdf` (Chapter 3, arts 1.3.01–1.3.06;
@@ -6,11 +6,11 @@
 >
 > Domain: `MatchEngine` + `GameMode.EIGHT_BALL`. Product scope: `docs/01-product-specification.md`.
 
-## RackTrack MVP — what is implemented
+## RackTrack v1 — what is implemented
 
 Race scoreboard only. No solids/stripes table state; players judge groups and calls.
 
-| FFB topic | MVP |
+| FFB topic | v1 |
 |---|---|
 | Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
 | Alternating / winner break | **Yes** — setup `BreakRule` |
@@ -65,7 +65,7 @@ The shooter **loses the rack** if:
 - The 8 is pocketed **with a foul**.
 - The 8 is pocketed in a pocket other than the one called.
 
-**MVP:** all of these collapse into one **EARLY 8** action on the losing player (opponent scores the rack).
+**v1:** all of these collapse into one **EARLY 8** action on the losing player (opponent scores the rack).
 
 ## 7. Fouls
 
@@ -73,7 +73,7 @@ The shooter **loses the rack** if:
 - Full foul list: art. 1.2.09.
 - **There is no three-consecutive-fouls rack loss** in the 8-ball chapter.
 
-**MVP:** FOUL is a soft counter / reminder only; clearing via foul-chip tap is **disabled** for 8-ball.
+**v1:** FOUL is a soft counter / reminder only; clearing via foul-chip tap is **disabled** for 8-ball.
 
 ## 8. End of rack / end of match
 

@@ -14,9 +14,18 @@ android {
         applicationId = "com.racktrack"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = providers.gradleProperty("racktrack.versionCode").get().toInt()
+        versionName = providers.gradleProperty("racktrack.versionName").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Epoch ms at configuration time (formatted in-app). Avoids `java.*` in this DSL
+        // where `java` is shadowed by the Android/Java extension.
+        buildConfigField("long", "BUILD_EPOCH_MS", "${System.currentTimeMillis()}L")
+        buildConfigField(
+            "String",
+            "REPO_URL",
+            "\"https://github.com/Asarox33/RackTrack\"",
+        )
     }
 
     buildTypes {
@@ -25,6 +34,8 @@ android {
         }
         release {
             isMinifyEnabled = false
+            // Installable CI / GitHub Release APKs until a Play Store keystore exists.
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -39,6 +50,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {

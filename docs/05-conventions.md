@@ -47,7 +47,7 @@ Examples:
 ```
 feat(domain): award golden break in 9-ball
 fix(fourteenone): include foul penalties in inning net points
-docs(readme): reflect multi-mode MVP
+docs(readme): reflect multi-mode v1 product
 ```
 
 ## 6. Branching & PR discipline
@@ -56,14 +56,16 @@ docs(readme): reflect multi-mode MVP
 2. Prefer not mixing large domain rule changes with unrelated UI polish in one commit.
 3. Engine changes in `domain/` ship with unit tests (nominal + at least one edge/foul case).
 4. No commit is done if ktlint/detekt would fail.
+5. Shipping a user-facing build: bump `racktrack.versionName` + `racktrack.versionCode` in
+   `gradle.properties` (see `docs/07-versioning-and-releases.md`).
 
 ## 7. Testing
 
 - **Highest priority: `domain/` engines** (`MatchEngine`, `FourteenOneEngine`, `MatchStats`).
 - **Next: `MatchCoordinator`** (setup → board routing, engine dispatch, settings mirrors). Keep it Android-free.
-- **Not for this MVP:** Compose screenshot / golden-image tests (high maintenance while UI moves).
+- **Not in v1 scope:** Compose screenshot / golden-image tests (high maintenance vs value).
 - Test naming: `` `given X, when Y, then Z` `` (JUnit 5 backticks).
-- No E2E required for this MVP.
+- No E2E required for v1.
 
 ## 8. In-code documentation
 
