@@ -241,4 +241,52 @@ class FourteenOneEngineTest {
         assertEquals(15, FourteenOneEngine.reduceObjectBalls(2, 1))
         assertEquals(15, FourteenOneEngine.reduceObjectBalls(1, 1))
     }
+
+    @Test
+    fun `pointsFromTableToRemaining covers same rack and single re-rack`() {
+        assertEquals(0, FourteenOneEngine.pointsFromTableToRemaining(10, 10))
+        assertEquals(3, FourteenOneEngine.pointsFromTableToRemaining(10, 7))
+        assertEquals(7, FourteenOneEngine.pointsFromTableToRemaining(15, 8))
+        // 6 → re-rack → 13: (6-1)+(15-13)=7
+        assertEquals(7, FourteenOneEngine.pointsFromTableToRemaining(6, 13))
+        assertEquals(1, FourteenOneEngine.pointsFromTableToRemaining(2, 15))
+    }
+
+    @Test
+    fun `passWithRemaining adds last-rack points then switches hand`() {
+        val start = fresh().copy(objectBallsOnTable = 10)
+        val next = FourteenOneEngine.passWithRemaining(start, start.player1.id, 7, now())
+
+        assertEquals(3, next.score1)
+        assertEquals(7, next.objectBallsOnTable)
+        assertEquals(start.player2.id, next.currentShooterId)
+        assertEquals(1, next.innings1)
+        assertEquals(MatchEventType.PASS, next.history.last().type)
+    }
+
+    @Test
+    fun `foulWithRemaining syncs table then applies foul penalty`() {
+        val start = fresh().copy(objectBallsOnTable = 6)
+        val next = FourteenOneEngine.foulWithRemaining(start, start.player1.id, 4, now())
+
+        // +2 then foul −1
+        assertEquals(1, next.score1)
+        assertEquals(4, next.objectBallsOnTable)
+        assertEquals(start.player2.id, next.currentShooterId)
+        assertEquals(MatchEventType.FOUL, next.history.last().type)
+    }
+
+    @Test
+    fun `passWithRemaining after plus fourteen only syncs partial rack`() {
+        var match = fresh()
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 14, now())
+        assertEquals(15, match.objectBallsOnTable)
+        assertEquals(14, match.currentRun)
+
+        match = FourteenOneEngine.passWithRemaining(match, match.player1.id, 11, now())
+
+        assertEquals(14 + 4, match.score1)
+        assertEquals(11, match.objectBallsOnTable)
+        assertEquals(match.player2.id, match.currentShooterId)
+    }
 }

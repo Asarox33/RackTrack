@@ -26,7 +26,7 @@ or share past match stats.
 - **8-ball race** — +1, Run out, Foul, Early 8, Dry break
 - **9-ball race** — +1, Run out, Foul, Golden break, Dry break; 3 consecutive fouls = rack loss
 - **10-ball race** — +1, Run out, Foul; 3 consecutive fouls = rack loss
-- **14/1 continuous** — +1/+5/+14, PASS, FOUL (−1), BREAK −2, 3-foul −15; distance + optional innings
+- **14/1 continuous** — clear-rack +N, PASS/FOUL (balls-left modal), BREAK −2 on opening; distance + optional innings
 
 ### Later (only if product asks)
 - Camera / AI ball detection — prerequisite for any automatic shot scoring

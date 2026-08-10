@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.domain.MatchEngine
 import com.racktrack.domain.MatchStats
 import com.racktrack.domain.model.GameMode
@@ -79,9 +80,10 @@ fun MatchBoardScreen(
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
     onAddPoints: (PlayerId, Int) -> Unit = { _, _ -> },
-    onPass: (PlayerId) -> Unit = {},
+    onPassWithRemaining: (PlayerId, Int, Int) -> Unit = { _, _, _ -> },
     onBreakFoul: (PlayerId) -> Unit = {},
     onFoul: (PlayerId) -> Unit,
+    onFoulWithRemaining: (PlayerId, Int, Int) -> Unit = { _, _, _ -> },
     onClearFouls: (PlayerId) -> Unit = {},
     onUndo: () -> Unit,
     onNewMatch: () -> Unit,
@@ -90,6 +92,7 @@ fun MatchBoardScreen(
 ) {
     val landscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val felt = LocalFeltPalette.current
 
     FeltBackground(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -97,7 +100,10 @@ fun MatchBoardScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = if (landscape) 16.dp else 12.dp,
+                        vertical = if (landscape) 8.dp else 6.dp,
+                    ),
             ) {
                 Text(
                     text = if (match.gameMode.isPointScoring) {
@@ -106,21 +112,22 @@ fun MatchBoardScreen(
                         "${match.gameMode.shortLabel()}  ·  RACE TO ${match.racksToWin}"
                     },
                     style = MaterialTheme.typography.titleLarge,
+                    color = felt.accentLight,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 44.dp),
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(if (landscape) 8.dp else 10.dp))
 
                 if (match.gameMode.isPointScoring) {
                     FourteenOneBoardContent(
                         match = match,
                         landscape = landscape,
                         onAddPoints = onAddPoints,
-                        onPass = onPass,
-                        onFoul = onFoul,
+                        onPassWithRemaining = onPassWithRemaining,
+                        onFoulWithRemaining = onFoulWithRemaining,
                         onBreakFoul = onBreakFoul,
                         modifier = Modifier
                             .weight(1f)
@@ -155,6 +162,8 @@ fun MatchBoardScreen(
                             .fillMaxWidth(),
                     )
                 }
+
+                Spacer(modifier = Modifier.height(if (landscape) 6.dp else 12.dp))
 
                 Row(
                     modifier = Modifier
@@ -285,7 +294,8 @@ private fun PortraitBoard(
             compact = true,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(top = PortraitNameTopInset, bottom = PortraitMedianInset),
         )
         MedianDivider(landscape = false)
         PlayerPanel(
@@ -308,7 +318,7 @@ private fun PortraitBoard(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(top = PortraitPlayer2TopInset),
+                .padding(top = PortraitMedianInset),
         )
     }
 }
@@ -334,8 +344,8 @@ private fun MedianDivider(landscape: Boolean) {
         } else {
             Modifier
                 .fillMaxWidth()
-                .height(3.dp)
                 .padding(horizontal = 12.dp)
+                .height(3.dp)
                 .background(brush)
         },
     )
@@ -361,14 +371,13 @@ private fun PlayerPanel(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
 ) {
-    val scoreSize = if (compact) 72.sp else 92.sp
     val nameStyle = if (compact) {
-        MaterialTheme.typography.titleLarge
+        MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp)
     } else {
         MaterialTheme.typography.headlineLarge
     }
     val actionHeight = if (compact) ActionRowHeightCompact else ActionRowHeight
-    val cueSize = if (compact) BreakCueBallSizeCompact else BreakCueBallSize
+    val actionGap = if (compact) 6.dp else 8.dp
     val canRunOut = MatchEngine.canBreakAndClear(match, player.id)
     val canGolden = MatchEngine.canRecordGoldenBreak(match, player.id)
     val canDry = MatchEngine.canRecordDryBreak(match, player.id)
@@ -380,7 +389,10 @@ private fun PlayerPanel(
             match.gameMode.supportsEightBallLoss
 
     Column(
-        modifier = modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+        modifier = modifier.padding(
+            horizontal = if (compact) 8.dp else 12.dp,
+            vertical = 4.dp,
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -388,164 +400,255 @@ private fun PlayerPanel(
             style = nameStyle,
             textAlign = TextAlign.Center,
         )
+        if (compact) {
+            Spacer(modifier = Modifier.height(6.dp))
+        }
 
-        Box(
+        RaceScoreCluster(
+            match = match,
+            score = score,
+            fouls = fouls,
+            runOuts = runOuts,
+            hasBreak = hasBreak,
+            breakAnchor = breakAnchor,
+            enabled = enabled,
+            showFoulWarning = showFoulWarning,
+            onClearFouls = onClearFouls,
+            compact = compact,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                val breakAlpha by animateFloatAsState(
-                    targetValue = if (hasBreak) 1f else 0f,
-                    label = "break-alpha",
-                )
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AnimatedContent(
-                        targetState = score,
-                        transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        label = "score",
-                    ) { value ->
-                        Text(
-                            text = value.toString(),
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
-                        )
-                    }
-                    CueBallBreakIndicator(
-                        modifier = Modifier
-                            .align(breakAnchor.alignment())
-                            .padding(breakAnchor.inset())
-                            .alpha(breakAlpha),
-                        size = cueSize,
-                    )
-                }
-                PlayerStatIcons(
-                    gameMode = match.gameMode,
-                    runOuts = runOuts,
-                    consecutiveFouls = fouls,
-                    maxConsecutiveFouls = if (showFoulWarning) {
-                        MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK
-                    } else {
-                        0
-                    },
-                    onClearFouls = if (enabled && showFoulWarning) onClearFouls else null,
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-                val warnAlpha by animateFloatAsState(
-                    targetValue = if (
-                        showFoulWarning &&
-                        fouls == MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK - 1
-                    ) {
-                        1f
-                    } else {
-                        0f
-                    },
-                    label = "foul-warn-alpha",
-                )
-                Box(
-                    modifier = Modifier
-                        .height(FoulWarnSlotHeight)
-                        .padding(top = 10.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        RaceActionButtons(
+            gameMode = match.gameMode,
+            enabled = enabled,
+            canRunOut = canRunOut,
+            canGolden = canGolden,
+            canDry = canDry,
+            canEarlyEight = canEarlyEight,
+            showModeExtras = showModeExtras,
+            actionHeight = actionHeight,
+            actionGap = actionGap,
+            onPlusOne = onPlusOne,
+            onRunOut = onRunOut,
+            onGoldenBreak = onGoldenBreak,
+            onDryBreak = onDryBreak,
+            onEightBallLoss = onEightBallLoss,
+            onFoul = onFoul,
+        )
+    }
+}
+
+@Composable
+private fun RaceScoreCluster(
+    match: Match,
+    score: Int,
+    fouls: Int,
+    runOuts: Int,
+    hasBreak: Boolean,
+    breakAnchor: BreakAnchor,
+    enabled: Boolean,
+    showFoulWarning: Boolean,
+    onClearFouls: () -> Unit,
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val scoreSize = if (compact) 56.sp else 76.sp
+    val cueSize = if (compact) BreakCueBallSizeCompact else BreakCueBallSize
+    val nearRackLoss =
+        showFoulWarning && fouls == MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK - 1
+    val breakAlpha by animateFloatAsState(
+        targetValue = if (hasBreak) 1f else 0f,
+        label = "break-alpha",
+    )
+    val warnAlpha by animateFloatAsState(
+        targetValue = if (nearRackLoss) 1f else 0f,
+        label = "foul-warn-alpha",
+    )
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                AnimatedContent(
+                    targetState = score,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "score",
+                ) { value ->
                     Text(
-                        text = "1 MORE FOUL = RACK LOSS",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = ButtonFoulLight.copy(alpha = warnAlpha),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.alpha(warnAlpha),
+                        text = value.toString(),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
                     )
                 }
+                CueBallBreakIndicator(
+                    modifier = Modifier
+                        .align(breakAnchor.alignment())
+                        .padding(breakAnchor.inset(compact))
+                        .alpha(breakAlpha),
+                    size = cueSize,
+                )
+            }
+            PlayerStatIcons(
+                gameMode = match.gameMode,
+                runOuts = runOuts,
+                consecutiveFouls = fouls,
+                maxConsecutiveFouls = if (showFoulWarning) {
+                    MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK
+                } else {
+                    0
+                },
+                onClearFouls = if (enabled && showFoulWarning) onClearFouls else null,
+                modifier = Modifier.padding(top = if (compact) 6.dp else 10.dp),
+            )
+            if (nearRackLoss) {
+                Text(
+                    text = "1 MORE FOUL = RACK LOSS",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = ButtonFoulLight.copy(alpha = warnAlpha),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .alpha(warnAlpha),
+                )
             }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Column(
+@Composable
+private fun RaceActionButtons(
+    gameMode: GameMode,
+    enabled: Boolean,
+    canRunOut: Boolean,
+    canGolden: Boolean,
+    canDry: Boolean,
+    canEarlyEight: Boolean,
+    showModeExtras: Boolean,
+    actionHeight: Dp,
+    actionGap: Dp,
+    onPlusOne: () -> Unit,
+    onRunOut: () -> Unit,
+    onGoldenBreak: () -> Unit,
+    onDryBreak: () -> Unit,
+    onEightBallLoss: () -> Unit,
+    onFoul: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(actionGap),
+    ) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(actionGap),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                TexturedActionButton(
-                    label = "+1",
-                    base = ButtonPlus,
-                    light = ButtonPlusLight,
-                    dark = ButtonPlusDark,
-                    enabled = enabled,
-                    onClick = onPlusOne,
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "RUN OUT",
-                    base = ButtonRunOut,
-                    light = ButtonRunOutLight,
-                    dark = ButtonRunOutDark,
-                    enabled = enabled && canRunOut,
-                    onClick = onRunOut,
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "FOUL",
-                    base = ButtonFoul,
-                    light = ButtonFoulLight,
-                    dark = ButtonFoulDark,
-                    enabled = enabled,
-                    onClick = onFoul,
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-            }
-            if (showModeExtras) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    if (match.gameMode.supportsGoldenBreak) {
-                        TexturedActionButton(
-                            label = "GOLDEN",
-                            base = ButtonGolden,
-                            light = ButtonGoldenLight,
-                            dark = ButtonGoldenDark,
-                            enabled = enabled && canGolden,
-                            onClick = onGoldenBreak,
-                            modifier = Modifier.weight(1f),
-                            height = actionHeight,
-                        )
-                    }
-                    if (match.gameMode.supportsEightBallLoss) {
-                        TexturedActionButton(
-                            label = "EARLY 8",
-                            base = ButtonFoul,
-                            light = ButtonFoulLight,
-                            dark = ButtonFoulDark,
-                            enabled = enabled && canEarlyEight,
-                            onClick = onEightBallLoss,
-                            modifier = Modifier.weight(1f),
-                            height = actionHeight,
-                        )
-                    }
-                    if (match.gameMode.supportsDryBreak) {
-                        TexturedActionButton(
-                            label = "DRY",
-                            base = ButtonDry,
-                            light = ButtonDryLight,
-                            dark = ButtonDryDark,
-                            enabled = enabled && canDry,
-                            onClick = onDryBreak,
-                            modifier = Modifier.weight(1f),
-                            height = actionHeight,
-                        )
-                    }
-                }
-            }
+            TexturedActionButton(
+                label = "+1",
+                base = ButtonPlus,
+                light = ButtonPlusLight,
+                dark = ButtonPlusDark,
+                enabled = enabled,
+                onClick = onPlusOne,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+            TexturedActionButton(
+                label = "RUN OUT",
+                base = ButtonRunOut,
+                light = ButtonRunOutLight,
+                dark = ButtonRunOutDark,
+                enabled = enabled && canRunOut,
+                onClick = onRunOut,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+            TexturedActionButton(
+                label = "FOUL",
+                base = ButtonFoul,
+                light = ButtonFoulLight,
+                dark = ButtonFoulDark,
+                enabled = enabled,
+                onClick = onFoul,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+        }
+        if (showModeExtras) {
+            RaceModeExtraButtons(
+                gameMode = gameMode,
+                enabled = enabled,
+                canGolden = canGolden,
+                canDry = canDry,
+                canEarlyEight = canEarlyEight,
+                actionHeight = actionHeight,
+                actionGap = actionGap,
+                onGoldenBreak = onGoldenBreak,
+                onDryBreak = onDryBreak,
+                onEightBallLoss = onEightBallLoss,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RaceModeExtraButtons(
+    gameMode: GameMode,
+    enabled: Boolean,
+    canGolden: Boolean,
+    canDry: Boolean,
+    canEarlyEight: Boolean,
+    actionHeight: Dp,
+    actionGap: Dp,
+    onGoldenBreak: () -> Unit,
+    onDryBreak: () -> Unit,
+    onEightBallLoss: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(actionGap),
+    ) {
+        if (gameMode.supportsGoldenBreak) {
+            TexturedActionButton(
+                label = "GOLDEN",
+                base = ButtonGolden,
+                light = ButtonGoldenLight,
+                dark = ButtonGoldenDark,
+                enabled = enabled && canGolden,
+                onClick = onGoldenBreak,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+        }
+        if (gameMode.supportsEightBallLoss) {
+            TexturedActionButton(
+                label = "EARLY 8",
+                base = ButtonFoul,
+                light = ButtonFoulLight,
+                dark = ButtonFoulDark,
+                enabled = enabled && canEarlyEight,
+                onClick = onEightBallLoss,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+        }
+        if (gameMode.supportsDryBreak) {
+            TexturedActionButton(
+                label = "DRY",
+                base = ButtonDry,
+                light = ButtonDryLight,
+                dark = ButtonDryDark,
+                enabled = enabled && canDry,
+                onClick = onDryBreak,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
         }
     }
 }
@@ -556,11 +659,13 @@ private fun BreakAnchor.alignment(): Alignment =
         BreakAnchor.TowardStart -> Alignment.CenterStart
     }
 
-private fun BreakAnchor.inset(): PaddingValues =
-    when (this) {
-        BreakAnchor.TowardEnd -> PaddingValues(end = BreakMedianInset)
-        BreakAnchor.TowardStart -> PaddingValues(start = BreakMedianInset)
+private fun BreakAnchor.inset(compact: Boolean = false): PaddingValues {
+    val inset = if (compact) BreakMedianInsetCompact else BreakMedianInset
+    return when (this) {
+        BreakAnchor.TowardEnd -> PaddingValues(end = inset)
+        BreakAnchor.TowardStart -> PaddingValues(start = inset)
     }
+}
 
 private fun GameMode.shortLabel(): String =
     when (this) {
@@ -570,13 +675,14 @@ private fun GameMode.shortLabel(): String =
         GameMode.FOURTEEN_ONE -> "14/1"
     }
 
-private val BreakCueBallSize: Dp = 52.dp
-private val BreakCueBallSizeCompact: Dp = 44.dp
-private val BreakMedianInset: Dp = 36.dp
-private val PortraitPlayer2TopInset: Dp = 14.dp
-private val FoulWarnSlotHeight: Dp = 36.dp
-private val ActionRowHeight: Dp = 52.dp
-private val ActionRowHeightCompact: Dp = 48.dp
+private val BreakCueBallSize: Dp = 48.dp
+private val BreakCueBallSizeCompact: Dp = 36.dp
+private val BreakMedianInset: Dp = 28.dp
+private val BreakMedianInsetCompact: Dp = 20.dp
+private val PortraitMedianInset: Dp = 16.dp
+private val PortraitNameTopInset: Dp = 8.dp
+private val ActionRowHeight: Dp = 44.dp
+private val ActionRowHeightCompact: Dp = 40.dp
 
 @Preview(widthDp = 820, heightDp = 380, showBackground = true)
 @Composable

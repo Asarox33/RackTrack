@@ -143,11 +143,17 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun foul(playerId: PlayerId) = coordinator.foul(playerId)
 
+    fun foulWithRemaining(playerId: PlayerId, remaining: Int, priorPoints: Int = 0) =
+        coordinator.foulWithRemaining(playerId, remaining, priorPoints)
+
     fun clearFouls(playerId: PlayerId) = coordinator.clearFouls(playerId)
 
     fun addPoints(playerId: PlayerId, points: Int) = coordinator.addPoints(playerId, points)
 
     fun pass(playerId: PlayerId) = coordinator.pass(playerId)
+
+    fun passWithRemaining(playerId: PlayerId, remaining: Int, priorPoints: Int = 0) =
+        coordinator.passWithRemaining(playerId, remaining, priorPoints)
 
     fun breakFoul(playerId: PlayerId) = coordinator.breakFoul(playerId)
 

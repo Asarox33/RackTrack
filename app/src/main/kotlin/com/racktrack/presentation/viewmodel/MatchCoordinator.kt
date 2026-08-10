@@ -163,6 +163,15 @@ class MatchCoordinator(
         }
     }
 
+    fun foulWithRemaining(playerId: PlayerId, remaining: Int, priorPoints: Int = 0) = mutateMatch {
+        var match = it
+        if (priorPoints > 0) {
+            match = FourteenOneEngine.addPoints(match, playerId, priorPoints, clock())
+            if (match.status != MatchStatus.IN_PROGRESS) return@mutateMatch match
+        }
+        FourteenOneEngine.foulWithRemaining(match, playerId, remaining, clock())
+    }
+
     fun clearFouls(playerId: PlayerId) = mutateMatch {
         MatchEngine.clearConsecutiveFouls(it, playerId, clock())
     }
@@ -173,6 +182,15 @@ class MatchCoordinator(
 
     fun pass(playerId: PlayerId) = mutateMatch {
         FourteenOneEngine.pass(it, playerId, clock())
+    }
+
+    fun passWithRemaining(playerId: PlayerId, remaining: Int, priorPoints: Int = 0) = mutateMatch {
+        var match = it
+        if (priorPoints > 0) {
+            match = FourteenOneEngine.addPoints(match, playerId, priorPoints, clock())
+            if (match.status != MatchStatus.IN_PROGRESS) return@mutateMatch match
+        }
+        FourteenOneEngine.passWithRemaining(match, playerId, remaining, clock())
     }
 
     fun breakFoul(playerId: PlayerId) = mutateMatch {

@@ -6,6 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,29 +16,43 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.domain.FourteenOneEngine
 import com.racktrack.domain.model.Match
+import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.TexturedActionButton
+import com.racktrack.presentation.component.rememberClickHaptic
 import com.racktrack.presentation.theme.ButtonFoul
 import com.racktrack.presentation.theme.ButtonFoulDark
 import com.racktrack.presentation.theme.ButtonFoulLight
@@ -48,93 +65,138 @@ import com.racktrack.presentation.theme.ButtonRunOutLight
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 
+private enum class VisitEndAction { PASS, FOUL }
+
+private data class VisitEndDraft(
+    val playerId: PlayerId,
+    val action: VisitEndAction,
+)
+
 @Composable
 fun FourteenOneBoardContent(
     match: Match,
     landscape: Boolean,
     onAddPoints: (PlayerId, Int) -> Unit,
-    onPass: (PlayerId) -> Unit,
-    onFoul: (PlayerId) -> Unit,
+    onPassWithRemaining: (PlayerId, Int, Int) -> Unit,
+    onFoulWithRemaining: (PlayerId, Int, Int) -> Unit,
     onBreakFoul: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (landscape) {
-        Row(modifier = modifier) {
-            FourteenOnePlayerPanel(
-                match = match,
-                player = match.player1,
-                score = match.score1,
-                innings = match.innings1,
-                fouls = match.foul1,
-                highRun = match.highRun1,
-                hasHand = match.currentShooterId == match.player1.id,
-                handTowardEnd = true,
-                onAddPoints = onAddPoints,
-                onPass = onPass,
-                onFoul = onFoul,
-                onBreakFoul = onBreakFoul,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-            )
-            FourteenMedianDivider(landscape = true)
-            FourteenOnePlayerPanel(
-                match = match,
-                player = match.player2,
-                score = match.score2,
-                innings = match.innings2,
-                fouls = match.foul2,
-                highRun = match.highRun2,
-                hasHand = match.currentShooterId == match.player2.id,
-                handTowardEnd = false,
-                onAddPoints = onAddPoints,
-                onPass = onPass,
-                onFoul = onFoul,
-                onBreakFoul = onBreakFoul,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-            )
+    var visitEnd by remember { mutableStateOf<VisitEndDraft?>(null) }
+
+    Box(modifier = modifier) {
+        if (landscape) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                FourteenOnePlayerPanel(
+                    match = match,
+                    player = match.player1,
+                    score = match.score1,
+                    innings = match.innings1,
+                    fouls = match.foul1,
+                    highRun = match.highRun1,
+                    hasHand = match.currentShooterId == match.player1.id,
+                    handTowardEnd = true,
+                    onAddPoints = onAddPoints,
+                    onRequestPass = {
+                        visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.PASS)
+                    },
+                    onRequestFoul = {
+                        visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
+                    },
+                    onBreakFoul = onBreakFoul,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                )
+                FourteenMedianDivider(landscape = true)
+                FourteenOnePlayerPanel(
+                    match = match,
+                    player = match.player2,
+                    score = match.score2,
+                    innings = match.innings2,
+                    fouls = match.foul2,
+                    highRun = match.highRun2,
+                    hasHand = match.currentShooterId == match.player2.id,
+                    handTowardEnd = false,
+                    onAddPoints = onAddPoints,
+                    onRequestPass = {
+                        visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.PASS)
+                    },
+                    onRequestFoul = {
+                        visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.FOUL)
+                    },
+                    onBreakFoul = onBreakFoul,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                )
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                FourteenOnePlayerPanel(
+                    match = match,
+                    player = match.player1,
+                    score = match.score1,
+                    innings = match.innings1,
+                    fouls = match.foul1,
+                    highRun = match.highRun1,
+                    hasHand = match.currentShooterId == match.player1.id,
+                    handTowardEnd = true,
+                    onAddPoints = onAddPoints,
+                    onRequestPass = {
+                        visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.PASS)
+                    },
+                    onRequestFoul = {
+                        visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
+                    },
+                    onBreakFoul = onBreakFoul,
+                    compact = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(top = PortraitNameTopInset, bottom = PortraitMedianInset),
+                )
+                FourteenMedianDivider(landscape = false)
+                FourteenOnePlayerPanel(
+                    match = match,
+                    player = match.player2,
+                    score = match.score2,
+                    innings = match.innings2,
+                    fouls = match.foul2,
+                    highRun = match.highRun2,
+                    hasHand = match.currentShooterId == match.player2.id,
+                    handTowardEnd = true,
+                    onAddPoints = onAddPoints,
+                    onRequestPass = {
+                        visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.PASS)
+                    },
+                    onRequestFoul = {
+                        visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.FOUL)
+                    },
+                    onBreakFoul = onBreakFoul,
+                    compact = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(top = PortraitMedianInset),
+                )
+            }
         }
-    } else {
-        Column(modifier = modifier) {
-            FourteenOnePlayerPanel(
+
+        visitEnd?.let { draft ->
+            VisitEndBallsModal(
                 match = match,
-                player = match.player1,
-                score = match.score1,
-                innings = match.innings1,
-                fouls = match.foul1,
-                highRun = match.highRun1,
-                hasHand = match.currentShooterId == match.player1.id,
-                handTowardEnd = true,
-                onAddPoints = onAddPoints,
-                onPass = onPass,
-                onFoul = onFoul,
-                onBreakFoul = onBreakFoul,
-                compact = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            )
-            FourteenMedianDivider(landscape = false)
-            FourteenOnePlayerPanel(
-                match = match,
-                player = match.player2,
-                score = match.score2,
-                innings = match.innings2,
-                fouls = match.foul2,
-                highRun = match.highRun2,
-                hasHand = match.currentShooterId == match.player2.id,
-                handTowardEnd = true,
-                onAddPoints = onAddPoints,
-                onPass = onPass,
-                onFoul = onFoul,
-                onBreakFoul = onBreakFoul,
-                compact = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(top = 14.dp),
+                action = draft.action,
+                onDismiss = { visitEnd = null },
+                onConfirm = { remaining, priorPoints ->
+                    when (draft.action) {
+                        VisitEndAction.PASS ->
+                            onPassWithRemaining(draft.playerId, remaining, priorPoints)
+                        VisitEndAction.FOUL ->
+                            onFoulWithRemaining(draft.playerId, remaining, priorPoints)
+                    }
+                    visitEnd = null
+                },
             )
         }
     }
@@ -159,19 +221,86 @@ private fun FourteenOnePlayerPanel(
     hasHand: Boolean,
     handTowardEnd: Boolean,
     onAddPoints: (PlayerId, Int) -> Unit,
-    onPass: (PlayerId) -> Unit,
-    onFoul: (PlayerId) -> Unit,
+    onRequestPass: () -> Unit,
+    onRequestFoul: () -> Unit,
     onBreakFoul: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
 ) {
     val enabled = match.status == MatchStatus.IN_PROGRESS && hasHand
-    val scoreSize = if (compact) 64.sp else 76.sp
-    val actionHeight = if (compact) 44.dp else 46.dp
-    val cueSize = if (compact) 44.dp else 48.dp
-    val visitStatSize = if (compact) 22.sp else 26.sp
+    val actionHeight = if (compact) 40.dp else 44.dp
+    val actionGap = if (compact) 6.dp else 8.dp
     val showBreakFoul = enabled && match.awaitingOpeningBreak
+    // Continuous clear: pocket until keyball alone → re-rack to 15 (= onTable - 1).
+    val clearRackPoints = (match.objectBallsOnTable - 1).coerceAtLeast(1)
+
+    Column(
+        modifier = modifier.padding(
+            horizontal = if (compact) 8.dp else 10.dp,
+            vertical = 4.dp,
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = player.name.uppercase(),
+            style = if (compact) {
+                MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp)
+            } else {
+                MaterialTheme.typography.headlineLarge
+            },
+            textAlign = TextAlign.Center,
+        )
+        if (compact) {
+            Spacer(modifier = Modifier.height(6.dp))
+        }
+
+        FourteenOneScoreCluster(
+            match = match,
+            score = score,
+            innings = innings,
+            fouls = fouls,
+            highRun = highRun,
+            hasHand = hasHand,
+            handTowardEnd = handTowardEnd,
+            compact = compact,
+            modifier = Modifier
+                .weight(1f, fill = true)
+                .fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(if (compact) 8.dp else 6.dp))
+
+        FourteenOneActionButtons(
+            enabled = enabled,
+            showBreakFoul = showBreakFoul,
+            clearRackPoints = clearRackPoints,
+            actionHeight = actionHeight,
+            actionGap = actionGap,
+            onAddPoints = { onAddPoints(player.id, clearRackPoints) },
+            onRequestPass = onRequestPass,
+            onRequestFoul = onRequestFoul,
+            onBreakFoul = { onBreakFoul(player.id) },
+        )
+    }
+}
+
+@Composable
+private fun FourteenOneScoreCluster(
+    match: Match,
+    score: Int,
+    innings: Int,
+    fouls: Int,
+    highRun: Int,
+    hasHand: Boolean,
+    handTowardEnd: Boolean,
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val scoreSize = if (compact) 56.sp else 76.sp
+    val cueSize = if (compact) 36.dp else 44.dp
+    val visitStatSize = if (compact) 18.sp else 22.sp
     val foulWarn = fouls == FourteenOneEngine.CONSECUTIVE_FOULS_TO_PENALTY - 1
+    val felt = LocalFeltPalette.current
     val handAlpha by animateFloatAsState(
         targetValue = if (hasHand) 1f else 0f,
         label = "hand-alpha",
@@ -180,28 +309,13 @@ private fun FourteenOnePlayerPanel(
         targetValue = if (foulWarn && hasHand) 1f else 0f,
         label = "fourteen-foul-warn",
     )
+    val cueInset = if (compact) 20.dp else 28.dp
 
-    Column(
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = player.name.uppercase(),
-            style = if (compact) {
-                MaterialTheme.typography.titleLarge
-            } else {
-                MaterialTheme.typography.headlineLarge
-            },
-            textAlign = TextAlign.Center,
-        )
-
-        // Score can shrink; visit stats stay pinned above the action buttons (no landscape crop).
-        Box(
-            modifier = Modifier
-                .weight(1f, fill = true)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
@@ -221,159 +335,395 @@ private fun FourteenOnePlayerPanel(
                         .align(if (handTowardEnd) Alignment.CenterEnd else Alignment.CenterStart)
                         .padding(
                             if (handTowardEnd) {
-                                PaddingValues(end = 28.dp)
+                                PaddingValues(end = cueInset)
                             } else {
-                                PaddingValues(start = 28.dp)
+                                PaddingValues(start = cueInset)
                             },
                         )
                         .alpha(handAlpha),
                     size = cueSize,
                 )
             }
-        }
-
-        Text(
-            text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
-            style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.78f),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 2.dp),
-        )
-
-        // Always reserve one line so the active shooter’s TABLE / RUN never jump the layout.
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp)
-                .height(if (compact) 28.dp else 32.dp),
-            contentAlignment = Alignment.Center,
-        ) {
+            Text(
+                text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
+                style = MaterialTheme.typography.bodyLarge,
+                color = ScoreWhite.copy(alpha = 0.78f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
+            )
             if (hasHand) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "On Table : ${match.objectBallsOnTable}",
-                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                        color = ScoreWhite,
-                    )
-                    if (match.currentRun > 0) {
-                        Text(
-                            text = "  ·  ",
-                            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                            color = ScoreWhite.copy(alpha = 0.45f),
-                        )
-                        Text(
-                            text = "RUN ${match.currentRun}",
-                            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                            color = ButtonRunOutLight,
-                        )
-                    }
-                }
+                FourteenOneVisitStats(
+                    objectBallsOnTable = match.objectBallsOnTable,
+                    currentRun = match.currentRun,
+                    visitStatSize = visitStatSize,
+                    accent = felt.accentLight,
+                    modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
+                )
+            }
+            if (foulWarn && hasHand) {
+                Text(
+                    text = "NEXT FOUL = −15",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = ButtonFoulLight.copy(alpha = warnAlpha),
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .alpha(warnAlpha),
+                )
             }
         }
+    }
+}
 
-        Box(
-            modifier = Modifier
-                .height(if (foulWarn && hasHand) 28.dp else 0.dp)
-                .padding(top = if (foulWarn && hasHand) 4.dp else 0.dp),
-            contentAlignment = Alignment.Center,
-        ) {
+@Composable
+private fun FourteenOneVisitStats(
+    objectBallsOnTable: Int,
+    currentRun: Int,
+    visitStatSize: TextUnit,
+    accent: Color,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "On Table : $objectBallsOnTable",
+            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+            color = accent,
+        )
+        if (currentRun > 0) {
             Text(
-                text = "NEXT FOUL = −15",
-                style = MaterialTheme.typography.titleLarge,
-                color = ButtonFoulLight.copy(alpha = warnAlpha),
-                modifier = Modifier.alpha(warnAlpha),
+                text = "  ·  ",
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                color = ScoreWhite.copy(alpha = 0.45f),
+            )
+            Text(
+                text = "RUN $currentRun",
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                color = ButtonRunOutLight,
             )
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Column(
+@Composable
+private fun FourteenOneActionButtons(
+    enabled: Boolean,
+    showBreakFoul: Boolean,
+    clearRackPoints: Int,
+    actionHeight: Dp,
+    actionGap: Dp,
+    onAddPoints: () -> Unit,
+    onRequestPass: () -> Unit,
+    onRequestFoul: () -> Unit,
+    onBreakFoul: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(actionGap),
+    ) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(actionGap),
         ) {
-            Row(
+            TexturedActionButton(
+                label = "+$clearRackPoints",
+                base = ButtonPlus,
+                light = ButtonPlusLight,
+                dark = ButtonPlusDark,
+                enabled = enabled,
+                onClick = onAddPoints,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+            TexturedActionButton(
+                label = "PASS",
+                base = ButtonRunOut,
+                light = ButtonRunOutLight,
+                dark = ButtonRunOutDark,
+                enabled = enabled,
+                onClick = onRequestPass,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+            TexturedActionButton(
+                label = "FOUL",
+                base = ButtonFoul,
+                light = ButtonFoulLight,
+                dark = ButtonFoulDark,
+                enabled = enabled,
+                onClick = onRequestFoul,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+        }
+        if (showBreakFoul) {
+            TexturedActionButton(
+                label = "BREAK −2",
+                base = ButtonFoul,
+                light = ButtonFoulLight,
+                dark = ButtonFoulDark,
+                enabled = true,
+                onClick = onBreakFoul,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                TexturedActionButton(
-                    label = "+1",
-                    base = ButtonPlus,
-                    light = ButtonPlusLight,
-                    dark = ButtonPlusDark,
-                    enabled = enabled,
-                    onClick = { onAddPoints(player.id, 1) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "+5",
-                    base = ButtonPlus,
-                    light = ButtonPlusLight,
-                    dark = ButtonPlusDark,
-                    enabled = enabled,
-                    onClick = { onAddPoints(player.id, 5) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "+14",
-                    base = ButtonPlus,
-                    light = ButtonPlusLight,
-                    dark = ButtonPlusDark,
-                    enabled = enabled,
-                    onClick = { onAddPoints(player.id, POINTS_FOURTEEN) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-            }
-            Row(
+                height = actionHeight,
+            )
+            Text(
+                text = "Opening break",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun VisitEndBallsModal(
+    match: Match,
+    action: VisitEndAction,
+    onDismiss: () -> Unit,
+    onConfirm: (remaining: Int, priorPoints: Int) -> Unit,
+) {
+    val felt = LocalFeltPalette.current
+    val minBalls = FourteenOneEngine.MIN_OBJECT_BALLS_REMAINING
+    val maxBalls = Match.OBJECT_BALLS_FULL_RACK
+    val tableAtOpen = match.objectBallsOnTable.coerceIn(minBalls, maxBalls)
+    var remaining by remember(match.objectBallsOnTable, action) {
+        mutableIntStateOf(tableAtOpen)
+    }
+    var priorPoints by remember(match.objectBallsOnTable, action) { mutableIntStateOf(0) }
+    var draftBalls by remember(match.objectBallsOnTable, action) { mutableIntStateOf(tableAtOpen) }
+    var modalRacks by remember(match.objectBallsOnTable, action) { mutableIntStateOf(0) }
+    val syncPoints = remember(draftBalls, remaining) {
+        FourteenOneEngine.pointsFromTableToRemaining(draftBalls, remaining)
+    }
+    val impliesAutoRerack = remaining > draftBalls
+    val boardRacks = remember(match.history, match.currentShooterId, match.currentRun) {
+        fullRacksInCurrentVisit(match)
+    }
+    val boardRemainder = (match.currentRun - boardRacks * POINTS_FOURTEEN).coerceAtLeast(0)
+    val modalClearPoints = (priorPoints - modalRacks * POINTS_FOURTEEN).coerceAtLeast(0)
+    val totalRacks = boardRacks + modalRacks
+    val rackPoints = totalRacks * POINTS_FOURTEEN
+    val partialPoints = boardRemainder + modalClearPoints + syncPoints
+    val visitTotal = match.currentRun + priorPoints + syncPoints
+    val racksLabel = if (totalRacks <= 1) "$totalRacks rack" else "$totalRacks racks"
+    val title = when (action) {
+        VisitEndAction.PASS -> "END INNING — PASS"
+        VisitEndAction.FOUL -> "END INNING — FOUL"
+    }
+    val confirmBase = when (action) {
+        VisitEndAction.PASS -> ButtonRunOut
+        VisitEndAction.FOUL -> ButtonFoul
+    }
+    val confirmLight = when (action) {
+        VisitEndAction.PASS -> ButtonRunOutLight
+        VisitEndAction.FOUL -> ButtonFoulLight
+    }
+    val confirmDark = when (action) {
+        VisitEndAction.PASS -> ButtonRunOutDark
+        VisitEndAction.FOUL -> ButtonFoulDark
+    }
+
+    fun tapPlusFourteen() {
+        // Match board clear-to-re-rack if needed, then one full continuous rack from 15.
+        if (draftBalls != maxBalls) {
+            priorPoints += draftBalls - 1
+            draftBalls = maxBalls
+        }
+        priorPoints += POINTS_FOURTEEN
+        modalRacks += 1
+        draftBalls = maxBalls
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.55f))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onDismiss,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 420.dp)
+                .fillMaxWidth(MODAL_CONTENT_WIDTH_FRACTION)
+                .clip(RoundedCornerShape(22.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(felt.dark.copy(alpha = 0.98f), felt.vignette),
+                    ),
+                )
+                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(22.dp))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                )
+                .padding(horizontal = 22.dp, vertical = 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = ScoreWhite.copy(alpha = 0.85f),
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Balls left on table",
+                style = MaterialTheme.typography.bodyLarge,
+                color = ScoreWhite.copy(alpha = 0.7f),
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                TexturedActionButton(
-                    label = "PASS",
-                    base = ButtonRunOut,
-                    light = ButtonRunOutLight,
-                    dark = ButtonRunOutDark,
-                    enabled = enabled,
-                    onClick = { onPass(player.id) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
+                StepperButton(
+                    label = "−",
+                    enabled = remaining > minBalls,
+                    onClick = { remaining -= 1 },
                 )
-                TexturedActionButton(
-                    label = "FOUL",
-                    base = ButtonFoul,
-                    light = ButtonFoulLight,
-                    dark = ButtonFoulDark,
-                    enabled = enabled,
-                    onClick = { onFoul(player.id) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-                TexturedActionButton(
-                    label = "BREAK −2",
-                    base = ButtonFoul,
-                    light = ButtonFoulLight,
-                    dark = ButtonFoulDark,
-                    enabled = showBreakFoul,
-                    onClick = { onBreakFoul(player.id) },
-                    modifier = Modifier.weight(1f),
-                    height = actionHeight,
-                )
-            }
-            if (match.awaitingOpeningBreak && hasHand) {
                 Text(
-                    text = "Opening break",
-                    style = MaterialTheme.typography.labelLarge,
+                    text = remaining.toString(),
+                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
+                    color = ScoreWhite,
+                    modifier = Modifier.widthIn(min = 96.dp),
+                    textAlign = TextAlign.Center,
+                )
+                StepperButton(
+                    label = "+",
+                    enabled = remaining < maxBalls,
+                    onClick = { remaining += 1 },
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            TexturedActionButton(
+                label = "+14",
+                base = ButtonPlus,
+                light = ButtonPlusLight,
+                dark = ButtonPlusDark,
+                enabled = true,
+                onClick = { tapPlusFourteen() },
+                modifier = Modifier.fillMaxWidth(MODAL_PLUS_FOURTEEN_WIDTH_FRACTION),
+                height = 44.dp,
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Full continuous rack (use for racks missed on the board)",
+                style = MaterialTheme.typography.bodyLarge,
+                color = ScoreWhite.copy(alpha = 0.55f),
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "$racksLabel (+$rackPoints)  ·  +$partialPoints partial  ·  Visit $visitTotal",
+                style = MaterialTheme.typography.titleLarge,
+                color = ButtonRunOutLight,
+                textAlign = TextAlign.Center,
+            )
+            if (impliesAutoRerack) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Warning: from On Table $draftBalls → $remaining counts at most one re-rack. Tap +14 for each extra full rack.",
+                    style = MaterialTheme.typography.bodyLarge,
                     color = OutlineWarm,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (action == VisitEndAction.FOUL) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Then foul −1",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = ButtonFoulLight,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                TexturedActionButton(
+                    label = "CANCEL",
+                    base = felt.mid,
+                    light = felt.light,
+                    dark = felt.dark,
+                    enabled = true,
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    height = 48.dp,
+                )
+                TexturedActionButton(
+                    label = "CONFIRM",
+                    base = confirmBase,
+                    light = confirmLight,
+                    dark = confirmDark,
+                    enabled = true,
+                    onClick = { onConfirm(remaining, priorPoints) },
+                    modifier = Modifier.weight(1f),
+                    height = 48.dp,
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun StepperButton(
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val felt = LocalFeltPalette.current
+    val performHaptic = rememberClickHaptic()
+    val interaction = remember { MutableInteractionSource() }
+    val alpha = if (enabled) 1f else 0.38f
+    val shape = RoundedCornerShape(16.dp)
+    Box(
+        modifier = Modifier
+            .size(72.dp, 64.dp)
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        felt.accentLight.copy(alpha = alpha),
+                        felt.accentDark.copy(alpha = alpha),
+                    ),
+                ),
+            )
+            .border(
+                width = 2.dp,
+                color = OutlineWarm.copy(alpha = if (enabled) 0.85f else 0.28f),
+                shape = shape,
+            )
+            .clickable(
+                enabled = enabled,
+                interactionSource = interaction,
+                indication = null,
+                onClick = {
+                    performHaptic()
+                    onClick()
+                },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.headlineLarge,
+            color = ScoreWhite.copy(alpha = alpha),
+        )
     }
 }
 
@@ -398,11 +748,37 @@ private fun FourteenMedianDivider(landscape: Boolean) {
         } else {
             Modifier
                 .fillMaxWidth()
-                .height(3.dp)
                 .padding(horizontal = 12.dp)
+                .height(3.dp)
                 .background(brush)
         },
     )
 }
 
+private val PortraitMedianInset = 16.dp
+private val PortraitNameTopInset = 8.dp
+private const val MODAL_CONTENT_WIDTH_FRACTION = 0.92f
+private const val MODAL_PLUS_FOURTEEN_WIDTH_FRACTION = 0.55f
 private const val POINTS_FOURTEEN = 14
+
+/** Full continuous racks (+14) already scored in the current unfinished visit. */
+private fun fullRacksInCurrentVisit(match: Match): Int {
+    var racks = 0
+    for (event in match.history.asReversed()) {
+        when (event.type) {
+            MatchEventType.POINTS ->
+                if (event.playerId == match.currentShooterId) {
+                    racks += event.value / POINTS_FOURTEEN
+                } else {
+                    return racks
+                }
+            MatchEventType.PASS,
+            MatchEventType.FOUL,
+            MatchEventType.BREAK_FOUL,
+            MatchEventType.THREE_FOUL_PENALTY,
+            -> return racks
+            else -> Unit
+        }
+    }
+    return racks
+}
