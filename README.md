@@ -3,16 +3,19 @@
 Native Android app (Kotlin + Jetpack Compose) for scoring **8-ball / 9-ball / 10-ball races**
 and **14/1 continuous** at the table, without slowing the game down.
 
+**Current version: 1.0.0** — see [docs/07-versioning-and-releases.md](docs/07-versioning-and-releases.md).
+
 ## Project status
 
-Ready for table use — race + 14/1 boards, settings, history, PDF share.
+Table-ready product (v1): race + 14/1 boards, settings, history, PDF share.
+Semver releases are cut automatically after green CI on `main` when `racktrack.versionName` bumps.
 
 ## Scope (current)
 
 - Landscape **and** portrait (`fullSensor`), split-screen boards on billiard cloth
 - Setup: game mode, race length or 14/1 distance (+ optional innings), who starts
 - Race actions: **+1**, **Run out**, **Foul**; 9-ball Golden/Dry; 8-ball Early 8/Dry
-- 14/1: **+1 / +5 / +14**, **PASS**, **FOUL (−1)**, **BREAK −2**, 3-foul **−15**
+- 14/1: clear-rack **+(On Table − 1)**, **PASS** / **FOUL** (balls-left modal), **BREAK −2** on opening
 - Break / hand indicator, undo, end-of-match summary (**SHARE PDF** + **BACK**)
 - Match history (per selected mode): player filters, reopen stats, delete with confirm
 - Styled PDF share (start / end / duration; filename includes start date-time)
@@ -29,11 +32,12 @@ FFB mode notes live in `docs/02-game-rules-*.md`; official text in the PDF under
 ./gradlew :app:domainCoverage   # domain JaCoCo → app/build/reports/jacoco/domainCoverage/
 ./gradlew ktlintCheck detekt
 ./gradlew :app:assembleDebug
+./gradlew :app:assembleRelease  # GitHub Release APK (debug-keystore signed for now)
 ```
 
 On pull requests to `main`, CI posts a **Domain coverage** comment (JaCoCo) and uploads the HTML report as an artifact.
 
-Open in Android Studio (recent) or install the debug APK on a phone/tablet.
+Open in Android Studio (recent) or install a release APK from [GitHub Releases](https://github.com/Asarox33/RackTrack/releases).
 
 ## Docs
 
@@ -48,6 +52,7 @@ Open in Android Studio (recent) or install the debug APK on a phone/tablet.
 | [docs/04-architecture.md](docs/04-architecture.md) | Stack & layers |
 | [docs/05-conventions.md](docs/05-conventions.md) | Conventions |
 | [docs/06-roadmap-todo.md](docs/06-roadmap-todo.md) | Roadmap / backlog |
+| [docs/07-versioning-and-releases.md](docs/07-versioning-and-releases.md) | Semver + release pipeline |
 | `resources/code-sportif-americain-2026-2027.pdf` | Official FFB text |
 
 ## Tech stack

@@ -1,6 +1,6 @@
 # Roadmap & TODO
 
-Overall status: ✅ Table scoreboard + local history + PDF share
+Overall status: ✅ **v1.0.0** table scoreboard + local history + PDF share
 
 Legend: ⬜ to do · 🟨 in progress · ✅ done
 
@@ -48,15 +48,25 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ PASS / FOUL open end-of-inning modal: stepper for balls left (**2–15**), preview visit points
 - ✅ Sync formula allows at most one continuous re-rack after live clear-rack taps
 
+## Step 8 — v1.0.0 release pipeline
+- ✅ Semver in `gradle.properties` (`versionName` / `versionCode`)
+- ✅ Auto GitHub Release + APK after green CI on `main` when version bumps
+- ✅ Protected `v*` tags (repository ruleset)
+- ✅ Docs: versioning guide; MVP wording retired for v1 coverage
+
+## Post-v1 backlog (optional)
+- ⬜ Play Store / dedicated upload keystore (replace debug-keystore release APKs)
+- ⬜ Camera / AI ball detection — only if product revisits automatic scoring
+
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
 - ~~PNG share of match summary~~ — PDF only
-- Camera / AI assistance — only if product revisits automatic ball detection later
 
 ## Progress notes
 
-- 2026-08-10: 14/1 visit-end modal (balls-left stepper); board +14 / hide BREAK −2 off opening.
+- 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.
+- 2026-08-10: 14/1 visit-end modal (balls-left stepper); board clear-rack / hide BREAK −2 off opening.
 - 2026-08-10: Alternate/Winner break for 8/9/10; 14/1 On Table balls remaining.
 - 2026-08-09: History (mode-scoped, filters, delete), styled PDF share, BACK labels; dropped deep FFB / screenshots / PNG share.
 - 2026-08-08: Cleanup pass — dead APIs, assets, `appearance/` for felt, docs aligned to multi-mode board.

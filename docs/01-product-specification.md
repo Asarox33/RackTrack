@@ -68,3 +68,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 Standing at a table, two players can run an 8/9/10 race or a 14/1 to a set distance with the
 relevant taps, see who breaks / has the hand, finish, review or share a summary, and later
 find that match in history — without entering shot details.
+
+## 10. Product version
+
+**1.0.0** — first table-ready product cut. Versioning and GitHub Releases:
+`docs/07-versioning-and-releases.md`.

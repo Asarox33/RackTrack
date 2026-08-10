@@ -1,4 +1,4 @@
-# 10-Ball Game Rules (FFB, 2026-2027) — Modeling + MVP status
+# 10-Ball Game Rules (FFB, 2026-2027) — Modeling + v1 coverage
 
 > Rewritten technical specification, not the official regulatory text. Authority:
 > `resources/code-sportif-americain-2026-2027.pdf` (Chapter 5, arts 1.5.01–1.5.07;
@@ -6,12 +6,12 @@
 >
 > Domain: `MatchEngine` + `GameMode.TEN_BALL`. Product scope: `docs/01-product-specification.md`.
 
-## RackTrack MVP — what is implemented
+## RackTrack v1 — what is implemented
 
 The shipped app is a **race scoreboard**, not a shot-by-shot referee. Players (or a
 table partner) judge legality; the app records outcomes.
 
-| FFB topic | MVP |
+| FFB topic | v1 |
 |---|---|
 | Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
 | Alternating / winner break | **Yes** — setup `BreakRule`; cue follows breaker |
@@ -43,7 +43,7 @@ table partner) judge legality; the app records outcomes.
 - Must contact ball 1 first, otherwise → **foul**.
 - If no ball is pocketed: at least 4 object balls must contact a rail, otherwise → **foul** ("illegal break").
 - On a foul break: the opponent gets ball-in-hand anywhere on the table.
-- *(Masters category only: "break box" rule — mandatory break from a defined zone. Out of MVP scope.)*
+- *(Masters category only: "break box" rule — mandatory break from a defined zone. Out of v1 scope.)*
 
 ## 4. Push-out
 
@@ -85,7 +85,7 @@ Main fouls to model (see article 1.2.09 of the sporting code, full list in the P
 - Shooting out of turn
 - Shooting with an object ball instead of the cue ball
 
-*(MVP: unsportsmanlike conduct, slow play/shot clock, and dispute cases requiring a human referee are not modeled — trusted play / self-refereeing.)*
+*(v1: unsportsmanlike conduct, slow play/shot clock, and dispute cases requiring a human referee are not modeled — trusted play / self-refereeing.)*
 
 ## 8. Three consecutive fouls rule
 
@@ -93,7 +93,7 @@ Main fouls to model (see article 1.2.09 of the sporting code, full list in the P
 - After the 2nd consecutive foul, the opponent or referee **must** warn the player; if a 3rd foul occurs without that notification, FFB keeps the count at 2 (art. 1.5.07).
 - A legal shot resets the consecutive foul counter to zero.
 
-**MVP:** warning UI + auto rack loss on 3rd foul; clear via tap on foul chip. The “no warning → 3rd doesn’t count” exception is **not** modeled.
+**v1:** warning UI + auto rack loss on 3rd foul; clear via tap on foul chip. The “no warning → 3rd doesn’t count” exception is **not** modeled.
 
 ## 9. End of rack / end of match
 

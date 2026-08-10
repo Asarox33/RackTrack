@@ -1,0 +1,96 @@
+name: Release
+
+# Builds a release APK and publishes a GitHub Release for tags vX.Y.Z.
+# Primary path after merges: cut-release.yml (CI success on main).
+# This workflow covers manual / admin tag pushes that match gradle.properties.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Read version from Gradle
+        id: version
+        run: |
+          NAME=$(grep -E '^racktrack\.versionName=' gradle.properties | cut -d= -f2)
+          CODE=$(grep -E '^racktrack\.versionCode=' gradle.properties | cut -d= -f2)
+          TAG="${GITHUB_REF_NAME}"
+          EXPECTED="v${NAME}"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "code=${CODE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if [ "$TAG" != "$EXPECTED" ]; then
+            echo "::error::Tag ${TAG} does not match gradle versionName (${EXPECTED}). Bump racktrack.versionName/versionCode together."
+            exit 1
+          fi
+
+      - name: Skip if release already exists
+        id: skip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${TAG} already exists — nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Quality gates
+        if: steps.skip.outputs.exists == 'false'
+        run: ./gradlew ktlintCheck detekt :app:domainCoverage
+
+      - name: Assemble release APK
+        if: steps.skip.outputs.exists == 'false'
+        run: ./gradlew :app:assembleRelease
+
+      - name: Stage APK artifact
+        if: steps.skip.outputs.exists == 'false'
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk \
+            "dist/RackTrack-${{ steps.version.outputs.name }}.apk"
+          ls -lh dist/
+
+      - name: Create GitHub Release
+        if: steps.skip.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          NAME="${{ steps.version.outputs.name }}"
+          CODE="${{ steps.version.outputs.code }}"
+          APK="dist/RackTrack-${NAME}.apk"
+          NOTES="$(printf '%s\n' \
+            "## RackTrack ${NAME}" \
+            "" \
+            "- **versionName:** \`${NAME}\`" \
+            "- **versionCode:** \`${CODE}\`" \
+            "- **APK:** \`RackTrack-${NAME}.apk\` (release build, debug keystore — sideload / club use)" \
+            "" \
+            "Built from tag \`${TAG}\` on \`${GITHUB_SHA:0:7}\`." \
+          )"
+          gh release create "$TAG" "$APK" \
+            --title "RackTrack ${NAME}" \
+            --notes "$NOTES" \
+            --verify-tag

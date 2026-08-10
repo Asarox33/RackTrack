@@ -7,11 +7,12 @@ You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) fo
 - Landscape + portrait split-screen board on billiard cloth (`fullSensor`)
 - Setup: game mode (8 / 9 / 10 / 14/1); race length or 14/1 distance + innings; who starts
 - Race modes: **+1**, **Run out**, **Foul**; 9-ball Golden/Dry; 8-ball Early 8/Dry
-- 14/1: **+1/+5/+14**, **PASS**, **FOUL (−1)**, **BREAK −2**, 3-foul **−15**
+- 14/1: clear-rack **+(On Table − 1)**, **PASS** / **FOUL** (balls-left modal), **BREAK −2** on opening
 - Break/hand indicator; undo; end-of-match summary (SHARE PDF + BACK; 14/1: HR, avg, innings, reprises)
 - Local history: mode-scoped list, player filters, delete with confirm, reopen stats
 - Styled PDF share of full MatchSummary (start/end/duration) — PDF only, not PNG/screenshot
 - Settings gear: cloth color, keep screen on, haptics, default race/distance/innings, FFB rules link
+- Product version **1.0.0+** (semver in `gradle.properties`; see `docs/07-versioning-and-releases.md`)
 - No per-shot ball + pocket entry (too slow at the table; needs camera/AI to be useful)
 
 ## Before generating anything

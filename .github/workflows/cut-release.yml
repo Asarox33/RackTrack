@@ -1,0 +1,102 @@
+name: Cut release from main
+
+# After CI succeeds on a push to main, if racktrack.versionName has no GitHub
+# Release yet, create annotated tag vX.Y.Z, build the APK, and publish the release.
+# (GITHUB_TOKEN tag pushes do not start other workflows, so release is done here.)
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  cut-release:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main at CI head SHA
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          set -euo pipefail
+          NAME=$(grep -E '^racktrack\.versionName=' gradle.properties | cut -d= -f2)
+          CODE=$(grep -E '^racktrack\.versionCode=' gradle.properties | cut -d= -f2)
+          TAG="v${NAME}"
+          if ! echo "$NAME" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid racktrack.versionName=${NAME} (expected X.Y.Z)"
+            exit 1
+          fi
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "code=${CODE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if release already exists
+        id: skip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${TAG} already exists — nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up JDK
+        if: steps.skip.outputs.exists == 'false'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        if: steps.skip.outputs.exists == 'false'
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Quality gates
+        if: steps.skip.outputs.exists == 'false'
+        run: ./gradlew ktlintCheck detekt :app:domainCoverage
+
+      - name: Assemble release APK
+        if: steps.skip.outputs.exists == 'false'
+        run: ./gradlew :app:assembleRelease
+
+      - name: Publish GitHub Release + tag
+        if: steps.skip.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NAME="${{ steps.version.outputs.name }}"
+          CODE="${{ steps.version.outputs.code }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          SHA="${{ steps.version.outputs.sha }}"
+          mkdir -p dist
+          APK="dist/RackTrack-${NAME}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          NOTES="$(printf '%s\n' \
+            "## RackTrack ${NAME}" \
+            "" \
+            "- **versionName:** \`${NAME}\`" \
+            "- **versionCode:** \`${CODE}\`" \
+            "- **APK:** \`RackTrack-${NAME}.apk\` (release build, debug keystore — sideload / club use)" \
+            "" \
+            "Cut automatically after CI on \`main\` (\`${SHA:0:7}\`)." \
+          )"
+          gh release create "$TAG" "$APK" \
+            --target "$SHA" \
+            --title "RackTrack ${NAME}" \
+            --notes "$NOTES"

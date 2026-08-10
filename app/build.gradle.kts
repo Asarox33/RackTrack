@@ -14,8 +14,8 @@ android {
         applicationId = "com.racktrack"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = providers.gradleProperty("racktrack.versionCode").get().toInt()
+        versionName = providers.gradleProperty("racktrack.versionName").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -25,6 +25,8 @@ android {
         }
         release {
             isMinifyEnabled = false
+            // Installable CI / GitHub Release APKs until a Play Store keystore exists.
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
