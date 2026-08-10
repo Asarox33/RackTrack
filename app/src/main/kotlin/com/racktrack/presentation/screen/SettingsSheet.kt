@@ -300,7 +300,7 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
                 .padding(vertical = 4.dp),
         )
         Text(
-            text = "Local scoreboard only — no accounts, no cloud.",
+            text = "One device scores the table — no remote play. Match history stays on this phone in v1.",
             style = MaterialTheme.typography.bodyLarge,
             color = ScoreWhite.copy(alpha = 0.55f),
             modifier = Modifier.fillMaxWidth(),

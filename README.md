@@ -22,7 +22,8 @@ Semver releases are cut automatically after green CI on `main` when `racktrack.v
 - Settings: felt color, keep screen on, haptics, default race/distance/innings, FFB rules link
 - Local only — no accounts, no cloud, no per-shot ball/pocket entry
 
-Out of scope: shot-by-shot call/pocket scoring, camera/AI, iOS, sync, PNG share.
+Out of scope: shot-by-shot call/pocket scoring, camera/AI, iOS, remote live scoring
+(two phones / two tables). Optional later: accounts for shared post-match stats only.
 FFB mode notes live in `docs/02-game-rules-*.md`; official text in the PDF under `resources/`.
 
 ## Run / build

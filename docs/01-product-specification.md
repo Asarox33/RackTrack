@@ -30,6 +30,9 @@ or share past match stats.
 
 ### Later (only if product asks)
 - Camera / AI ball detection — prerequisite for any automatic shot scoring
+- Optional **accounts / player identity** so each player can find others and **retrieve
+  stats for matches they played**, even when the scoreboard run was on someone else’s
+  phone — **still one device scores the live match** (never remote two-table play)
 
 Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
@@ -52,12 +55,17 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
 ## 7. Explicitly out of scope
 
+- **Remote / distant live scoring** (two players on two tables or two phones driving
+  one match) — forever out of product sense; **one device is the scoreboard of record**
 - Per-shot call ball + pocket entry (and any deep FFB referee UI without camera)
 - Push-out UI, full illegal-break geometry checks
-- User accounts, cloud, sync, iOS
+- iOS
 - Shot clock / disciplinary / federal competition machinery
 - Screenshot / UI golden tests
 - PNG export of match summary (PDF only)
+
+Accounts + cloud history sync are **not in v1**; they may appear later only for
+identity / find-players / shared post-match stats (see §5 Later) — not for remote play.
 
 ## 8. Constraints
 

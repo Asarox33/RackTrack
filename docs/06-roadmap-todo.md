@@ -58,14 +58,18 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 ## Post-v1 backlog (optional)
 - ⬜ Play Store / dedicated upload keystore (replace debug-keystore release APKs)
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
+- ⬜ Accounts / find players + shared post-match stats (each player can reopen a match
+  scored on another device) — **never** remote live scoring; one device remains the table scoreboard
 
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
 - ~~PNG share of match summary~~ — PDF only
+- ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
 
 ## Progress notes
 
+- 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
 - 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.
 - 2026-08-10: 14/1 visit-end modal (balls-left stepper); board clear-rack / hide BREAK −2 off opening.
 - 2026-08-10: Alternate/Winner break for 8/9/10; 14/1 On Table balls remaining.
