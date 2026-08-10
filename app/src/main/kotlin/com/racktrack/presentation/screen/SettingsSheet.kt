@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.racktrack.data.UserSettings
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
@@ -56,6 +57,7 @@ fun SettingsSheet(
     onDefaultRacksChange: (Int) -> Unit,
     onDefaultPointsChange: (Int) -> Unit,
     onDefaultInningsChange: (Int?) -> Unit,
+    onDefaultBreakRuleChange: (BreakRule) -> Unit = {},
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -185,6 +187,32 @@ fun SettingsSheet(
                     label = "∞",
                     selected = settings.defaultInningsLimit == null,
                     onClick = { onDefaultInningsChange(null) },
+                    selectedLight = felt.accentLight,
+                    selectedDark = felt.accentDark,
+                    idleLight = felt.mid,
+                    idleDark = felt.dark,
+                    height = 40.dp,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            SectionLabel("Default break rule (8/9/10)")
+            Spacer(modifier = Modifier.height(8.dp))
+            ChipRow {
+                TexturedChip(
+                    label = "ALTERNATE",
+                    selected = settings.defaultBreakRule == BreakRule.ALTERNATE,
+                    onClick = { onDefaultBreakRuleChange(BreakRule.ALTERNATE) },
+                    selectedLight = felt.accentLight,
+                    selectedDark = felt.accentDark,
+                    idleLight = felt.mid,
+                    idleDark = felt.dark,
+                    height = 40.dp,
+                )
+                TexturedChip(
+                    label = "WINNER",
+                    selected = settings.defaultBreakRule == BreakRule.WINNER,
+                    onClick = { onDefaultBreakRuleChange(BreakRule.WINNER) },
                     selectedLight = felt.accentLight,
                     selectedDark = felt.accentDark,
                     idleLight = felt.mid,

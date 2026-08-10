@@ -1,5 +1,6 @@
 package com.racktrack.domain
 
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEvent
 import com.racktrack.domain.model.MatchEventType
@@ -9,6 +10,14 @@ import com.racktrack.domain.model.PlayerId
 /** Pure rules for the landscape race MVP — no Android dependencies. */
 object MatchEngine {
     const val CONSECUTIVE_FOULS_TO_LOSE_RACK = 3
+
+    private val RACK_ENDING_TYPES = setOf(
+        MatchEventType.PLUS_ONE,
+        MatchEventType.RUN_OUT,
+        MatchEventType.GOLDEN_BREAK,
+        MatchEventType.THREE_FOULS_LOSS,
+        MatchEventType.EIGHT_BALL_LOSS,
+    )
 
     fun recordPlusOne(match: Match, playerId: PlayerId, nowMillis: Long): Match =
         awardRack(match, playerId, MatchEventType.PLUS_ONE, nowMillis)
@@ -184,10 +193,12 @@ object MatchEngine {
                         },
                     )
                 }
+                val breaker = breakerFromHistory(match, withoutLast)
                 revertedScores.copy(
                     foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
                     foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
-                    currentBreakerId = match.otherPlayerId(match.currentBreakerId),
+                    currentBreakerId = breaker,
+                    currentShooterId = breaker,
                     status = MatchStatus.IN_PROGRESS,
                     history = withoutLast,
                 )
@@ -216,10 +227,12 @@ object MatchEngine {
                 } else {
                     revertedScores
                 }
+                val breaker = breakerFromHistory(match, withoutLast)
                 withLossCounter.copy(
                     foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
                     foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
-                    currentBreakerId = match.otherPlayerId(match.currentBreakerId),
+                    currentBreakerId = breaker,
+                    currentShooterId = breaker,
                     status = MatchStatus.IN_PROGRESS,
                     history = withoutLast,
                 )
@@ -273,12 +286,14 @@ object MatchEngine {
         val nextScore2 = if (winnerId == match.player2.id) match.score2 + 1 else match.score2
         val completed =
             nextScore1 >= match.racksToWin || nextScore2 >= match.racksToWin
+        val nextBreaker = nextBreakerAfterRack(match, rackWinnerId = winnerId)
         return match.copy(
             score1 = nextScore1,
             score2 = nextScore2,
             foul1 = 0,
             foul2 = 0,
-            currentBreakerId = match.otherPlayerId(match.currentBreakerId),
+            currentBreakerId = nextBreaker,
+            currentShooterId = nextBreaker,
             status = if (completed) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
             history = match.history + MatchEvent(type, loserId, nowMillis),
         )
@@ -296,16 +311,52 @@ object MatchEngine {
         val nextScore2 = if (playerId == match.player2.id) match.score2 + 1 else match.score2
         val completed =
             nextScore1 >= match.racksToWin || nextScore2 >= match.racksToWin
+        val nextBreaker = nextBreakerAfterRack(match, rackWinnerId = playerId)
         return match.copy(
             score1 = nextScore1,
             score2 = nextScore2,
             foul1 = 0,
             foul2 = 0,
-            currentBreakerId = match.otherPlayerId(match.currentBreakerId),
+            currentBreakerId = nextBreaker,
+            currentShooterId = nextBreaker,
             status = if (completed) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
             history = match.history + MatchEvent(type, playerId, nowMillis),
         )
     }
+
+    private fun nextBreakerAfterRack(match: Match, rackWinnerId: PlayerId): PlayerId =
+        when (match.breakRule) {
+            BreakRule.ALTERNATE -> match.otherPlayerId(match.currentBreakerId)
+            BreakRule.WINNER -> rackWinnerId
+        }
+
+    /**
+     * Rebuilds who should break after [history], from [Match.openingBreakerId] and [BreakRule].
+     */
+    private fun breakerFromHistory(match: Match, history: List<MatchEvent>): PlayerId {
+        var breaker = match.openingBreakerId ?: match.currentBreakerId
+        for (event in history) {
+            if (event.type !in RACK_ENDING_TYPES) continue
+            val winnerId = rackWinnerId(match, event)
+            breaker = when (match.breakRule) {
+                BreakRule.ALTERNATE -> match.otherPlayerId(breaker)
+                BreakRule.WINNER -> winnerId
+            }
+        }
+        return breaker
+    }
+
+    private fun rackWinnerId(match: Match, event: MatchEvent): PlayerId =
+        when (event.type) {
+            MatchEventType.PLUS_ONE,
+            MatchEventType.RUN_OUT,
+            MatchEventType.GOLDEN_BREAK,
+            -> event.playerId
+            MatchEventType.THREE_FOULS_LOSS,
+            MatchEventType.EIGHT_BALL_LOSS,
+            -> match.otherPlayerId(event.playerId)
+            else -> error("Not a rack-ending event: ${event.type}")
+        }
 
     /**
      * Consecutive fouls since the last rack-ending event for [playerId].

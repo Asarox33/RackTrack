@@ -35,17 +35,19 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
 ## 6. Current features
 
-- Create a match (2 names, mode, race length or 14/1 distance/innings, who starts)
+- Create a match (2 names, mode, race length or 14/1 distance/innings, who starts;
+  race: Alternate vs Winner break)
 - Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink)
 - Landscape and portrait (`fullSensor`)
-- Break / shooter indicator; alternate break after each race rack
+- Break / shooter indicator; alternate or winner break after each race rack
+- 14/1: `TABLE n` object balls remaining on the shooter’s panel
 - Undo last action; end-of-match summary (**SHARE PDF** + **BACK** to setup)
 - Local match history:
   - Entry from setup (**HISTORY**, felt color), scoped to the selected game mode
   - Filter by player names (either seat); reopen the same stats as end-of-match
   - Delete with red ✕ + confirmation
 - Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
-- Settings: felt, keep screen on, haptics, default race/distance/innings, open FFB PDF rules link
+- Settings: felt, keep screen on, haptics, default race/distance/innings/break rule, open FFB PDF rules link
 
 ## 7. Explicitly out of scope
 

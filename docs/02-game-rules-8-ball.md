@@ -13,7 +13,7 @@ Race scoreboard only. No solids/stripes table state; players judge groups and ca
 | FFB topic | MVP |
 |---|---|
 | Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
-| Alternating break indicator | **Yes** |
+| Alternating / winner break | **Yes** — setup `BreakRule` |
 | Early-8 / lose rack cases (1.3.06) | **Yes** — single **EARLY 8** → opponent wins rack (`EIGHT_BALL_LOSS`) |
 | Dry / empty break as stat (1.3.03) | **Yes** — **DRY** on breaker; does not end rack; blocks Run out this rack |
 | Illegal-break opponent choices (accept / re-rack / force re-break) | **No** — operator only |

@@ -132,7 +132,7 @@ object MatchSummaryReport {
             addAll(playerStatLines(summary, 2).map { "  $it" })
             add("")
             if (summary.gameMode.isPointScoring) {
-                add("REPRISES")
+                add("INNINGS")
                 add(summary.player1Name)
                 summary.inningScores1.forEach {
                     add("  #${it.index}  ${it.points}  ${inningEndLabel(it.endType)}")

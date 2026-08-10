@@ -13,7 +13,7 @@ Race scoreboard. Richest race mode in the app (golden + dry + three-foul loss).
 | FFB topic | MVP |
 |---|---|
 | Race-to-N racks; +1 / Run out | **Yes** — `PLUS_ONE` / `RUN_OUT` |
-| Alternating break indicator | **Yes** |
+| Alternating / winner break | **Yes** — setup `BreakRule` |
 | Golden break — legal break pockets 9 (1.4.03) | **Yes** — **GOLDEN** → awards rack |
 | Dry break (no object ball pocketed) as stat | **Yes** — **DRY**; blocks Run out / Golden this rack |
 | Illegal break / “three-ball” soft-break rule | **No** — operator; may use FOUL or DRY by judgment |

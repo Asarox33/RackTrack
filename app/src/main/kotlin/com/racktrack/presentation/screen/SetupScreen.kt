@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.MatchFormatOptions
 import com.racktrack.presentation.component.SettingsGearButton
@@ -50,6 +51,7 @@ fun SetupScreen(
     onPointsChange: (Int) -> Unit,
     onInningsChange: (Int?) -> Unit,
     onBreakerChange: (Boolean) -> Unit,
+    onBreakRuleChange: (BreakRule) -> Unit = {},
     onStart: () -> Unit,
     onOpenHistory: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
@@ -70,6 +72,7 @@ fun SetupScreen(
                     onPointsChange = onPointsChange,
                     onInningsChange = onInningsChange,
                     onBreakerChange = onBreakerChange,
+                    onBreakRuleChange = onBreakRuleChange,
                     onStart = onStart,
                     onOpenHistory = onOpenHistory,
                 )
@@ -83,6 +86,7 @@ fun SetupScreen(
                     onPointsChange = onPointsChange,
                     onInningsChange = onInningsChange,
                     onBreakerChange = onBreakerChange,
+                    onBreakRuleChange = onBreakRuleChange,
                     onStart = onStart,
                     onOpenHistory = onOpenHistory,
                 )
@@ -108,6 +112,7 @@ private fun LandscapeSetup(
     onPointsChange: (Int) -> Unit,
     onInningsChange: (Int?) -> Unit,
     onBreakerChange: (Boolean) -> Unit,
+    onBreakRuleChange: (BreakRule) -> Unit,
     onStart: () -> Unit,
     onOpenHistory: () -> Unit,
 ) {
@@ -165,6 +170,13 @@ private fun LandscapeSetup(
                 style = MaterialTheme.typography.titleLarge,
             )
             BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = true)
+            if (!state.gameMode.isPointScoring) {
+                BreakRuleRow(
+                    state = state,
+                    onBreakRuleChange = onBreakRuleChange,
+                    compact = true,
+                )
+            }
             TexturedActionButton(
                 label = "START MATCH",
                 base = felt.accent,
@@ -199,6 +211,7 @@ private fun PortraitSetup(
     onPointsChange: (Int) -> Unit,
     onInningsChange: (Int?) -> Unit,
     onBreakerChange: (Boolean) -> Unit,
+    onBreakRuleChange: (BreakRule) -> Unit,
     onStart: () -> Unit,
     onOpenHistory: () -> Unit,
 ) {
@@ -251,6 +264,14 @@ private fun PortraitSetup(
             )
             Box(modifier = Modifier.height(10.dp))
             BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = false)
+            if (!state.gameMode.isPointScoring) {
+                Box(modifier = Modifier.height(10.dp))
+                BreakRuleRow(
+                    state = state,
+                    onBreakRuleChange = onBreakRuleChange,
+                    compact = false,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -390,6 +411,43 @@ private fun BreakerRow(
             idleDark = felt.dark,
             height = if (compact) 44.dp else 48.dp,
         )
+    }
+}
+
+@Composable
+private fun BreakRuleRow(
+    state: SetupUiState,
+    onBreakRuleChange: (BreakRule) -> Unit,
+    compact: Boolean,
+) {
+    val felt = LocalFeltPalette.current
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Break rule", style = MaterialTheme.typography.titleLarge)
+        if (!compact) Box(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            TexturedChip(
+                label = "ALTERNATE",
+                selected = state.breakRule == BreakRule.ALTERNATE,
+                onClick = { onBreakRuleChange(BreakRule.ALTERNATE) },
+                modifier = Modifier.widthIn(min = 120.dp),
+                selectedLight = felt.accentLight,
+                selectedDark = felt.accentDark,
+                idleLight = felt.light,
+                idleDark = felt.dark,
+                height = if (compact) 40.dp else 44.dp,
+            )
+            TexturedChip(
+                label = "WINNER",
+                selected = state.breakRule == BreakRule.WINNER,
+                onClick = { onBreakRuleChange(BreakRule.WINNER) },
+                modifier = Modifier.widthIn(min = 120.dp),
+                selectedLight = felt.accentLight,
+                selectedDark = felt.accentDark,
+                idleLight = felt.light,
+                idleDark = felt.dark,
+                height = if (compact) 40.dp else 44.dp,
+            )
+        }
     }
 }
 

@@ -65,7 +65,7 @@ object MatchStats {
             if (match.gameMode.isPointScoring) inningScores(match.history, match.player1.id) else emptyList()
         val inningScores2 =
             if (match.gameMode.isPointScoring) inningScores(match.history, match.player2.id) else emptyList()
-        // Include an open winning visit so Inn / avg match the REPRISES table.
+        // Include an open winning visit so Inn / avg match the INNINGS table.
         val inningsPlayed1 =
             if (match.gameMode.isPointScoring) inningScores1.size else match.innings1
         val inningsPlayed2 =

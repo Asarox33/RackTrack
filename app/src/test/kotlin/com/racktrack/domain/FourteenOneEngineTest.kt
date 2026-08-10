@@ -159,4 +159,86 @@ class FourteenOneEngineTest {
         assertEquals(-2, afterFoul.score1)
     }
 
+    @Test
+    fun `given full rack, when plus fourteen, then continuous re-rack restores fifteen`() {
+        val match = fresh()
+        assertEquals(15, match.objectBallsOnTable)
+
+        val next = FourteenOneEngine.addPoints(match, match.player1.id, 14, now())
+
+        // 14 pocketed → keyball alone → 14 re-racked → 15 again
+        assertEquals(15, next.objectBallsOnTable)
+    }
+
+    @Test
+    fun `given three balls left, when plus thirty-two, then thirteen remain`() {
+        val start = fresh().copy(objectBallsOnTable = 3)
+        // 2 to keyball/re-rack + 14 + 14 + 2 = 32 → 13 left on the last rack
+        val next = FourteenOneEngine.addPoints(start, start.player1.id, 32, now())
+
+        assertEquals(13, next.objectBallsOnTable)
+    }
+
+    @Test
+    fun `given two balls left, when plus one, then continuous re-rack restores fifteen`() {
+        val start = fresh().copy(objectBallsOnTable = 2)
+        val next = FourteenOneEngine.addPoints(start, start.player1.id, 1, now())
+
+        assertEquals(15, next.objectBallsOnTable)
+    }
+
+    @Test
+    fun `given points then pass, object balls on table are unchanged by pass`() {
+        val start = fresh()
+        val scored = FourteenOneEngine.addPoints(start, start.player1.id, 5, now())
+        assertEquals(10, scored.objectBallsOnTable)
+
+        val passed = FourteenOneEngine.pass(scored, scored.player1.id, now())
+        assertEquals(10, passed.objectBallsOnTable)
+    }
+
+    @Test
+    fun `given foul, object balls on table are unchanged`() {
+        val start = fresh()
+        val match = FourteenOneEngine.addPoints(start, start.player1.id, 3, now())
+        val fouled = FourteenOneEngine.foul(match, match.player1.id, now())
+
+        assertEquals(12, fouled.objectBallsOnTable)
+    }
+
+    @Test
+    fun `given three foul penalty, object balls reset to fifteen for re-break`() {
+        var match = fresh()
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 4, now())
+        match = FourteenOneEngine.foul(match, match.player1.id, now())
+        match = FourteenOneEngine.pass(match, match.player2.id, now())
+        match = FourteenOneEngine.foul(match, match.player1.id, now())
+        match = FourteenOneEngine.pass(match, match.player2.id, now())
+        assertEquals(11, match.objectBallsOnTable)
+
+        match = FourteenOneEngine.foul(match, match.player1.id, now())
+
+        assertTrue(match.awaitingOpeningBreak)
+        assertEquals(15, match.objectBallsOnTable)
+    }
+
+    @Test
+    fun `given points, when undo, then object balls restore`() {
+        val start = fresh()
+        val scored = FourteenOneEngine.addPoints(start, start.player1.id, 5, now())
+        assertEquals(10, scored.objectBallsOnTable)
+
+        val undone = FourteenOneEngine.undoLast(scored)
+        assertEquals(15, undone.objectBallsOnTable)
+    }
+
+    @Test
+    fun `reduceObjectBalls re-racks when keyball alone remains`() {
+        assertEquals(15, FourteenOneEngine.reduceObjectBalls(15, 14))
+        assertEquals(14, FourteenOneEngine.reduceObjectBalls(15, 15))
+        assertEquals(13, FourteenOneEngine.reduceObjectBalls(15, 16))
+        assertEquals(13, FourteenOneEngine.reduceObjectBalls(3, 32))
+        assertEquals(15, FourteenOneEngine.reduceObjectBalls(2, 1))
+        assertEquals(15, FourteenOneEngine.reduceObjectBalls(1, 1))
+    }
 }

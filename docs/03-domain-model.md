@@ -28,10 +28,13 @@ In-memory match for races or 14/1.
 | `racksToWin` | Race length | unused (0) |
 | `pointsToWin` | unused | Distance |
 | `inningsLimitBase` / `inningsLimit` | unused | Optional innings cap (+ overtime) |
+| `breakRule` | `ALTERNATE` or `WINNER` | ignored |
+| `openingBreakerId` | First breaker (undo rebuild) | same |
 | `foul1` / `foul2` | Consecutive fouls this rack | Consecutive fouls until legal shot |
 | `currentBreakerId` | Who breaks next rack | Opening-break indicator |
 | `currentShooterId` | Synced with breaker | Player at the table |
 | `currentRun` / `highRun*` | unused / n/a | Current inning / high run |
+| `objectBallsOnTable` | unused | Object balls left (1–15; continuous re-rack) |
 | `history` | `List<MatchEvent>` for undo + stats | same |
 
 Status: `IN_PROGRESS` | `COMPLETED`. Winner from scores when completed.
@@ -47,13 +50,17 @@ Race-oriented types include: `PLUS_ONE`, `RUN_OUT`, `FOUL`, `FOULS_CLEARED`, `GO
 ## 2. Engines (pure Kotlin)
 
 ### `MatchEngine`
-Race modes only. Records +1 / run-out / foul / golden / dry / early-8; advances breaker;
+Race modes only. Records +1 / run-out / foul / golden / dry / early-8; advances breaker
+per `BreakRule` (`ALTERNATE` flips breaker, `WINNER` gives next break to the rack winner);
+undo rebuilds breaker from `openingBreakerId` + history.
 three consecutive fouls end the rack when the mode supports it; completes when a player
 reaches `racksToWin`; supports undo.
 
 ### `FourteenOneEngine`
-14/1 only. Adds points, pass, classic foul (−1), break foul (−2), three-foul extra (−15);
+14/1 only. Adds points (and decrements `objectBallsOnTable` with continuous re-rack), pass,
+classic foul (−1), break foul (−2), three-foul extra (−15, resets table to 15);
 tracks innings / high run / opening break; optional innings overtime; completes at distance
+or innings.
 or innings end; supports undo.
 
 ### `MatchStats` / `MatchSummary`

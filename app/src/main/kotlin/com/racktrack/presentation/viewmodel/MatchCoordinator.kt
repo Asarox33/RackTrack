@@ -4,6 +4,7 @@ import com.racktrack.appearance.FeltTone
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.FourteenOneEngine
 import com.racktrack.domain.MatchEngine
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchStatus
@@ -69,6 +70,11 @@ class MatchCoordinator(
         _setup.update { it.copy(inningsLimit = value) }
     }
 
+    fun setDefaultBreakRule(value: BreakRule) {
+        updateSettings { it.copy(defaultBreakRule = value) }
+        _setup.update { it.copy(breakRule = value) }
+    }
+
     fun updatePlayer1Name(value: String) {
         _setup.update { it.copy(player1Name = value) }
     }
@@ -97,6 +103,10 @@ class MatchCoordinator(
         _setup.update { it.copy(player1BreaksFirst = value) }
     }
 
+    fun setBreakRule(value: BreakRule) {
+        _setup.update { it.copy(breakRule = value) }
+    }
+
     fun startMatch() {
         val s = _setup.value
         val now = clock()
@@ -119,6 +129,7 @@ class MatchCoordinator(
                 initialBreakerIsPlayer1 = s.player1BreaksFirst,
                 startedAtMillis = now,
                 gameMode = s.gameMode,
+                breakRule = s.breakRule,
             )
         }
         _screen.value = AppScreen.MatchBoard(match)
@@ -219,6 +230,7 @@ class MatchCoordinator(
                 racksToWin = settings.defaultRacksToWin,
                 pointsToWin = settings.defaultPointsToWin,
                 inningsLimit = settings.defaultInningsLimit,
+                breakRule = settings.defaultBreakRule,
             )
     }
 }

@@ -8,14 +8,16 @@
 
 ## RackTrack MVP — what is implemented
 
-Points scoreboard with hand indicator (current shooter). Ball values and continuous re-rack
-geometry are **not** tracked — players enter points in chunks.
+Points scoreboard with hand indicator (current shooter). Approximate object-ball count
+(`objectBallsOnTable` / UI **TABLE n**) tracks continuous re-rack for the scoreboard;
+geometry and call-shot are **not** enforced — players enter points in chunks.
 
 | FFB topic | MVP |
 |---|---|
 | Race to distance (points to win) | **Yes** — setup `pointsToWin` |
 | Optional innings (reprises) limit + +5 OT on tie (1.6.05) | **Yes** |
-| Add points during a visit | **Yes** — **+1 / +5 / +14** (`POINTS`) |
+| Add points during a visit | **Yes** — **+1 / +5 / +14** (`POINTS`); updates `TABLE n` |
+| Object balls remaining (scoreboard approx.) | **Yes** — start 15; −n on points; at 1 left → re-rack to 15; PASS/FOUL/BREAK unchanged; 3-foul → 15 |
 | Legal end of turn (pass hand) | **Yes** — **PASS** (resets that player’s foul count) |
 | Classic foul −1, hand to opponent, no BIH (1.6.07) | **Yes** — **FOUL** |
 | Legal shot / pass clears consecutive fouls | **Yes** — via `addPoints` / `PASS` (no separate clear chip) |
@@ -24,7 +26,7 @@ geometry are **not** tracked — players enter points in chunks.
 | Opponent may force re-break after illegal open (cumulate −2) | **Partial** — operator can tap BREAK −2 again; no accept/refuse UI |
 | Classic foul on legal open = −1 (not −2) | **Yes** — use FOUL, not BREAK −2 |
 | Combined illegal open + classic foul (−3) | **No** — single action only |
-| Call ball + pocket; continuous re-rack with 1 left; object respot | **No** |
+| Call ball + pocket; continuous re-rack with 1 left; object respot | **Partial** — table count only; no call/geometry |
 | High run / current run / innings stats | **Yes** |
 | Undo; summary with net per-inning points | **Yes** |
 

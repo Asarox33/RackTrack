@@ -1,5 +1,6 @@
 package com.racktrack.domain
 
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEventType
@@ -511,5 +512,58 @@ class MatchEngineTest {
 
         assertEquals(1, current.score2)
         assertEquals(MatchEventType.THREE_FOULS_LOSS, current.history.last().type)
+    }
+
+    @Test
+    fun `given alternate break, when rack awarded, then breaker always flips`() {
+        val match = freshMatch().copy(breakRule = BreakRule.ALTERNATE)
+        val afterP1 = MatchEngine.recordPlusOne(match, match.player1.id, now())
+        assertEquals(match.player2.id, afterP1.currentBreakerId)
+
+        val afterP2 = MatchEngine.recordPlusOne(afterP1, afterP1.player2.id, now())
+        assertEquals(match.player1.id, afterP2.currentBreakerId)
+
+        // Non-breaker wins: still flips from previous breaker
+        val afterP1Again = MatchEngine.recordPlusOne(afterP2, afterP2.player1.id, now())
+        assertEquals(match.player2.id, afterP1Again.currentBreakerId)
+    }
+
+    @Test
+    fun `given winner break, when rack awarded, then winner keeps the break`() {
+        val match = freshMatch().copy(breakRule = BreakRule.WINNER)
+        val afterP1 = MatchEngine.recordPlusOne(match, match.player1.id, now())
+        assertEquals(match.player1.id, afterP1.currentBreakerId)
+
+        val afterP2 = MatchEngine.recordPlusOne(afterP1, afterP1.player2.id, now())
+        assertEquals(match.player2.id, afterP2.currentBreakerId)
+    }
+
+    @Test
+    fun `given winner break and non-breaker wins, then winner takes the next break`() {
+        val match = freshMatch().copy(breakRule = BreakRule.WINNER)
+        // p2 wins while p1 was breaker
+        val next = MatchEngine.recordPlusOne(match, match.player2.id, now())
+        assertEquals(match.player2.id, next.currentBreakerId)
+    }
+
+    @Test
+    fun `given winner break, when undo rack, then breaker is rebuilt from history`() {
+        val match = freshMatch().copy(breakRule = BreakRule.WINNER)
+        val awarded = MatchEngine.recordPlusOne(match, match.player1.id, now())
+        assertEquals(match.player1.id, awarded.currentBreakerId)
+
+        val undone = MatchEngine.undoLast(awarded)
+        assertEquals(match.player1.id, undone.currentBreakerId)
+        assertEquals(0, undone.score1)
+    }
+
+    @Test
+    fun `given winner break after opponent win, when undo, then opening breaker restored`() {
+        val match = freshMatch().copy(breakRule = BreakRule.WINNER)
+        val awarded = MatchEngine.recordPlusOne(match, match.player2.id, now())
+        assertEquals(match.player2.id, awarded.currentBreakerId)
+
+        val undone = MatchEngine.undoLast(awarded)
+        assertEquals(match.player1.id, undone.currentBreakerId)
     }
 }
