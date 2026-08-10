@@ -48,6 +48,7 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
   - Delete with red ✕ + confirmation
 - Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
 - Settings: felt, keep screen on, haptics, default race/distance/innings/break rule, open FFB PDF rules link
+- About (in Settings): version, build type/time, GitHub repo link
 
 ## 7. Explicitly out of scope
 

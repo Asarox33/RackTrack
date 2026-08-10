@@ -12,6 +12,7 @@ You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) fo
 - Local history: mode-scoped list, player filters, delete with confirm, reopen stats
 - Styled PDF share of full MatchSummary (start/end/duration) — PDF only, not PNG/screenshot
 - Settings gear: cloth color, keep screen on, haptics, default race/distance/innings, FFB rules link
+- About in Settings: versionName/code, build type, build time (UTC), GitHub repo
 - Product version **1.0.0+** (semver in `gradle.properties`; see `docs/07-versioning-and-releases.md`)
 - No per-shot ball + pocket entry (too slow at the table; needs camera/AI to be useful)
 

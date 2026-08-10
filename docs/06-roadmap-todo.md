@@ -53,6 +53,7 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ Auto GitHub Release + APK after green CI on `main` when version bumps
 - ✅ Protected `v*` tags (repository ruleset)
 - ✅ Docs: versioning guide; MVP wording retired for v1 coverage
+- ✅ Settings About: version, build type/time, GitHub repo
 
 ## Post-v1 backlog (optional)
 - ⬜ Play Store / dedicated upload keystore (replace debug-keystore release APKs)

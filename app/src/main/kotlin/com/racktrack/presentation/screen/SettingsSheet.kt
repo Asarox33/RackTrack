@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.racktrack.BuildConfig
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
@@ -47,6 +48,10 @@ import com.racktrack.appearance.FeltTone
 import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun SettingsSheet(
@@ -241,6 +246,15 @@ fun SettingsSheet(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+            SectionLabel("About")
+            Spacer(modifier = Modifier.height(8.dp))
+            AboutPanel(onOpenRepo = {
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.REPO_URL)),
+                )
+            })
+
+            Spacer(modifier = Modifier.height(16.dp))
             TexturedActionButton(
                 label = "CLOSE",
                 base = felt.accent,
@@ -252,6 +266,67 @@ fun SettingsSheet(
                 height = 48.dp,
             )
         }
+    }
+}
+
+@Composable
+private fun AboutPanel(onOpenRepo: () -> Unit) {
+    val felt = LocalFeltPalette.current
+    val buildKind = if (BuildConfig.DEBUG) "debug" else "release"
+    val builtAt = remember {
+        SimpleDateFormat("yyyy-MM-dd HH:mm 'UTC'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date(BuildConfig.BUILD_EPOCH_MS))
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        AboutMetaRow(label = "App", value = "RackTrack")
+        AboutMetaRow(
+            label = "Version",
+            value = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+        )
+        AboutMetaRow(label = "Build", value = buildKind)
+        AboutMetaRow(label = "Built", value = builtAt)
+        Text(
+            text = "GitHub · Asarox33/RackTrack",
+            style = MaterialTheme.typography.bodyLarge,
+            color = felt.accentLight,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenRepo)
+                .padding(vertical = 4.dp),
+        )
+        Text(
+            text = "Local scoreboard only — no accounts, no cloud.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite.copy(alpha = 0.55f),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun AboutMetaRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite.copy(alpha = 0.55f),
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite,
+            textAlign = TextAlign.End,
+            modifier = Modifier.padding(start = 12.dp),
+        )
     }
 }
 
