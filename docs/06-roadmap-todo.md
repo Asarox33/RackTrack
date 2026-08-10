@@ -41,13 +41,12 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Step 6 — Break rule & 14/1 table balls
 - ✅ Race `BreakRule` Alternate / Winner (setup + settings default)
-- ✅ 14/1 `objectBallsOnTable` + board `TABLE n` on shooter panel
+- ✅ 14/1 `objectBallsOnTable` + board `On Table : n` on shooter panel
 
-## Next — PASS modal / board scoring (deferred)
-- ⬜ No `+15` on the 14/1 dashboard
-- ⬜ Keep board `+14` for mid-visit continuous racks
-- ⬜ PASS opens end-of-visit modal: balls at visit start, quick `+14` racks, last-rack points input;
-  total = `14 * racks + last` (with guards). Possibly drop board `+1`/`+5` once modal lands.
+## Step 7 — 14/1 PASS / FOUL modal
+- ✅ Board: dynamic **+(On Table − 1)** clear-to-re-rack (was fixed +14); no +1/+5/+15; **BREAK −2** only while opening break
+- ✅ PASS / FOUL open end-of-inning modal: stepper for balls left (**2–15**), preview visit points
+- ✅ Sync formula allows at most one continuous re-rack after live clear-rack taps
 
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
@@ -57,7 +56,8 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Progress notes
 
-- 2026-08-10: Alternate/Winner break for 8/9/10; 14/1 TABLE balls remaining; PASS/+14 modal deferred.
+- 2026-08-10: 14/1 visit-end modal (balls-left stepper); board +14 / hide BREAK −2 off opening.
+- 2026-08-10: Alternate/Winner break for 8/9/10; 14/1 On Table balls remaining.
 - 2026-08-09: History (mode-scoped, filters, delete), styled PDF share, BACK labels; dropped deep FFB / screenshots / PNG share.
 - 2026-08-08: Cleanup pass — dead APIs, assets, `appearance/` for felt, docs aligned to multi-mode board.
 - 2026-08: Expanded beyond 10-ball-only landscape board to 8/9/10 + 14/1 and settings.

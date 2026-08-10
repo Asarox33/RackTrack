@@ -12,6 +12,8 @@ import com.racktrack.domain.model.PlayerId
  */
 object FourteenOneEngine {
     const val CONSECUTIVE_FOULS_TO_PENALTY = 3
+    /** Stable table count after continuous re-rack (never 0 or keyball-only). */
+    const val MIN_OBJECT_BALLS_REMAINING = 2
     private const val CLASSIC_FOUL_PENALTY = -1
     private const val BREAK_FOUL_PENALTY = -2
     private const val THREE_FOUL_EXTRA_PENALTY = -15
@@ -111,6 +113,72 @@ object FourteenOneEngine {
                 historyEvent = null,
             )
             resolveInningsLimit(ended)
+        }
+    }
+
+    /**
+     * End the visit with PASS after syncing the table to [remaining] balls (2..15).
+     * Full continuous clears during the visit should already be entered via board +(n−1).
+     */
+    fun passWithRemaining(
+        match: Match,
+        playerId: PlayerId,
+        remaining: Int,
+        nowMillis: Long,
+    ): Match {
+        val synced = syncTableToRemaining(match, playerId, remaining, nowMillis)
+        if (synced.status != MatchStatus.IN_PROGRESS) return synced
+        return pass(synced, playerId, nowMillis)
+    }
+
+    /**
+     * End the visit with a classic foul after syncing the table to [remaining] balls (2..15).
+     */
+    fun foulWithRemaining(
+        match: Match,
+        playerId: PlayerId,
+        remaining: Int,
+        nowMillis: Long,
+    ): Match {
+        val synced = syncTableToRemaining(match, playerId, remaining, nowMillis)
+        if (synced.status != MatchStatus.IN_PROGRESS) return synced
+        return foul(synced, playerId, nowMillis)
+    }
+
+    /**
+     * Points to go from the current table count to [remaining] balls left,
+     * allowing at most one continuous re-rack in between.
+     * Longer runs must use mid-visit clear-rack taps (+(n−1)).
+     */
+    fun pointsFromTableToRemaining(currentOnTable: Int, remaining: Int): Int {
+        require(remaining in MIN_OBJECT_BALLS_REMAINING..Match.OBJECT_BALLS_FULL_RACK) {
+            "remaining must be $MIN_OBJECT_BALLS_REMAINING..${Match.OBJECT_BALLS_FULL_RACK}"
+        }
+        val current = if (currentOnTable <= 1) {
+            Match.OBJECT_BALLS_FULL_RACK
+        } else {
+            currentOnTable.coerceAtMost(Match.OBJECT_BALLS_FULL_RACK)
+        }
+        return when {
+            remaining == current -> 0
+            remaining < current -> current - remaining
+            else -> (current - 1) + (Match.OBJECT_BALLS_FULL_RACK - remaining)
+        }
+    }
+
+    private fun syncTableToRemaining(
+        match: Match,
+        playerId: PlayerId,
+        remaining: Int,
+        nowMillis: Long,
+    ): Match {
+        if (!isActiveFourteenOne(match) || playerId != match.currentShooterId) return match
+        if (remaining !in MIN_OBJECT_BALLS_REMAINING..Match.OBJECT_BALLS_FULL_RACK) return match
+        val points = pointsFromTableToRemaining(match.objectBallsOnTable, remaining)
+        return if (points > 0) {
+            addPoints(match, playerId, points, nowMillis)
+        } else {
+            match.copy(objectBallsOnTable = remaining)
         }
     }
 

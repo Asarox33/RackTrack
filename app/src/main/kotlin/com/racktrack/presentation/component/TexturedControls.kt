@@ -38,12 +38,12 @@ fun TexturedActionButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    height: Dp = 56.dp,
+    height: Dp = 44.dp,
 ) {
     val performHaptic = rememberClickHaptic()
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(14.dp)
     val alpha = if (enabled) 1f else 0.38f
     val top = if (pressed && enabled) dark else light
     val bottom = if (pressed && enabled) base.copy(alpha = 0.85f) else dark
@@ -68,8 +68,8 @@ fun TexturedActionButton(
                 )
             }
             .border(
-                width = 2.dp,
-                color = OutlineWarm.copy(alpha = if (enabled) 0.85f else 0.28f),
+                width = 1.5.dp,
+                color = OutlineWarm.copy(alpha = if (enabled) 0.55f else 0.22f),
                 shape = shape,
             )
             .clickable(
@@ -85,7 +85,11 @@ fun TexturedActionButton(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = if (height <= 42.dp) {
+                MaterialTheme.typography.labelMedium
+            } else {
+                MaterialTheme.typography.labelLarge
+            },
             color = ScoreWhite.copy(alpha = if (enabled) 1f else 0.45f),
         )
     }
@@ -118,8 +122,8 @@ fun TexturedChip(
                 drawFeltGrain(alpha = CHIP_GRAIN_ALPHA)
             }
             .border(
-                width = 2.dp,
-                color = OutlineWarm.copy(alpha = if (selected) 0.95f else 0.45f),
+                width = 1.5.dp,
+                color = OutlineWarm.copy(alpha = if (selected) 0.85f else 0.40f),
                 shape = shape,
             )
             .clickable {
@@ -161,8 +165,8 @@ fun TexturedOutlineAction(
                 ),
             )
             .border(
-                2.dp,
-                OutlineWarm.copy(alpha = if (enabled) 0.8f else 0.28f),
+                1.5.dp,
+                OutlineWarm.copy(alpha = if (enabled) 0.55f else 0.22f),
                 shape,
             )
             .clickable(enabled = enabled) {
@@ -200,10 +204,10 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawFeltGrain(alpha
     }
 }
 
-private const val GRAIN_OVERLAY_ALPHA = 0.10f
-private const val CHIP_GRAIN_ALPHA = 0.08f
+private const val GRAIN_OVERLAY_ALPHA = 0.07f
+private const val CHIP_GRAIN_ALPHA = 0.06f
 private val CHIP_PADDING_HORIZONTAL = 12.dp
-private const val HIGHLIGHT_ALPHA = 0.14f
+private const val HIGHLIGHT_ALPHA = 0.10f
 private const val HIGHLIGHT_FADE_STOP = 0.35f
 private const val GRAIN_STEP_PX = 3.5f
 private const val GRAIN_HASH_X = 73_856_093
