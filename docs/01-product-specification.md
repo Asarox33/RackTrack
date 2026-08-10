@@ -33,6 +33,7 @@ or share past match stats.
 - Optional **accounts / player identity** so each player can find others and **retrieve
   stats for matches they played**, even when the scoreboard run was on someone else’s
   phone — **still one device scores the live match** (never remote two-table play)
+- **Player timeouts / match pauses** (FFB art. 1.2.16) — see roadmap post-v1; not a per-shot timer
 
 Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
@@ -60,7 +61,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - Per-shot call ball + pocket entry (and any deep FFB referee UI without camera)
 - Push-out UI, full illegal-break geometry checks
 - iOS
-- Shot clock / disciplinary / federal competition machinery
+- Shot clock / per-shot timing (art. 1.2.13) and disciplinary / federal competition machinery
+  (player **match pauses / timeouts** are a separate optional backlog item — art. 1.2.16)
 - Screenshot / UI golden tests
 - PNG export of match summary (PDF only)
 

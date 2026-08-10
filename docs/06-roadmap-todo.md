@@ -60,15 +60,24 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats (each player can reopen a match
   scored on another device) — **never** remote live scoring; one device remains the table scoreboard
+- ⬜ **Player timeouts (match pause)** — FFB art. **1.2.16** (general Chapter 2 → **all modes** 8/9/10 + 14/1):
+  - **1 pause per player per match**, max **5 minutes** (director may extend for venue layout)
+  - Request vs opponent **only when a rack is being recomposed**; signal to table/director in clubs
+  - Track used/remaining per player on the board; show counts on end summary + PDF
+  - 14/1 nuance: if the non-pausing player has the hand, play may continue (with referee) —
+    for trusted club play, decide UX (freeze board vs allow continue) when implementing
+  - **Not** a per-shot shot clock (art. 1.2.13 — explicitly dropped)
 
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
 - ~~PNG share of match summary~~ — PDF only
 - ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
+- ~~Per-shot shot clock / time foul (art. 1.2.13)~~ — fights race/innings scoreboard model
 
 ## Progress notes
 
+- 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.
 - 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
 - 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.
 - 2026-08-10: 14/1 visit-end modal (balls-left stepper); board clear-rack / hide BREAK −2 off opening.
