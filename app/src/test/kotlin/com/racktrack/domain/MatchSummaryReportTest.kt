@@ -66,7 +66,7 @@ class MatchSummaryReportTest {
     }
 
     @Test
-    fun `14-1 report includes both players reprises`() {
+    fun `14-1 report includes both players innings`() {
         val summary = MatchSummary(
             gameMode = GameMode.FOURTEEN_ONE,
             winnerName = "Sam",
@@ -106,7 +106,7 @@ class MatchSummaryReportTest {
             endedAtMillis = 1_700_000_047_000L,
         )
         val text = MatchSummaryReport.lines(summary).joinToString("\n")
-        assertTrue(text.contains("REPRISES"))
+        assertTrue(text.contains("INNINGS"))
         assertTrue(text.contains("#1  14  pass"))
         assertTrue(text.contains("#2  6  foul"))
         assertTrue(text.contains("#1  100  win"))

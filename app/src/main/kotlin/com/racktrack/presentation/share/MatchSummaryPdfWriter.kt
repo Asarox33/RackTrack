@@ -79,7 +79,7 @@ object MatchSummaryPdfWriter {
             drawPlayerCards(summary)
             y += 18f
             if (summary.gameMode.isPointScoring) {
-                drawSectionTitle("REPRISES")
+                drawSectionTitle("INNINGS")
                 drawInningsColumn(summary.player1Name, summary.inningScores1)
                 y += 10f
                 drawInningsColumn(summary.player2Name, summary.inningScores2)

@@ -221,7 +221,7 @@ private fun MatchSummaryContent(
         if (summary.gameMode.isPointScoring) {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "REPRISES",
+                text = "INNINGS",
                 style = MaterialTheme.typography.titleLarge,
                 color = ScoreWhite.copy(alpha = 0.75f),
                 modifier = Modifier.fillMaxWidth(),

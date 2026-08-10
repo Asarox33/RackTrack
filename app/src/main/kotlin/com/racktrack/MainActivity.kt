@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
                         onPointsChange = viewModel::updatePointsToWin,
                         onInningsChange = viewModel::updateInningsLimit,
                         onBreakerChange = viewModel::setPlayer1BreaksFirst,
+                        onBreakRuleChange = viewModel::setBreakRule,
                         onStart = viewModel::startMatch,
                         onOpenHistory = viewModel::openHistory,
                         onOpenSettings = viewModel::openSettings,
@@ -103,6 +104,7 @@ class MainActivity : ComponentActivity() {
                         onDefaultRacksChange = viewModel::setDefaultRacksToWin,
                         onDefaultPointsChange = viewModel::setDefaultPointsToWin,
                         onDefaultInningsChange = viewModel::setDefaultInningsLimit,
+                        onDefaultBreakRuleChange = viewModel::setDefaultBreakRule,
                         onDismiss = viewModel::closeSettings,
                     )
                 }

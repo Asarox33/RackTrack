@@ -143,8 +143,8 @@ fun FourteenOneBoardContent(
 fun fourteenOneHeader(match: Match): String {
     val inningsLabel = match.inningsLimit?.let { limit ->
         val shown = maxOf(match.innings1, match.innings2)
-        "reprise $shown/$limit"
-    } ?: "reprise ${maxOf(match.innings1, match.innings2)}"
+        "inning $shown/$limit"
+    } ?: "inning ${maxOf(match.innings1, match.innings2)}"
     return "14/1  ·  ${match.pointsToWin} pts  ·  $inningsLabel"
 }
 
@@ -166,11 +166,20 @@ private fun FourteenOnePlayerPanel(
     compact: Boolean = false,
 ) {
     val enabled = match.status == MatchStatus.IN_PROGRESS && hasHand
-    val scoreSize = if (compact) 64.sp else 84.sp
-    val actionHeight = if (compact) 44.dp else 48.dp
-    val cueSize = if (compact) 44.dp else 52.dp
+    val scoreSize = if (compact) 64.sp else 76.sp
+    val actionHeight = if (compact) 44.dp else 46.dp
+    val cueSize = if (compact) 44.dp else 48.dp
+    val visitStatSize = if (compact) 22.sp else 26.sp
     val showBreakFoul = enabled && match.awaitingOpeningBreak
     val foulWarn = fouls == FourteenOneEngine.CONSECUTIVE_FOULS_TO_PENALTY - 1
+    val handAlpha by animateFloatAsState(
+        targetValue = if (hasHand) 1f else 0f,
+        label = "hand-alpha",
+    )
+    val warnAlpha by animateFloatAsState(
+        targetValue = if (foulWarn && hasHand) 1f else 0f,
+        label = "fourteen-foul-warn",
+    )
 
     Column(
         modifier = modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -186,84 +195,104 @@ private fun FourteenOnePlayerPanel(
             textAlign = TextAlign.Center,
         )
 
+        // Score can shrink; visit stats stay pinned above the action buttons (no landscape crop).
         Box(
             modifier = Modifier
-                .weight(1f)
+                .weight(1f, fill = true)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                val handAlpha by animateFloatAsState(
-                    targetValue = if (hasHand) 1f else 0f,
-                    label = "hand-alpha",
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                AnimatedContent(
+                    targetState = score,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "fourteen-score",
+                ) { value ->
+                    Text(
+                        text = value.toString(),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
+                    )
+                }
+                CueBallBreakIndicator(
+                    modifier = Modifier
+                        .align(if (handTowardEnd) Alignment.CenterEnd else Alignment.CenterStart)
+                        .padding(
+                            if (handTowardEnd) {
+                                PaddingValues(end = 28.dp)
+                            } else {
+                                PaddingValues(start = 28.dp)
+                            },
+                        )
+                        .alpha(handAlpha),
+                    size = cueSize,
                 )
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
+            }
+        }
+
+        Text(
+            text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite.copy(alpha = 0.78f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 2.dp),
+        )
+
+        // Always reserve one line so the active shooter’s TABLE / RUN never jump the layout.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp)
+                .height(if (compact) 28.dp else 32.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (hasHand) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    AnimatedContent(
-                        targetState = score,
-                        transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        label = "fourteen-score",
-                    ) { value ->
+                    Text(
+                        text = "On Table : ${match.objectBallsOnTable}",
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                        color = ScoreWhite,
+                    )
+                    if (match.currentRun > 0) {
                         Text(
-                            text = value.toString(),
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
+                            text = "  ·  ",
+                            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                            color = ScoreWhite.copy(alpha = 0.45f),
+                        )
+                        Text(
+                            text = "RUN ${match.currentRun}",
+                            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
+                            color = ButtonRunOutLight,
                         )
                     }
-                    CueBallBreakIndicator(
-                        modifier = Modifier
-                            .align(if (handTowardEnd) Alignment.CenterEnd else Alignment.CenterStart)
-                            .padding(
-                                if (handTowardEnd) {
-                                    PaddingValues(end = 36.dp)
-                                } else {
-                                    PaddingValues(start = 36.dp)
-                                },
-                            )
-                            .alpha(handAlpha),
-                        size = cueSize,
-                    )
-                }
-                Text(
-                    text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = ScoreWhite.copy(alpha = 0.78f),
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-                if (hasHand && match.currentRun > 0) {
-                    Text(
-                        text = "RUN ${match.currentRun}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = ButtonRunOutLight,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                }
-                val warnAlpha by animateFloatAsState(
-                    targetValue = if (foulWarn && hasHand) 1f else 0f,
-                    label = "fourteen-foul-warn",
-                )
-                Box(
-                    modifier = Modifier
-                        .height(36.dp)
-                        .padding(top = 8.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "NEXT FOUL = −15",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = ButtonFoulLight.copy(alpha = warnAlpha),
-                        modifier = Modifier.alpha(warnAlpha),
-                    )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Box(
+            modifier = Modifier
+                .height(if (foulWarn && hasHand) 28.dp else 0.dp)
+                .padding(top = if (foulWarn && hasHand) 4.dp else 0.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "NEXT FOUL = −15",
+                style = MaterialTheme.typography.titleLarge,
+                color = ButtonFoulLight.copy(alpha = warnAlpha),
+                modifier = Modifier.alpha(warnAlpha),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -16,6 +16,10 @@ data class Match(
     val inningsLimitBase: Int? = null,
     /** Effective innings cap (base + overtime extensions). */
     val inningsLimit: Int? = null,
+    /** Race only — who breaks after each rack. Ignored for 14/1. */
+    val breakRule: BreakRule = BreakRule.ALTERNATE,
+    /** First breaker at match start (used to rebuild breaker on undo). */
+    val openingBreakerId: PlayerId? = null,
     val score1: Int = 0,
     val score2: Int = 0,
     val innings1: Int = 0,
@@ -36,6 +40,11 @@ data class Match(
     val highRun2: Int = 0,
     /** Points scored in the current unfinished 14/1 inning. */
     val currentRun: Int = 0,
+    /**
+     * 14/1 — object balls still on the table (1..15).
+     * Continuous re-rack restores 15 as soon as only the keyball would remain.
+     */
+    val objectBallsOnTable: Int = OBJECT_BALLS_FULL_RACK,
     val currentBreakerId: PlayerId,
     /** Player with the table (14/1). For races, kept in sync with [currentBreakerId]. */
     val currentShooterId: PlayerId,
@@ -53,6 +62,12 @@ data class Match(
         require(currentShooterId == player1.id || currentShooterId == player2.id) {
             "shooter must be one of the match players"
         }
+        val opening = openingBreakerId
+        if (opening != null) {
+            require(opening == player1.id || opening == player2.id) {
+                "opening breaker must be one of the match players"
+            }
+        }
         if (gameMode.isPointScoring) {
             require(pointsToWin > 0) { "pointsToWin must be positive for 14/1" }
             require(inningsLimitBase == null || inningsLimitBase > 0) {
@@ -60,6 +75,9 @@ data class Match(
             }
             require(inningsLimit == null || inningsLimit > 0) {
                 "inningsLimit must be positive when set"
+            }
+            require(objectBallsOnTable in 1..OBJECT_BALLS_FULL_RACK) {
+                "objectBallsOnTable must be 1..$OBJECT_BALLS_FULL_RACK"
             }
         } else {
             require(racksToWin > 0) { "racksToWin must be positive" }
@@ -101,6 +119,7 @@ data class Match(
             gameMode: GameMode = GameMode.TEN_BALL,
             pointsToWin: Int = 0,
             inningsLimit: Int? = null,
+            breakRule: BreakRule = BreakRule.ALTERNATE,
         ): Match {
             val p1 = Player(PlayerId("p1"), player1Name.trim().ifEmpty { "Player 1" })
             val p2 = Player(PlayerId("p2"), player2Name.trim().ifEmpty { "Player 2" })
@@ -113,11 +132,16 @@ data class Match(
                 pointsToWin = pointsToWin,
                 inningsLimitBase = inningsLimit,
                 inningsLimit = inningsLimit,
+                breakRule = if (gameMode.isPointScoring) BreakRule.ALTERNATE else breakRule,
+                openingBreakerId = starter,
+                objectBallsOnTable = OBJECT_BALLS_FULL_RACK,
                 currentBreakerId = starter,
                 currentShooterId = starter,
                 awaitingOpeningBreak = gameMode.isPointScoring,
                 startedAtMillis = startedAtMillis,
             )
         }
+
+        const val OBJECT_BALLS_FULL_RACK = 15
     }
 }

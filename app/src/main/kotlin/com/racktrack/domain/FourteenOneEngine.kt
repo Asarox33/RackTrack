@@ -29,6 +29,7 @@ object FourteenOneEngine {
             currentRun = match.currentRun + points,
             foul1 = if (playerId == match.player1.id) 0 else match.foul1,
             foul2 = if (playerId == match.player2.id) 0 else match.foul2,
+            objectBallsOnTable = reduceObjectBalls(match.objectBallsOnTable, points),
             awaitingOpeningBreak = false,
             history = match.history + MatchEvent(
                 MatchEventType.POINTS,
@@ -161,6 +162,7 @@ object FourteenOneEngine {
                 reverted.copy(
                     foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
                     foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
+                    objectBallsOnTable = objectBallsFromHistory(withoutLast),
                     awaitingOpeningBreak = awaitingOpeningBreakFromHistory(withoutLast),
                     status = MatchStatus.IN_PROGRESS,
                     history = withoutLast,
@@ -185,6 +187,7 @@ object FourteenOneEngine {
                         highRun1 = highRunFromHistory(withoutLast, match.player1.id),
                         highRun2 = highRunFromHistory(withoutLast, match.player2.id),
                         currentRun = currentRunFromHistory(withoutLast, last.playerId),
+                        objectBallsOnTable = objectBallsFromHistory(withoutLast),
                         awaitingOpeningBreak = awaitingOpeningBreakFromHistory(withoutLast),
                         status = MatchStatus.IN_PROGRESS,
                         history = withoutLast,
@@ -215,6 +218,7 @@ object FourteenOneEngine {
                     highRun2 = highRunFromHistory(withoutLast, match.player2.id),
                     foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
                     foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
+                    objectBallsOnTable = objectBallsFromHistory(withoutLast),
                     inningsLimit = effectiveInningsLimit(match.inningsLimitBase, withoutLast, match),
                     status = MatchStatus.IN_PROGRESS,
                     history = withoutLast,
@@ -248,6 +252,7 @@ object FourteenOneEngine {
             foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
             foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
             awaitingOpeningBreak = awaitingOpeningBreakFromHistory(withoutLast),
+            objectBallsOnTable = objectBallsFromHistory(withoutLast),
             inningsLimit = effectiveInningsLimit(match.inningsLimitBase, withoutLast, match),
             status = MatchStatus.IN_PROGRESS,
             history = withoutLast,
@@ -282,9 +287,42 @@ object FourteenOneEngine {
             currentShooterId = nextShooterId,
             currentBreakerId = nextShooterId,
             awaitingOpeningBreak = awaitingOpeningBreak,
+            objectBallsOnTable = if (awaitingOpeningBreak) {
+                Match.OBJECT_BALLS_FULL_RACK
+            } else {
+                match.objectBallsOnTable
+            },
             currentRun = 0,
             history = if (historyEvent != null) match.history + historyEvent else match.history,
         )
+    }
+
+    /**
+     * Pocket [points] object balls with FFB continuous re-rack:
+     * when only the keyball remains (1), the fourteen are re-racked → 15 on table again.
+     * There is no “pocket through 0” cycle — re-rack happens at 1, not after 15 points.
+     */
+    internal fun reduceObjectBalls(current: Int, points: Int): Int {
+        var balls = current
+        repeat(points) {
+            balls -= 1
+            if (balls <= 1) {
+                balls = Match.OBJECT_BALLS_FULL_RACK
+            }
+        }
+        return balls
+    }
+
+    private fun objectBallsFromHistory(history: List<MatchEvent>): Int {
+        var balls = Match.OBJECT_BALLS_FULL_RACK
+        for (event in history) {
+            when (event.type) {
+                MatchEventType.THREE_FOUL_PENALTY -> balls = Match.OBJECT_BALLS_FULL_RACK
+                MatchEventType.POINTS -> balls = reduceObjectBalls(balls, event.value)
+                else -> Unit
+            }
+        }
+        return balls
     }
 
     private fun applyScoreDelta(match: Match, playerId: PlayerId, delta: Int): Match =

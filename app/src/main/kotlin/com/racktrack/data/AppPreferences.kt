@@ -2,6 +2,7 @@ package com.racktrack.data
 
 import android.content.Context
 import com.racktrack.appearance.FeltTone
+import com.racktrack.domain.model.BreakRule
 
 class AppPreferences(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -16,6 +17,7 @@ class AppPreferences(context: Context) {
             defaultInningsLimit = prefs.getInt(KEY_DEFAULT_INNINGS, DEFAULT_INNINGS).let { value ->
                 if (value <= 0) null else value
             },
+            defaultBreakRule = breakRule(),
         )
 
     fun save(settings: UserSettings) {
@@ -26,6 +28,7 @@ class AppPreferences(context: Context) {
             .putInt(KEY_DEFAULT_RACKS, settings.defaultRacksToWin)
             .putInt(KEY_DEFAULT_POINTS, settings.defaultPointsToWin)
             .putInt(KEY_DEFAULT_INNINGS, settings.defaultInningsLimit ?: 0)
+            .putString(KEY_DEFAULT_BREAK_RULE, settings.defaultBreakRule.name)
             .apply()
     }
 
@@ -36,6 +39,11 @@ class AppPreferences(context: Context) {
         return FeltTone.entries.firstOrNull { it.name == raw } ?: FeltTone.FOREST
     }
 
+    private fun breakRule(): BreakRule {
+        val raw = prefs.getString(KEY_DEFAULT_BREAK_RULE, BreakRule.ALTERNATE.name)
+        return BreakRule.entries.firstOrNull { it.name == raw } ?: BreakRule.ALTERNATE
+    }
+
     private companion object {
         const val PREFS_NAME = "racktrack_prefs"
         const val KEY_FELT_TONE = "felt_tone"
@@ -44,6 +52,7 @@ class AppPreferences(context: Context) {
         const val KEY_DEFAULT_RACKS = "default_racks_to_win"
         const val KEY_DEFAULT_POINTS = "default_points_to_win"
         const val KEY_DEFAULT_INNINGS = "default_innings_limit"
+        const val KEY_DEFAULT_BREAK_RULE = "default_break_rule"
         const val LEGACY_CLASSIC_GREEN = "CLASSIC_GREEN"
         const val DEFAULT_RACKS = 6
         const val DEFAULT_POINTS = 100

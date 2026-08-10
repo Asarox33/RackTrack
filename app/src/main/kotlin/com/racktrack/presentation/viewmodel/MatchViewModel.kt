@@ -11,6 +11,7 @@ import com.racktrack.data.MatchHistoryStore
 import com.racktrack.data.StoredMatch
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.MatchStats
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.PlayerId
@@ -31,6 +32,7 @@ data class SetupUiState(
     /** Null = unlimited innings. */
     val inningsLimit: Int? = 30,
     val player1BreaksFirst: Boolean = true,
+    val breakRule: BreakRule = BreakRule.ALTERNATE,
 )
 
 data class HistoryUiState(
@@ -109,6 +111,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setDefaultInningsLimit(value: Int?) = coordinator.setDefaultInningsLimit(value)
 
+    fun setDefaultBreakRule(value: BreakRule) = coordinator.setDefaultBreakRule(value)
+
     fun updatePlayer1Name(value: String) = coordinator.updatePlayer1Name(value)
 
     fun updatePlayer2Name(value: String) = coordinator.updatePlayer2Name(value)
@@ -122,6 +126,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun updateInningsLimit(value: Int?) = coordinator.updateInningsLimit(value)
 
     fun setPlayer1BreaksFirst(value: Boolean) = coordinator.setPlayer1BreaksFirst(value)
+
+    fun setBreakRule(value: BreakRule) = coordinator.setBreakRule(value)
 
     fun startMatch() = coordinator.startMatch()
 

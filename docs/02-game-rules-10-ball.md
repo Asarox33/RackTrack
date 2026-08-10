@@ -14,7 +14,7 @@ table partner) judge legality; the app records outcomes.
 | FFB topic | MVP |
 |---|---|
 | Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
-| Alternating break indicator | **Yes** — cue on breaker panel |
+| Alternating / winner break | **Yes** — setup `BreakRule`; cue follows breaker |
 | Foul increments consecutive counter | **Yes** — `FOUL` |
 | 3 consecutive fouls → lose rack (1.5.07) | **Yes** — `THREE_FOULS_LOSS` |
 | Warning after 2 consecutive fouls | **Yes** — on-screen “1 MORE FOUL = RACK LOSS” |
