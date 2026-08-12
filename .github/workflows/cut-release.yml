@@ -87,16 +87,19 @@ jobs:
           mkdir -p dist
           APK="dist/RackTrack-${NAME}.apk"
           cp app/build/outputs/apk/release/app-release.apk "$APK"
-          NOTES="$(printf '%s\n' \
-            "## RackTrack ${NAME}" \
-            "" \
-            "- **versionName:** \`${NAME}\`" \
-            "- **versionCode:** \`${CODE}\`" \
-            "- **APK:** \`RackTrack-${NAME}.apk\` (release build, debug keystore — sideload / club use)" \
-            "" \
-            "Cut automatically after CI on \`main\` (\`${SHA:0:7}\`)." \
-          )"
+          CHANGELOG_BODY="$(bash .github/scripts/extract-changelog.sh "$NAME")"
+          NOTES_FILE="$(mktemp)"
+          {
+            printf '%s\n' "## RackTrack ${NAME}" ""
+            printf '%s\n' "$CHANGELOG_BODY"
+            printf '%s\n' "" "---" "" \
+              "- **versionName:** \`${NAME}\`" \
+              "- **versionCode:** \`${CODE}\`" \
+              "- **APK:** \`RackTrack-${NAME}.apk\`" \
+              "" \
+              "Cut automatically after CI on \`main\` (\`${SHA:0:7}\`)."
+          } > "$NOTES_FILE"
           gh release create "$TAG" "$APK" \
             --target "$SHA" \
             --title "RackTrack ${NAME}" \
-            --notes "$NOTES"
+            --notes-file "$NOTES_FILE"
