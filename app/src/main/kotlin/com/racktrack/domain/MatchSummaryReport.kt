@@ -3,6 +3,12 @@ package com.racktrack.domain
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.MatchEventType
 
+data class PairedInningRow(
+    val index: Int,
+    val player1: InningStat?,
+    val player2: InningStat?,
+)
+
 /** Shared copy/helpers for match summary UI and PDF export. */
 object MatchSummaryReport {
     fun modeLabel(mode: GameMode): String =
@@ -54,6 +60,30 @@ object MatchSummaryReport {
             null -> "win"
             else -> ""
         }
+
+    /**
+     * One row per inning index for both players (14/1 score sheet style).
+     * Missing side shows as null (render as —).
+     */
+    fun pairedInningRows(
+        innings1: List<InningStat>,
+        innings2: List<InningStat>,
+    ): List<PairedInningRow> {
+        val byIndex1 = innings1.associateBy { it.index }
+        val byIndex2 = innings2.associateBy { it.index }
+        val maxIndex = maxOf(
+            byIndex1.keys.maxOrNull() ?: 0,
+            byIndex2.keys.maxOrNull() ?: 0,
+        )
+        if (maxIndex <= 0) return emptyList()
+        return (1..maxIndex).map { index ->
+            PairedInningRow(
+                index = index,
+                player1 = byIndex1[index],
+                player2 = byIndex2[index],
+            )
+        }
+    }
 
     fun playerStatLines(summary: MatchSummary, side: Int): List<String> {
         val fouls = if (side == 1) summary.totalFouls1 else summary.totalFouls2
@@ -133,13 +163,13 @@ object MatchSummaryReport {
             add("")
             if (summary.gameMode.isPointScoring) {
                 add("INNINGS")
-                add(summary.player1Name)
-                summary.inningScores1.forEach {
-                    add("  #${it.index}  ${it.points}  ${inningEndLabel(it.endType)}")
-                }
-                add(summary.player2Name)
-                summary.inningScores2.forEach {
-                    add("  #${it.index}  ${it.points}  ${inningEndLabel(it.endType)}")
+                add(
+                    "#  ${summary.player1Name}  End  ${summary.player2Name}  End",
+                )
+                pairedInningRows(summary.inningScores1, summary.inningScores2).forEach { row ->
+                    val p1 = row.player1?.let { "${it.points}  ${inningEndLabel(it.endType)}" } ?: "—  —"
+                    val p2 = row.player2?.let { "${it.points}  ${inningEndLabel(it.endType)}" } ?: "—  —"
+                    add("#${row.index}  $p1  $p2")
                 }
             } else {
                 add("RACKS")

@@ -107,8 +107,15 @@ class MatchSummaryReportTest {
         )
         val text = MatchSummaryReport.lines(summary).joinToString("\n")
         assertTrue(text.contains("INNINGS"))
-        assertTrue(text.contains("#1  14  pass"))
-        assertTrue(text.contains("#2  6  foul"))
-        assertTrue(text.contains("#1  100  win"))
+        assertTrue(text.contains("#1  14  pass  100  win"))
+        assertTrue(text.contains("#2  6  foul  —  —"))
+        val paired = MatchSummaryReport.pairedInningRows(
+            summary.inningScores1,
+            summary.inningScores2,
+        )
+        assertTrue(paired.size == 2)
+        assertTrue(paired[0].player1?.points == 14)
+        assertTrue(paired[0].player2?.points == 100)
+        assertTrue(paired[1].player2 == null)
     }
 }

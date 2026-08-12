@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
-import com.racktrack.domain.InningStat
 import com.racktrack.domain.MatchSummary
 import com.racktrack.domain.MatchSummaryReport
 import java.io.File
@@ -80,9 +79,7 @@ object MatchSummaryPdfWriter {
             y += 18f
             if (summary.gameMode.isPointScoring) {
                 drawSectionTitle("INNINGS")
-                drawInningsColumn(summary.player1Name, summary.inningScores1)
-                y += 10f
-                drawInningsColumn(summary.player2Name, summary.inningScores2)
+                drawInningsTable(summary)
             } else {
                 drawSectionTitle("RACKS")
                 drawRacksTable(summary)
@@ -213,27 +210,46 @@ object MatchSummaryPdfWriter {
             }
         }
 
-        private fun drawInningsColumn(name: String, innings: List<InningStat>) {
-            ensureSpace(40f)
-            canvas!!.drawText(name, MARGIN_LEFT, y, namePaint)
-            y += 14f
-            if (innings.isEmpty()) {
-                canvas!!.drawText("—", MARGIN_LEFT + 8f, y, mutedPaint)
+        private fun drawInningsTable(summary: MatchSummary) {
+            val rows = MatchSummaryReport.pairedInningRows(
+                summary.inningScores1,
+                summary.inningScores2,
+            )
+            if (rows.isEmpty()) {
+                ensureSpace(20f)
+                canvas!!.drawText("No innings recorded", MARGIN_LEFT, y, mutedPaint)
                 y += 16f
                 return
             }
-            drawTableHeader(listOf("#", "Points", "End"), floatArrayOf(0.15f, 0.45f, 0.40f))
-            innings.forEachIndexed { index, inning ->
+            val name1 = truncateHeaderName(summary.player1Name)
+            val name2 = truncateHeaderName(summary.player2Name)
+            val weights = INNINGS_WEIGHTS
+            drawTableHeader(
+                cells = listOf("#", name1, "End", name2, "End"),
+                weights = weights,
+            )
+            rows.forEachIndexed { index, row ->
                 ensureSpace(ROW_HEIGHT + 4f)
                 drawTableRow(
                     cells = listOf(
-                        "#${inning.index}",
-                        inning.points.toString(),
-                        MatchSummaryReport.inningEndLabel(inning.endType),
+                        "#${row.index}",
+                        row.player1?.points?.toString() ?: "—",
+                        row.player1?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
+                        row.player2?.points?.toString() ?: "—",
+                        row.player2?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
                     ),
-                    weights = floatArrayOf(0.15f, 0.45f, 0.40f),
+                    weights = weights,
                     alt = index % 2 == 1,
                 )
+            }
+        }
+
+        private fun truncateHeaderName(name: String): String {
+            val trimmed = name.trim().ifEmpty { "Player" }
+            return if (trimmed.length <= INNINGS_NAME_MAX) {
+                trimmed
+            } else {
+                trimmed.take(INNINGS_NAME_MAX - 1) + "…"
             }
         }
 
@@ -339,4 +355,6 @@ object MatchSummaryPdfWriter {
     private const val PLAYER_CARD_HEIGHT = 118f
     private const val ROW_HEIGHT = 22f
     private const val DEFAULT_ACCENT = 0xFF1B9A4A.toInt()
+    private const val INNINGS_NAME_MAX = 12
+    private val INNINGS_WEIGHTS = floatArrayOf(0.10f, 0.22f, 0.18f, 0.22f, 0.28f)
 }
