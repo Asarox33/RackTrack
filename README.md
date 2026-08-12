@@ -3,7 +3,7 @@
 Native Android app (Kotlin + Jetpack Compose) for scoring **8-ball / 9-ball / 10-ball races**
 and **14/1 continuous** at the table, without slowing the game down.
 
-**Current version: 1.0.0** — see [docs/07-versioning-and-releases.md](docs/07-versioning-and-releases.md).
+**Current version: 1.0.1** — see [docs/07-versioning-and-releases.md](docs/07-versioning-and-releases.md).
 
 ## Project status
 
