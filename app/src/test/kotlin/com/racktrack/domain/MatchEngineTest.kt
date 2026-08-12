@@ -515,6 +515,48 @@ class MatchEngineTest {
     }
 
     @Test
+    fun `given foul then clear on 9-ball, golden and dry stay disabled`() {
+        val match = freshMatch(GameMode.NINE_BALL)
+        assertTrue(MatchEngine.canRecordGoldenBreak(match, match.player1.id))
+        assertTrue(MatchEngine.canRecordDryBreak(match, match.player1.id))
+
+        val fouled = MatchEngine.recordFoul(match, match.player1.id, now())
+        assertFalse(MatchEngine.canRecordGoldenBreak(fouled, match.player1.id))
+        assertFalse(MatchEngine.canRecordDryBreak(fouled, match.player1.id))
+
+        val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
+        assertEquals(0, cleared.foul1)
+        assertFalse(MatchEngine.canRecordGoldenBreak(cleared, match.player1.id))
+        assertFalse(MatchEngine.canRecordDryBreak(cleared, match.player1.id))
+        assertFalse(MatchEngine.canBreakAndClear(cleared, match.player1.id))
+    }
+
+    @Test
+    fun `given foul then clear, match total fouls still counts the foul events`() {
+        val match = freshMatch(GameMode.NINE_BALL)
+        val fouled = MatchEngine.recordFoul(
+            MatchEngine.recordFoul(match, match.player1.id, now()),
+            match.player1.id,
+            now(),
+        )
+        val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
+        val stats = MatchStats.summarize(cleared)
+        assertEquals(2, stats.totalFouls1)
+        assertEquals(0, cleared.foul1)
+    }
+
+    @Test
+    fun `given 8-ball foul, dry stays disabled and clear is unavailable`() {
+        val match = freshMatch(GameMode.EIGHT_BALL)
+        assertTrue(MatchEngine.canRecordDryBreak(match, match.player1.id))
+        val fouled = MatchEngine.recordFoul(match, match.player1.id, now())
+        assertFalse(MatchEngine.canRecordDryBreak(fouled, match.player1.id))
+        val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
+        assertEquals(1, cleared.foul1)
+        assertFalse(MatchEngine.canRecordDryBreak(cleared, match.player1.id))
+    }
+
+    @Test
     fun `given alternate break, when rack awarded, then breaker always flips`() {
         val match = freshMatch().copy(breakRule = BreakRule.ALTERNATE)
         val afterP1 = MatchEngine.recordPlusOne(match, match.player1.id, now())

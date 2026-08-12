@@ -100,6 +100,8 @@ object MatchEngine {
     /**
      * Clears consecutive fouls for [playerId] after a legal shot (9/10-ball only).
      * Undoable via [MatchEventType.FOULS_CLEARED] in history. No-op for 8-ball / 14.1.
+     * Does not remove fouls from match totals; break actions (Golden / Dry) stay blocked
+     * for the rest of the rack.
      */
     fun clearConsecutiveFouls(match: Match, playerId: PlayerId, nowMillis: Long): Match {
         if (match.status == MatchStatus.COMPLETED) return match
@@ -257,14 +259,14 @@ object MatchEngine {
     fun canBreakAndClear(match: Match, playerId: PlayerId): Boolean =
         match.status != MatchStatus.COMPLETED &&
             playerId == match.currentBreakerId &&
-            match.foulsFor(playerId) == 0 &&
+            !hasFoulCommittedThisRack(match, playerId) &&
             !hasDryBreakThisRack(match, playerId)
 
     fun canRecordDryBreak(match: Match, playerId: PlayerId): Boolean =
         match.status != MatchStatus.COMPLETED &&
             match.gameMode.supportsDryBreak &&
             playerId == match.currentBreakerId &&
-            match.foulsFor(playerId) == 0 &&
+            !hasFoulCommittedThisRack(match, playerId) &&
             !hasDryBreakThisRack(match, playerId)
 
     fun canRecordGoldenBreak(match: Match, playerId: PlayerId): Boolean =
@@ -403,6 +405,33 @@ object MatchEngine {
                 -> return false
                 MatchEventType.DRY_BREAK -> if (event.playerId == playerId) return true
                 MatchEventType.FOUL,
+                MatchEventType.FOULS_CLEARED,
+                -> Unit
+            }
+        }
+        return false
+    }
+
+    /**
+     * True if [playerId] recorded a foul in the current rack.
+     * [MatchEventType.FOULS_CLEARED] resets the consecutive counter for three-foul loss
+     * but does **not** revive break actions (Golden / Dry / break-and-run).
+     */
+    private fun hasFoulCommittedThisRack(match: Match, playerId: PlayerId): Boolean {
+        for (event in match.history.asReversed()) {
+            when (event.type) {
+                MatchEventType.PLUS_ONE,
+                MatchEventType.RUN_OUT,
+                MatchEventType.GOLDEN_BREAK,
+                MatchEventType.THREE_FOULS_LOSS,
+                MatchEventType.EIGHT_BALL_LOSS,
+                MatchEventType.POINTS,
+                MatchEventType.PASS,
+                MatchEventType.BREAK_FOUL,
+                MatchEventType.THREE_FOUL_PENALTY,
+                -> return false
+                MatchEventType.FOUL -> if (event.playerId == playerId) return true
+                MatchEventType.DRY_BREAK,
                 MatchEventType.FOULS_CLEARED,
                 -> Unit
             }
