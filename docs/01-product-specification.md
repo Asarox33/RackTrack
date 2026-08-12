@@ -46,6 +46,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - Break / shooter indicator; alternate or winner break after each race rack
 - 14/1: `TABLE n` object balls remaining on the shooter’s panel
 - Undo last action; end-of-match summary (**SHARE PDF** + **BACK** to setup)
+- Club **pause** (top-right, next to settings): stops match/rack duration accounting for a
+  break (toilet / smoke / drink) — no max length, not recorded in stats/PDF; not FFB timeout
 - Local match history:
   - Entry from setup (**HISTORY**, felt color), scoped to the selected game mode
   - Filter by player names (either seat); reopen the same stats as end-of-match

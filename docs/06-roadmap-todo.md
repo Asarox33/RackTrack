@@ -77,6 +77,8 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Progress notes
 
+- 2026-08-12: Patch **1.0.1** — club match pause (top-right, next to settings): freezes
+  duration math only; no max, no pause stats/PDF; not FFB 5‑min timeout / shot clock.
 - 2026-08-12: Patch **1.0.1** — 14/1 PDF + summary: one paired innings table
   (# / P1 pts+end / P2 pts+end) instead of two side columns.
 - 2026-08-12: Patch **1.0.1** — 14/1 visit-end modal: scroll + height cap so CANCEL/CONFIRM

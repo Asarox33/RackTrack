@@ -177,4 +177,62 @@ class MatchCoordinatorTest {
         assertEquals(AppScreen.History, c.screen.value)
     }
 
+    @Test
+    fun `given board, when paused, scoring is ignored until resume`() {
+        var now = 1_000_000L
+        val c = MatchCoordinator(
+            initialSettings = UserSettings(),
+            persistSettings = {},
+            clock = { now },
+        )
+        c.updatePlayer1Name("Alex")
+        c.updatePlayer2Name("Sam")
+        c.startMatch()
+        val p1 = c.board().match.player1.id
+
+        c.toggleMatchPause()
+        assertTrue(c.matchPaused.value)
+        c.plusOne(p1)
+        assertEquals(0, c.board().match.score1)
+
+        now += 60_000L
+        c.toggleMatchPause()
+        assertTrue(!c.matchPaused.value)
+        assertEquals(1, c.board().match.pauseSpans.size)
+        assertEquals(60_000L, c.board().match.pauseSpans.single().let { it.endMillis - it.startMillis })
+
+        c.plusOne(p1)
+        assertEquals(1, c.board().match.score1)
+    }
+
+    @Test
+    fun `pause spans are excluded from summarized match duration`() {
+        var now = 0L
+        val c = MatchCoordinator(
+            initialSettings = UserSettings(),
+            persistSettings = {},
+            clock = { now },
+        )
+        c.updateGameMode(GameMode.TEN_BALL)
+        c.updateRacksToWin(2)
+        c.updatePlayer1Name("Alex")
+        c.updatePlayer2Name("Sam")
+        c.startMatch()
+        val p1 = c.board().match.player1.id
+        val p2 = c.board().match.player2.id
+
+        now = 10_000L
+        c.plusOne(p1)
+        c.toggleMatchPause()
+        now = 70_000L
+        c.toggleMatchPause()
+        now = 80_000L
+        c.plusOne(p2)
+
+        val summary = com.racktrack.domain.MatchStats.summarize(c.board().match)
+        // Playing time 0→10k + 70k→80k = 20k (60k pause excluded)
+        assertEquals(20_000L, summary.totalDurationMillis)
+        assertEquals(10_000L, summary.racks[0].durationMillis)
+        assertEquals(10_000L, summary.racks[1].durationMillis)
+    }
 }

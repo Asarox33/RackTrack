@@ -52,6 +52,11 @@ data class Match(
     val awaitingOpeningBreak: Boolean = false,
     val status: MatchStatus = MatchStatus.IN_PROGRESS,
     val startedAtMillis: Long = 0L,
+    /**
+     * Completed club pauses (not FFB timeouts). Excluded from duration math only —
+     * never exported to summary / PDF lines.
+     */
+    val pauseSpans: List<PauseSpan> = emptyList(),
     val history: List<MatchEvent> = emptyList(),
 ) {
     init {
