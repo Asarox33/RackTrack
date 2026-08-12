@@ -4,7 +4,9 @@ import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEvent
 import com.racktrack.domain.model.MatchEventType
+import com.racktrack.domain.model.PauseSpan
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.domain.model.pausedMillisBetween
 
 data class RackStat(
     val index: Int,
@@ -101,11 +103,14 @@ object MatchStats {
             inningScores1 = inningScores1,
             inningScores2 = inningScores2,
             racks = racks,
-            totalDurationMillis = (endMillis - startedAt).coerceAtLeast(0L),
+            totalDurationMillis = playingDuration(startedAt, endMillis, match.pauseSpans),
             startedAtMillis = startedAt,
             endedAtMillis = endMillis.coerceAtLeast(startedAt),
         )
     }
+
+    private fun playingDuration(from: Long, to: Long, pauses: List<PauseSpan>): Long =
+        ((to - from) - pauses.pausedMillisBetween(from, to)).coerceAtLeast(0L)
 
     /**
      * Net points per visit for [playerId], in order (pocketed + FOUL/BREAK/−15).
@@ -183,7 +188,7 @@ object MatchStats {
                 match.player1.id -> match.player1.name
                 else -> match.player2.name
             }
-            val duration = (event.atMillis - segmentStart).coerceAtLeast(0L)
+            val duration = playingDuration(segmentStart, event.atMillis, match.pauseSpans)
             segmentStart = event.atMillis
             RackStat(
                 index = index + 1,

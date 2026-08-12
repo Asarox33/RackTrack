@@ -5,8 +5,8 @@
 Product version lives in [`gradle.properties`](../gradle.properties):
 
 ```properties
-racktrack.versionName=1.0.0
-racktrack.versionCode=10000
+racktrack.versionName=1.0.1
+racktrack.versionCode=10001
 ```
 
 - **versionName** — classic semver `X.Y.Z` (users + GitHub Releases).
@@ -25,15 +25,32 @@ The app module reads these properties in `app/build.gradle.kts`.
 
 **1.0.0** is the first table-ready product release (MVP phase closed).
 
+## Release notes (`CHANGELOG.md`)
+
+User-facing notes live in [`CHANGELOG.md`](../CHANGELOG.md).
+
+For every version bump PR:
+
+1. Add a top section `## X.Y.Z — YYYY-MM-DD` with at least:
+   - `### Features` and/or
+   - `### Bug fixes`
+2. Keep wording short and product-facing (what players notice).
+3. Merge only when that section exists — CI **fails the release cut** if it is missing.
+
+Workflows `cut-release.yml` and `release.yml` run
+`.github/scripts/extract-changelog.sh X.Y.Z` and paste the section into the
+**GitHub Release** body (Releases list on the repo).
+
 ## How a release is produced
 
-1. Open a PR that bumps `racktrack.versionName` + `racktrack.versionCode` when you intend to ship.
+1. Open a PR that bumps `racktrack.versionName` + `racktrack.versionCode` **and** updates
+   `CHANGELOG.md` for that version.
 2. Merge to **`main`** after CI is green.
 3. Workflow **Cut release from main** (`cut-release.yml`) runs after **CI** succeeds on `main`.
    If GitHub Release `v{versionName}` does not exist, it:
    - re-checks quality gates
    - builds `assembleRelease`
-   - creates annotated tag + GitHub Release with `RackTrack-{version}.apk`
+   - creates annotated tag + GitHub Release with `RackTrack-{version}.apk` and changelog notes
 4. Workflow **Release** (`release.yml`) also runs on manual `vX.Y.Z` tag pushes
    (admins / ruleset bypass). It no-ops if the release already exists.
 
@@ -63,4 +80,5 @@ Optional hardening: add a `creation` rule and store an admin `RELEASE_PAT` secre
 ## Signing note
 
 Release APKs on GitHub Releases use the **debug keystore** until a dedicated upload
-keystore exists. Fine for club / sideload; not for Play Store.
+keystore exists (see Play Store docs when present on `main`). Fine for club / sideload;
+not for Play Store.

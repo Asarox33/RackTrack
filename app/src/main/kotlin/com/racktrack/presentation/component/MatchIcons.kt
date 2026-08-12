@@ -3,18 +3,25 @@ package com.racktrack.presentation.component
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -27,8 +34,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.theme.ButtonFoul
 import com.racktrack.presentation.theme.ButtonFoulLight
@@ -160,6 +170,7 @@ fun PlayerStatIcons(
     onClearFouls: (() -> Unit)? = null,
 ) {
     val performHaptic = rememberClickHaptic()
+    val foulClearable = consecutiveFouls > 0 && onClearFouls != null
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(22.dp),
@@ -176,31 +187,41 @@ fun PlayerStatIcons(
                 size = StatIconSize,
             )
         }
-        StatIconChip(
-            countLabel = if (maxConsecutiveFouls > 0) {
-                "$consecutiveFouls/$maxConsecutiveFouls"
-            } else {
-                consecutiveFouls.toString()
-            },
-            emphasized = consecutiveFouls > 0,
-            accent = ButtonFoulLight,
-            onClick = if (consecutiveFouls > 0 && onClearFouls != null) {
-                {
-                    performHaptic()
-                    onClearFouls()
-                }
-            } else {
-                null
-            },
-        ) {
-            FoulIcon(
-                tint = when {
-                    consecutiveFouls >= FOUL_WARN_THRESHOLD -> ButtonFoulLight
-                    consecutiveFouls > 0 -> ButtonFoul
-                    else -> ScoreWhite.copy(alpha = MUTED_ICON_ALPHA)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            StatIconChip(
+                countLabel = if (maxConsecutiveFouls > 0) {
+                    "$consecutiveFouls/$maxConsecutiveFouls"
+                } else {
+                    consecutiveFouls.toString()
                 },
-                size = StatIconSize,
-            )
+                emphasized = consecutiveFouls > 0,
+                accent = ButtonFoulLight,
+                clearable = foulClearable,
+                onClick = if (foulClearable) {
+                    {
+                        performHaptic()
+                        onClearFouls()
+                    }
+                } else {
+                    null
+                },
+            ) {
+                FoulIcon(
+                    tint = when {
+                        consecutiveFouls >= FOUL_WARN_THRESHOLD -> ButtonFoulLight
+                        consecutiveFouls > 0 -> ButtonFoul
+                        else -> ScoreWhite.copy(alpha = MUTED_ICON_ALPHA)
+                    },
+                    size = StatIconSize,
+                )
+            }
+            if (foulClearable) {
+                Text(
+                    text = "TAP TO CLEAR",
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 11.sp),
+                    color = ButtonFoulLight.copy(alpha = 0.95f),
+                )
+            }
         }
     }
 }
@@ -210,20 +231,37 @@ private fun StatIconChip(
     countLabel: String,
     emphasized: Boolean,
     accent: Color,
+    clearable: Boolean = false,
     onClick: (() -> Unit)? = null,
     icon: @Composable () -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
-    Row(
-        modifier = if (onClick != null) {
-            Modifier.clickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onClick,
-            )
-        } else {
+    val shape = RoundedCornerShape(FOUL_CHIP_CORNER)
+    val chipModifier = when {
+        onClick != null -> {
             Modifier
-        },
+                .semantics { contentDescription = "Clear consecutive fouls" }
+                .clip(shape)
+                .then(
+                    if (clearable) {
+                        Modifier
+                            .border(2.dp, accent.copy(alpha = 0.9f), shape)
+                            .background(accent.copy(alpha = 0.18f), shape)
+                    } else {
+                        Modifier
+                    },
+                )
+                .clickable(
+                    interactionSource = interaction,
+                    indication = ripple(bounded = true, color = accent),
+                    onClick = onClick,
+                )
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        }
+        else -> Modifier
+    }
+    Row(
+        modifier = chipModifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -477,6 +515,7 @@ private const val TIP_RADIUS_FACTOR = 0.24f
 private const val MUTED_ICON_ALPHA = 0.45f
 private const val MUTED_LABEL_ALPHA = 0.55f
 private const val FOUL_WARN_THRESHOLD = 2
+private val FOUL_CHIP_CORNER = 12.dp
 private val BallEightBlack = Color(0xFF1C1C1C)
 private val BallNineYellow = Color(0xFFF0C12E)
 private val BallTenBlue = Color(0xFF2F6FB5)

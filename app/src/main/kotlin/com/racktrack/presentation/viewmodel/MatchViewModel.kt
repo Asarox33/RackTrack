@@ -68,6 +68,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     val setup: StateFlow<SetupUiState> = coordinator.setup
     val screen: StateFlow<AppScreen> = coordinator.screen
     val settingsOpen: StateFlow<Boolean> = coordinator.settingsOpen
+    val matchPaused: StateFlow<Boolean> = coordinator.matchPaused
 
     val history: StateFlow<HistoryUiState> = combine(
         historyStore.matches,
@@ -98,6 +99,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun openSettings() = coordinator.openSettings()
 
     fun closeSettings() = coordinator.closeSettings()
+
+    fun toggleMatchPause() = coordinator.toggleMatchPause()
 
     fun setFeltTone(tone: FeltTone) = coordinator.setFeltTone(tone)
 

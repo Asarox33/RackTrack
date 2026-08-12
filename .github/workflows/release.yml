@@ -77,20 +77,24 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           TAG="${{ steps.version.outputs.tag }}"
           NAME="${{ steps.version.outputs.name }}"
           CODE="${{ steps.version.outputs.code }}"
           APK="dist/RackTrack-${NAME}.apk"
-          NOTES="$(printf '%s\n' \
-            "## RackTrack ${NAME}" \
-            "" \
-            "- **versionName:** \`${NAME}\`" \
-            "- **versionCode:** \`${CODE}\`" \
-            "- **APK:** \`RackTrack-${NAME}.apk\` (release build, debug keystore — sideload / club use)" \
-            "" \
-            "Built from tag \`${TAG}\` on \`${GITHUB_SHA:0:7}\`." \
-          )"
+          CHANGELOG_BODY="$(bash .github/scripts/extract-changelog.sh "$NAME")"
+          NOTES_FILE="$(mktemp)"
+          {
+            printf '%s\n' "## RackTrack ${NAME}" ""
+            printf '%s\n' "$CHANGELOG_BODY"
+            printf '%s\n' "" "---" "" \
+              "- **versionName:** \`${NAME}\`" \
+              "- **versionCode:** \`${CODE}\`" \
+              "- **APK:** \`RackTrack-${NAME}.apk\`" \
+              "" \
+              "Built from tag \`${TAG}\` on \`${GITHUB_SHA:0:7}\`."
+          } > "$NOTES_FILE"
           gh release create "$TAG" "$APK" \
             --title "RackTrack ${NAME}" \
-            --notes "$NOTES" \
+            --notes-file "$NOTES_FILE" \
             --verify-tag

@@ -8,6 +8,7 @@ import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchStatus
+import com.racktrack.domain.model.PauseSpan
 import com.racktrack.domain.model.PlayerId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,12 +36,42 @@ class MatchCoordinator(
     private val _settingsOpen = MutableStateFlow(false)
     val settingsOpen: StateFlow<Boolean> = _settingsOpen.asStateFlow()
 
+    /** Club break pause — freezes duration accounting; not an FFB player timeout. */
+    private val _matchPaused = MutableStateFlow(false)
+    val matchPaused: StateFlow<Boolean> = _matchPaused.asStateFlow()
+
+    /** Wall time when the current open pause began; null when running. */
+    private var openPauseStartedAt: Long? = null
+
     fun openSettings() {
         _settingsOpen.value = true
     }
 
     fun closeSettings() {
         _settingsOpen.value = false
+    }
+
+    fun toggleMatchPause() {
+        val board = _screen.value as? AppScreen.MatchBoard ?: return
+        if (board.match.status != MatchStatus.IN_PROGRESS) return
+        val wall = clock()
+        val started = openPauseStartedAt
+        if (started == null) {
+            openPauseStartedAt = wall
+            _matchPaused.value = true
+        } else {
+            openPauseStartedAt = null
+            _matchPaused.value = false
+            val span = PauseSpan(startMillis = started, endMillis = wall)
+            _screen.value = AppScreen.MatchBoard(
+                board.match.copy(pauseSpans = board.match.pauseSpans + span),
+            )
+        }
+    }
+
+    private fun clearPauseState() {
+        openPauseStartedAt = null
+        _matchPaused.value = false
     }
 
     fun setFeltTone(tone: FeltTone) {
@@ -108,6 +139,7 @@ class MatchCoordinator(
     }
 
     fun startMatch() {
+        clearPauseState()
         val s = _setup.value
         val now = clock()
         val match = if (s.gameMode.isPointScoring) {
@@ -206,6 +238,7 @@ class MatchCoordinator(
     }
 
     fun newMatch() {
+        clearPauseState()
         _screen.value = AppScreen.Setup
     }
 
@@ -228,6 +261,7 @@ class MatchCoordinator(
     }
 
     private fun mutateMatch(transform: (Match) -> Match) {
+        if (_matchPaused.value) return
         val current = _screen.value
         if (current is AppScreen.MatchBoard) {
             val previous = current.match

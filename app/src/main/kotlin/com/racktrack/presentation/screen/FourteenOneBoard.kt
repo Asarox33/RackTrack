@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,11 +20,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -539,7 +543,7 @@ private fun VisitEndBallsModal(
         draftBalls = maxBalls
     }
 
-    Box(
+BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.55f))
@@ -550,10 +554,14 @@ private fun VisitEndBallsModal(
             ),
         contentAlignment = Alignment.Center,
     ) {
+        // Cap height so landscape (and short portrait) keep CANCEL/CONFIRM on-screen when
+        // the auto re-rack warning (remaining > On Table) adds extra lines.
+        val panelMaxHeight = maxHeight * MODAL_MAX_HEIGHT_FRACTION
         Column(
             modifier = Modifier
                 .widthIn(max = 420.dp)
                 .fillMaxWidth(MODAL_CONTENT_WIDTH_FRACTION)
+                .heightIn(max = panelMaxHeight)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.verticalGradient(
@@ -569,85 +577,93 @@ private fun VisitEndBallsModal(
                 .padding(horizontal = 22.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = ScoreWhite.copy(alpha = 0.85f),
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Balls left on table",
-                style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.7f),
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
+            Column(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                StepperButton(
-                    label = "−",
-                    enabled = remaining > minBalls,
-                    onClick = { remaining -= 1 },
-                )
                 Text(
-                    text = remaining.toString(),
-                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
-                    color = ScoreWhite,
-                    modifier = Modifier.widthIn(min = 96.dp),
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = ScoreWhite.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center,
                 )
-                StepperButton(
-                    label = "+",
-                    enabled = remaining < maxBalls,
-                    onClick = { remaining += 1 },
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            TexturedActionButton(
-                label = "+14",
-                base = ButtonPlus,
-                light = ButtonPlusLight,
-                dark = ButtonPlusDark,
-                enabled = true,
-                onClick = { tapPlusFourteen() },
-                modifier = Modifier.fillMaxWidth(MODAL_PLUS_FOURTEEN_WIDTH_FRACTION),
-                height = 44.dp,
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Full continuous rack (use for racks missed on the board)",
-                style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.55f),
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "$racksLabel (+$rackPoints)  ·  +$partialPoints partial  ·  Visit $visitTotal",
-                style = MaterialTheme.typography.titleLarge,
-                color = ButtonRunOutLight,
-                textAlign = TextAlign.Center,
-            )
-            if (impliesAutoRerack) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Warning: from On Table $draftBalls → $remaining counts at most one re-rack. Tap +14 for each extra full rack.",
+                    text = "Balls left on table",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = OutlineWarm,
+                    color = ScoreWhite.copy(alpha = 0.7f),
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                ) {
+                    StepperButton(
+                        label = "−",
+                        enabled = remaining > minBalls,
+                        onClick = { remaining -= 1 },
+                    )
+                    Text(
+                        text = remaining.toString(),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
+                        color = ScoreWhite,
+                        modifier = Modifier.widthIn(min = 96.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                    StepperButton(
+                        label = "+",
+                        enabled = remaining < maxBalls,
+                        onClick = { remaining += 1 },
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                TexturedActionButton(
+                    label = "+14",
+                    base = ButtonPlus,
+                    light = ButtonPlusLight,
+                    dark = ButtonPlusDark,
+                    enabled = true,
+                    onClick = { tapPlusFourteen() },
+                    modifier = Modifier.fillMaxWidth(MODAL_PLUS_FOURTEEN_WIDTH_FRACTION),
+                    height = 44.dp,
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Full continuous rack (use for racks missed on the board)",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = ScoreWhite.copy(alpha = 0.55f),
                     textAlign = TextAlign.Center,
                 )
-            }
-            if (action == VisitEndAction.FOUL) {
-                Spacer(modifier = Modifier.height(4.dp))
+
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Then foul −1",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = ButtonFoulLight,
+                    text = "$racksLabel (+$rackPoints)  ·  +$partialPoints partial  ·  Visit $visitTotal",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = ButtonRunOutLight,
+                    textAlign = TextAlign.Center,
                 )
+                if (impliesAutoRerack) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "On Table $draftBalls → $remaining: at most one re-rack. Tap +14 for each extra full rack.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = OutlineWarm,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                if (action == VisitEndAction.FOUL) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Then foul −1",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = ButtonFoulLight,
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -758,6 +774,7 @@ private fun FourteenMedianDivider(landscape: Boolean) {
 private val PortraitMedianInset = 16.dp
 private val PortraitNameTopInset = 8.dp
 private const val MODAL_CONTENT_WIDTH_FRACTION = 0.92f
+private const val MODAL_MAX_HEIGHT_FRACTION = 0.92f
 private const val MODAL_PLUS_FOURTEEN_WIDTH_FRACTION = 0.55f
 private const val POINTS_FOURTEEN = 14
 

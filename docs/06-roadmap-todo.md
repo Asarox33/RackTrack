@@ -77,6 +77,14 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Progress notes
 
+- 2026-08-12: Patch **1.0.1** — club match pause (top-right, next to settings): freezes
+  duration math only; no max, no pause stats/PDF; not FFB 5‑min timeout / shot clock.
+- 2026-08-12: Patch **1.0.1** — 14/1 PDF + summary: one paired innings table
+  (# / P1 pts+end / P2 pts+end) instead of two side columns.
+- 2026-08-12: Patch **1.0.1** — 14/1 visit-end modal: scroll + height cap so CANCEL/CONFIRM
+  stay visible when balls-left > On Table warning shows (landscape + portrait).
+- 2026-08-12: Patch **1.0.1** — foul clear (9/10): Golden/Dry stay off after clear; foul chip
+  shows TAP TO CLEAR; match foul totals still count FOUL events; 8-ball clear remains no-op.
 - 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.
 - 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
 - 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.

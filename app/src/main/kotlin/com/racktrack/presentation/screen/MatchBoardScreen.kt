@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -44,6 +47,7 @@ import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
 import com.racktrack.presentation.component.CueBallBreakIndicator
+import com.racktrack.presentation.component.MatchPauseButton
 import com.racktrack.presentation.component.PlayerStatIcons
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.TexturedActionButton
@@ -63,6 +67,7 @@ import com.racktrack.presentation.theme.ButtonPlusLight
 import com.racktrack.presentation.theme.ButtonRunOut
 import com.racktrack.presentation.theme.ButtonRunOutDark
 import com.racktrack.presentation.theme.ButtonRunOutLight
+import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.theme.ScoreWhite
 
@@ -88,11 +93,14 @@ fun MatchBoardScreen(
     onUndo: () -> Unit,
     onNewMatch: () -> Unit,
     onOpenSettings: () -> Unit = {},
+    matchPaused: Boolean = false,
+    onTogglePause: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val landscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val felt = LocalFeltPalette.current
+    val playEnabled = match.status == MatchStatus.IN_PROGRESS && !matchPaused
 
     FeltBackground(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -115,7 +123,7 @@ fun MatchBoardScreen(
                     color = felt.accentLight,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 44.dp),
+                        .padding(horizontal = 88.dp),
                     textAlign = TextAlign.Center,
                 )
 
@@ -175,8 +183,7 @@ fun MatchBoardScreen(
                     TexturedOutlineAction(
                         label = "UNDO",
                         onClick = onUndo,
-                        enabled = match.history.isNotEmpty() &&
-                            match.status == MatchStatus.IN_PROGRESS,
+                        enabled = match.history.isNotEmpty() && playEnabled,
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     TexturedOutlineAction(
@@ -187,13 +194,52 @@ fun MatchBoardScreen(
                 }
             }
 
-            SettingsGearButton(
-                onClick = onOpenSettings,
+            if (matchPaused && match.status == MatchStatus.IN_PROGRESS) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.62f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onTogglePause,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "PAUSED",
+                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 42.sp),
+                            color = OutlineWarm,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Match timing stopped  ·  Tap to resume",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = ScoreWhite.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            }
+
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .safeDrawingPadding()
                     .padding(top = 6.dp, end = 10.dp),
-            )
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (match.status == MatchStatus.IN_PROGRESS) {
+                    MatchPauseButton(
+                        paused = matchPaused,
+                        onClick = onTogglePause,
+                    )
+                }
+                SettingsGearButton(onClick = onOpenSettings)
+            }
 
             if (match.status == MatchStatus.COMPLETED) {
                 MatchSummaryModal(

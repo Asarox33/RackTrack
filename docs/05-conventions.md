@@ -57,7 +57,8 @@ docs(readme): reflect multi-mode v1 product
 3. Engine changes in `domain/` ship with unit tests (nominal + at least one edge/foul case).
 4. No commit is done if ktlint/detekt would fail.
 5. Shipping a user-facing build: bump `racktrack.versionName` + `racktrack.versionCode` in
-   `gradle.properties` (see `docs/07-versioning-and-releases.md`).
+   `gradle.properties` **and** add a `## X.Y.Z` section to `CHANGELOG.md` (Features / Bug fixes)
+   so CI can publish GitHub Release notes (see `docs/07-versioning-and-releases.md`).
 
 ## 7. Testing
 

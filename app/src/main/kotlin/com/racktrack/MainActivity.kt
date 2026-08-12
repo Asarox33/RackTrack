@@ -65,23 +65,28 @@ class MainActivity : ComponentActivity() {
                         onOpenHistory = viewModel::openHistory,
                         onOpenSettings = viewModel::openSettings,
                     )
-                    is AppScreen.MatchBoard -> MatchBoardScreen(
-                        match = current.match,
-                        onPlusOne = viewModel::plusOne,
-                        onRunOut = viewModel::runOut,
-                        onGoldenBreak = viewModel::goldenBreak,
-                        onDryBreak = viewModel::dryBreak,
-                        onEightBallLoss = viewModel::eightBallLoss,
-                        onAddPoints = viewModel::addPoints,
-                        onPassWithRemaining = viewModel::passWithRemaining,
-                        onBreakFoul = viewModel::breakFoul,
-                        onFoul = viewModel::foul,
-                        onFoulWithRemaining = viewModel::foulWithRemaining,
-                        onClearFouls = viewModel::clearFouls,
-                        onUndo = viewModel::undo,
-                        onNewMatch = viewModel::newMatch,
-                        onOpenSettings = viewModel::openSettings,
-                    )
+                    is AppScreen.MatchBoard -> {
+                        val matchPaused by viewModel.matchPaused.collectAsStateWithLifecycle()
+                        MatchBoardScreen(
+                            match = current.match,
+                            onPlusOne = viewModel::plusOne,
+                            onRunOut = viewModel::runOut,
+                            onGoldenBreak = viewModel::goldenBreak,
+                            onDryBreak = viewModel::dryBreak,
+                            onEightBallLoss = viewModel::eightBallLoss,
+                            onAddPoints = viewModel::addPoints,
+                            onPassWithRemaining = viewModel::passWithRemaining,
+                            onBreakFoul = viewModel::breakFoul,
+                            onFoul = viewModel::foul,
+                            onFoulWithRemaining = viewModel::foulWithRemaining,
+                            onClearFouls = viewModel::clearFouls,
+                            onUndo = viewModel::undo,
+                            onNewMatch = viewModel::newMatch,
+                            onOpenSettings = viewModel::openSettings,
+                            matchPaused = matchPaused,
+                            onTogglePause = viewModel::toggleMatchPause,
+                        )
+                    }
                     AppScreen.History -> HistoryScreen(
                         state = history,
                         onPlayerFilter1Change = viewModel::setHistoryPlayerFilter1,
