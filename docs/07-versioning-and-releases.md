@@ -39,7 +39,8 @@ For every version bump PR:
 
 Workflows `cut-release.yml` and `release.yml` run
 `.github/scripts/extract-changelog.sh X.Y.Z` and paste the section into the
-**GitHub Release** body (Releases list on the repo).
+**GitHub Release** body (Releases list on the repo). Releases are **notes-only** —
+no APK/AAB asset is attached (binaries go to app stores).
 
 ## How a release is produced
 
@@ -49,8 +50,7 @@ Workflows `cut-release.yml` and `release.yml` run
 3. Workflow **Cut release from main** (`cut-release.yml`) runs after **CI** succeeds on `main`.
    If GitHub Release `v{versionName}` does not exist, it:
    - re-checks quality gates
-   - builds `assembleRelease`
-   - creates annotated tag + GitHub Release with `RackTrack-{version}.apk` and changelog notes
+   - creates annotated tag + GitHub Release with changelog notes (**no APK**)
 4. Workflow **Release** (`release.yml`) also runs on manual `vX.Y.Z` tag pushes
    (admins / ruleset bypass). It no-ops if the release already exists.
 
@@ -79,6 +79,7 @@ Optional hardening: add a `creation` rule and store an admin `RELEASE_PAT` secre
 
 ## Signing note
 
-Release APKs on GitHub Releases use the **debug keystore** until a dedicated upload
-keystore exists (see Play Store docs when present on `main`). Fine for club / sideload;
-not for Play Store.
+CI does not publish binaries. Store builds (Play / other) use a dedicated upload
+keystore configured outside this repo’s public workflows. Local
+`./gradlew :app:assembleRelease` may still use the debug keystore until Play signing
+is wired — fine for device sideload testing only.

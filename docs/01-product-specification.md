@@ -84,5 +84,5 @@ find that match in history — without entering shot details.
 
 ## 10. Product version
 
-**1.0.0** — first table-ready product cut. Versioning and GitHub Releases:
-`docs/07-versioning-and-releases.md`.
+**1.0.0** — first table-ready product cut. Versioning and GitHub Release notes:
+`docs/07-versioning-and-releases.md`. Binaries ship via app stores (see `LICENSE`).

@@ -50,7 +50,7 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Step 8 — v1.0.0 release pipeline
 - ✅ Semver in `gradle.properties` (`versionName` / `versionCode`)
-- ✅ Auto GitHub Release + APK after green CI on `main` when version bumps
+- ✅ Auto GitHub Release notes after green CI on `main` when version bumps (no APK asset)
 - ✅ Protected `v*` tags (repository ruleset)
 - ✅ Docs: versioning guide; MVP wording retired for v1 coverage
 - ✅ Settings About: version, build type/time, GitHub repo

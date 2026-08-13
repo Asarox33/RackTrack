@@ -1,6 +1,6 @@
 name: Release
 
-# Builds a release APK and publishes a GitHub Release for tags vX.Y.Z.
+# Publishes a notes-only GitHub Release for tags vX.Y.Z (no APK asset).
 # Primary path after merges: cut-release.yml (CI success on main).
 # This workflow covers manual / admin tag pushes that match gradle.properties.
 
@@ -60,19 +60,7 @@ jobs:
         if: steps.skip.outputs.exists == 'false'
         run: ./gradlew ktlintCheck detekt :app:domainCoverage
 
-      - name: Assemble release APK
-        if: steps.skip.outputs.exists == 'false'
-        run: ./gradlew :app:assembleRelease
-
-      - name: Stage APK artifact
-        if: steps.skip.outputs.exists == 'false'
-        run: |
-          mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk \
-            "dist/RackTrack-${{ steps.version.outputs.name }}.apk"
-          ls -lh dist/
-
-      - name: Create GitHub Release
+      - name: Create GitHub Release (notes only)
         if: steps.skip.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,7 +69,6 @@ jobs:
           TAG="${{ steps.version.outputs.tag }}"
           NAME="${{ steps.version.outputs.name }}"
           CODE="${{ steps.version.outputs.code }}"
-          APK="dist/RackTrack-${NAME}.apk"
           CHANGELOG_BODY="$(bash .github/scripts/extract-changelog.sh "$NAME")"
           NOTES_FILE="$(mktemp)"
           {
@@ -90,11 +77,11 @@ jobs:
             printf '%s\n' "" "---" "" \
               "- **versionName:** \`${NAME}\`" \
               "- **versionCode:** \`${CODE}\`" \
-              "- **APK:** \`RackTrack-${NAME}.apk\`" \
+              "- **Binaries:** app stores only (no APK attached to this release)" \
               "" \
               "Built from tag \`${TAG}\` on \`${GITHUB_SHA:0:7}\`."
           } > "$NOTES_FILE"
-          gh release create "$TAG" "$APK" \
+          gh release create "$TAG" \
             --title "RackTrack ${NAME}" \
             --notes-file "$NOTES_FILE" \
             --verify-tag
