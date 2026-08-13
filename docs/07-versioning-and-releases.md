@@ -5,8 +5,8 @@
 Product version lives in [`gradle.properties`](../gradle.properties):
 
 ```properties
-racktrack.versionName=1.0.1
-racktrack.versionCode=10001
+racktrack.versionName=1.0.2
+racktrack.versionCode=10002
 ```
 
 - **versionName** — classic semver `X.Y.Z` (users + GitHub Releases).

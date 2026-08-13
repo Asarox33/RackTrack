@@ -6,6 +6,13 @@ copies that section into the GitHub Release body.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.0.2 — 2026-08-13
+
+### Features
+
+- **Scroll hints on modals** — when summary, settings, or 14/1 visit-end content overflows,
+  a bottom fade + ▼ chevron appears until you reach the end (so scroll is discoverable).
+
 ## 1.0.1 — 2026-08-12
 
 ### Features

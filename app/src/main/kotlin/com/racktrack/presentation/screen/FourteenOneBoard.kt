@@ -55,6 +55,7 @@ import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
 import com.racktrack.presentation.component.CueBallBreakIndicator
+import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.rememberClickHaptic
 import com.racktrack.presentation.theme.ButtonFoul
@@ -577,13 +578,18 @@ BoxWithConstraints(
                 .padding(horizontal = 22.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
+            val bodyScroll = rememberScrollState()
+            Box(
                 modifier = Modifier
                     .weight(1f, fill = false)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth(),
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(bodyScroll),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
@@ -664,6 +670,11 @@ BoxWithConstraints(
                         color = ButtonFoulLight,
                     )
                 }
+                }
+                ScrollMoreHint(
+                    scrollState = bodyScroll,
+                    fadeColor = felt.vignette,
+                )
             }
 
             Spacer(modifier = Modifier.height(18.dp))

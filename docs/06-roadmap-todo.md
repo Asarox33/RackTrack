@@ -55,18 +55,24 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ Docs: versioning guide; MVP wording retired for v1 coverage
 - ✅ Settings About: version, build type/time, GitHub repo
 
-## Post-v1 backlog (optional)
+## On `main` — line 1.x
+
+### 1.0.2 — scroll discoverability
+- ✅ Modal scroll hints (fade + ▼) on match summary, settings, 14/1 visit-end
+
+### 1.1.0 — 14/1 solo training
+- ⬜ **Solo training (14/1 only)** — practice scorekeeping without an opponent:
+  - Setup: when mode is 14/1, toggle **Solo training** (single name; hide player 2)
+  - Dedicated solo board (one score column); same points / PASS / FOUL / BREAK −2 / On Table
+  - Summary + history + PDF adapted (one innings column; title like `Alex — solo`)
+  - Same HR / avg / innings / fouls stats as duel 14/1
+  - Ship before KMP/`rc/2.0.0`
+
+### Later on 1.x (optional)
 - ⬜ Play Store / dedicated upload keystore (replace debug-keystore release APKs)
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
-- ⬜ Accounts / find players + shared post-match stats (each player can reopen a match
-  scored on another device) — **never** remote live scoring; one device remains the table scoreboard
-- ⬜ **Player timeouts (match pause)** — FFB art. **1.2.16** (general Chapter 2 → **all modes** 8/9/10 + 14/1):
-  - **1 pause per player per match**, max **5 minutes** (director may extend for venue layout)
-  - Request vs opponent **only when a rack is being recomposed**; signal to table/director in clubs
-  - Track used/remaining per player on the board; show counts on end summary + PDF
-  - 14/1 nuance: if the non-pausing player has the hand, play may continue (with referee) —
-    for trusted club play, decide UX (freeze board vs allow continue) when implementing
-  - **Not** a per-shot shot clock (art. 1.2.13 — explicitly dropped)
+- ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
+- ⬜ **FFB player timeouts** (art. **1.2.16**) — distinct from club pause in 1.0.1
 
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
@@ -77,6 +83,9 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Progress notes
 
+- 2026-08-13: Patch **1.0.2** — scroll hints (fade + ▼) on overflow modals (summary, settings,
+  14/1 visit-end).
+- 2026-08-12: Backlog **1.1.0** — 14/1 solo training; keep off 1.0.x patches; before KMP.
 - 2026-08-12: Patch **1.0.1** — club match pause (top-right, next to settings): freezes
   duration math only; no max, no pause stats/PDF; not FFB 5‑min timeout / shot clock.
 - 2026-08-12: Patch **1.0.1** — 14/1 PDF + summary: one paired innings table

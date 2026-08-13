@@ -44,6 +44,7 @@ import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.MatchEventType
 import com.racktrack.presentation.component.FoulIcon
 import com.racktrack.presentation.component.RunOutIcon
+import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.formatDuration
 import com.racktrack.presentation.share.MatchSummaryShare
@@ -85,6 +86,7 @@ fun MatchSummaryScaffold(
     actionUsesFelt: Boolean = false,
 ) {
     val felt = LocalFeltPalette.current
+    val scrollState = rememberScrollState()
     val panel = Modifier
         .widthIn(max = 720.dp)
         .fillMaxWidth(if (scrim) MODAL_WIDTH_FRACTION else 1f)
@@ -98,8 +100,26 @@ fun MatchSummaryScaffold(
             ),
         )
         .border(2.dp, OutlineWarm.copy(alpha = PANEL_BORDER_ALPHA), RoundedCornerShape(22.dp))
-        .verticalScroll(rememberScrollState())
-        .padding(horizontal = 24.dp, vertical = 16.dp)
+
+    val panelBody: @Composable () -> Unit = {
+        Box(modifier = panel) {
+            MatchSummaryContent(
+                title = title,
+                summary = summary,
+                actionLabel = actionLabel,
+                onAction = onAction,
+                actionUsesFelt = actionUsesFelt,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+            )
+            ScrollMoreHint(
+                scrollState = scrollState,
+                fadeColor = felt.vignette,
+            )
+        }
+    }
 
     if (scrim) {
         Box(
@@ -109,14 +129,7 @@ fun MatchSummaryScaffold(
                 .safeDrawingPadding(),
             contentAlignment = Alignment.Center,
         ) {
-            MatchSummaryContent(
-                title = title,
-                summary = summary,
-                actionLabel = actionLabel,
-                onAction = onAction,
-                actionUsesFelt = actionUsesFelt,
-                modifier = panel,
-            )
+            panelBody()
         }
     } else {
         Box(
@@ -126,14 +139,7 @@ fun MatchSummaryScaffold(
                 .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            MatchSummaryContent(
-                title = title,
-                summary = summary,
-                actionLabel = actionLabel,
-                onAction = onAction,
-                actionUsesFelt = actionUsesFelt,
-                modifier = panel,
-            )
+            panelBody()
         }
     }
 }
