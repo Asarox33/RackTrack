@@ -1,8 +1,9 @@
 name: Cut release from main
 
 # After CI succeeds on a push to main, if racktrack.versionName has no GitHub
-# Release yet, create annotated tag vX.Y.Z, build the APK, and publish the release.
-# (GITHUB_TOKEN tag pushes do not start other workflows, so release is done here.)
+# Release yet, create annotated tag vX.Y.Z and publish release notes (no APK).
+# Binaries ship via app stores; (GITHUB_TOKEN tag pushes do not start other
+# workflows, so the release is created here.)
 
 on:
   workflow_run:
@@ -70,11 +71,7 @@ jobs:
         if: steps.skip.outputs.exists == 'false'
         run: ./gradlew ktlintCheck detekt :app:domainCoverage
 
-      - name: Assemble release APK
-        if: steps.skip.outputs.exists == 'false'
-        run: ./gradlew :app:assembleRelease
-
-      - name: Publish GitHub Release + tag
+      - name: Publish GitHub Release + tag (notes only)
         if: steps.skip.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,9 +81,6 @@ jobs:
           CODE="${{ steps.version.outputs.code }}"
           TAG="${{ steps.version.outputs.tag }}"
           SHA="${{ steps.version.outputs.sha }}"
-          mkdir -p dist
-          APK="dist/RackTrack-${NAME}.apk"
-          cp app/build/outputs/apk/release/app-release.apk "$APK"
           CHANGELOG_BODY="$(bash .github/scripts/extract-changelog.sh "$NAME")"
           NOTES_FILE="$(mktemp)"
           {
@@ -95,11 +89,11 @@ jobs:
             printf '%s\n' "" "---" "" \
               "- **versionName:** \`${NAME}\`" \
               "- **versionCode:** \`${CODE}\`" \
-              "- **APK:** \`RackTrack-${NAME}.apk\`" \
+              "- **Binaries:** app stores only (no APK attached to this release)" \
               "" \
               "Cut automatically after CI on \`main\` (\`${SHA:0:7}\`)."
           } > "$NOTES_FILE"
-          gh release create "$TAG" "$APK" \
+          gh release create "$TAG" \
             --target "$SHA" \
             --title "RackTrack ${NAME}" \
             --notes-file "$NOTES_FILE"

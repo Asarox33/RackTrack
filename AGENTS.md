@@ -35,5 +35,6 @@ No emulator/GUI in this VM — validate with unit tests + APK assemble/`apkanaly
 ### Releases
 
 Semver `racktrack.versionName` / `versionCode` in `gradle.properties`. After green CI on
-`main`, `cut-release.yml` publishes GitHub Release `vX.Y.Z` + APK when that version is new.
+`main`, `cut-release.yml` publishes GitHub Release `vX.Y.Z` **notes only** (no APK)
+when that version is new. Binaries ship via app stores.
 Details: `docs/07-versioning-and-releases.md`.

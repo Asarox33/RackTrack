@@ -1,8 +1,8 @@
 # Changelog
 
-User-facing notes for GitHub Releases. When bumping `racktrack.versionName`, add a
-`## X.Y.Z` section **before** merging to `main`. CI (`cut-release.yml` / `release.yml`)
-copies that section into the GitHub Release body.
+User-facing notes for GitHub Releases (notes only — no APK attached). When bumping
+`racktrack.versionName`, add a `## X.Y.Z` section **before** merging to `main`.
+CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Release body.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 

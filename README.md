@@ -33,12 +33,17 @@ FFB mode notes live in `docs/02-game-rules-*.md`; official text in the PDF under
 ./gradlew :app:domainCoverage   # domain JaCoCo → app/build/reports/jacoco/domainCoverage/
 ./gradlew ktlintCheck detekt
 ./gradlew :app:assembleDebug
-./gradlew :app:assembleRelease  # GitHub Release APK (debug-keystore signed for now)
+./gradlew :app:assembleRelease  # local store / sideload build (not published by CI)
 ```
 
 On pull requests to `main`, CI posts a **Domain coverage** comment (JaCoCo) and uploads the HTML report as an artifact.
 
-Open in Android Studio (recent) or install a release APK from [GitHub Releases](https://github.com/Asarox33/RackTrack/releases).
+[GitHub Releases](https://github.com/Asarox33/RackTrack/releases) publish **changelog notes only** — install binaries from authorized app stores (or build locally).
+
+## License
+
+Source is public under the [RackTrack Source-Available License](LICENSE): view and study welcome;
+redistribution and store listing require permission. Official APKs/AABs are store-only.
 
 ## Docs
 
