@@ -227,6 +227,7 @@ object MatchSummaryPdfWriter {
             drawTableHeader(
                 cells = listOf("#", name1, "End", name2, "End"),
                 weights = weights,
+                separatorAfterColumns = INNINGS_SEPARATOR_AFTER,
             )
             rows.forEachIndexed { index, row ->
                 ensureSpace(ROW_HEIGHT + 4f)
@@ -240,6 +241,7 @@ object MatchSummaryPdfWriter {
                     ),
                     weights = weights,
                     alt = index % 2 == 1,
+                    separatorAfterColumns = INNINGS_SEPARATOR_AFTER,
                 )
             }
         }
@@ -253,7 +255,11 @@ object MatchSummaryPdfWriter {
             }
         }
 
-        private fun drawTableHeader(cells: List<String>, weights: FloatArray) {
+        private fun drawTableHeader(
+            cells: List<String>,
+            weights: FloatArray,
+            separatorAfterColumns: IntArray = intArrayOf(),
+        ) {
             ensureSpace(ROW_HEIGHT + 4f)
             val c = canvas!!
             val top = y
@@ -263,10 +269,16 @@ object MatchSummaryPdfWriter {
                 c.drawText(cell, x, top + 15f, paint(theme.onFelt, 10f, bold = true))
                 x += CONTENT_WIDTH * weights[i]
             }
+            drawColumnSeparators(top, ROW_HEIGHT, weights, separatorAfterColumns, header = true)
             y = top + ROW_HEIGHT
         }
 
-        private fun drawTableRow(cells: List<String>, weights: FloatArray, alt: Boolean) {
+        private fun drawTableRow(
+            cells: List<String>,
+            weights: FloatArray,
+            alt: Boolean,
+            separatorAfterColumns: IntArray = intArrayOf(),
+        ) {
             val c = canvas!!
             val top = y
             val bg = if (alt) theme.rowAlt else theme.card
@@ -283,7 +295,31 @@ object MatchSummaryPdfWriter {
                 c.drawText(cell, x, top + 15f, bodyPaint)
                 x += CONTENT_WIDTH * weights[i]
             }
+            drawColumnSeparators(top, ROW_HEIGHT, weights, separatorAfterColumns, header = false)
             y = top + ROW_HEIGHT
+        }
+
+        /** Vertical rules after the given 0-based column indices (inclusive). */
+        private fun drawColumnSeparators(
+            top: Float,
+            height: Float,
+            weights: FloatArray,
+            afterColumns: IntArray,
+            header: Boolean,
+        ) {
+            if (afterColumns.isEmpty()) return
+            val c = canvas!!
+            val line = stroke(
+                color = if (header) 0x66F5F7F4 else theme.line,
+                width = if (header) 1.2f else 1f,
+            )
+            for (after in afterColumns) {
+                var edge = MARGIN_LEFT
+                for (i in 0..after) {
+                    edge += CONTENT_WIDTH * weights[i]
+                }
+                c.drawLine(edge, top + 2f, edge, top + height - 2f, line)
+            }
         }
 
         private fun ensureSpace(needed: Float) {
@@ -357,4 +393,6 @@ object MatchSummaryPdfWriter {
     private const val DEFAULT_ACCENT = 0xFF1B9A4A.toInt()
     private const val INNINGS_NAME_MAX = 12
     private val INNINGS_WEIGHTS = floatArrayOf(0.10f, 0.22f, 0.18f, 0.22f, 0.28f)
+    /** After `#` and after player-1 End (columns 0 and 2). */
+    private val INNINGS_SEPARATOR_AFTER = intArrayOf(0, 2)
 }

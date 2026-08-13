@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,6 +43,7 @@ import com.racktrack.BuildConfig
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
+import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
 import com.racktrack.appearance.FeltTone
@@ -68,6 +70,7 @@ fun SettingsSheet(
 ) {
     val context = LocalContext.current
     val felt = LocalFeltPalette.current
+    val scrollState = rememberScrollState()
 
     Box(
         modifier = modifier
@@ -77,10 +80,11 @@ fun SettingsSheet(
             .safeDrawingPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .widthIn(max = 560.dp)
                 .fillMaxWidth(PANEL_WIDTH)
+                .fillMaxHeight(PANEL_MAX_HEIGHT)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.verticalGradient(
@@ -92,11 +96,15 @@ fun SettingsSheet(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {},
-                )
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp, vertical = 18.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                ),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 22.dp, vertical = 18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
             Text(
                 text = "SETTINGS",
                 style = MaterialTheme.typography.titleLarge,
@@ -265,6 +273,11 @@ fun SettingsSheet(
                 modifier = Modifier.widthIn(min = 180.dp),
                 height = 48.dp,
             )
+            }
+            ScrollMoreHint(
+                scrollState = scrollState,
+                fadeColor = felt.vignette,
+            )
         }
     }
 }
@@ -425,5 +438,6 @@ const val FFB_RULES_URL = "https://m.ffbillard.com/ext/telechargement.php?id=322
 
 private const val SCRIM_ALPHA = 0.55f
 private const val PANEL_WIDTH = 0.88f
+private const val PANEL_MAX_HEIGHT = 0.92f
 private const val PANEL_TOP_ALPHA = 0.97f
 private const val PANEL_BORDER_ALPHA = 0.55f
