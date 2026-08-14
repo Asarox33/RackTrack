@@ -86,6 +86,20 @@ enum class FeltTone(
             accentDark = Color(0xFFB03E68),
         ),
     ),
+    /** Warm mustard-gold cloth, in the spirit of Predator Arcadia Select Gold. */
+    GOLDEN(
+        label = "Golden",
+        palette = FeltPalette(
+            light = Color(0xFFC9A63A),
+            mid = Color(0xFFB08C2E),
+            base = Color(0xFF8F7024),
+            dark = Color(0xFF5C4816),
+            vignette = Color(0xFF2A200A),
+            accentLight = Color(0xFFE8C85A),
+            accent = Color(0xFFD4A82E),
+            accentDark = Color(0xFF9A781C),
+        ),
+    ),
 }
 
 val LocalFeltPalette = staticCompositionLocalOf { FeltTone.FOREST.palette }

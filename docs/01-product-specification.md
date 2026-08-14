@@ -27,6 +27,7 @@ or share past match stats.
 - **9-ball race** — +1, Run out, Foul, Golden break, Dry break; 3 consecutive fouls = rack loss
 - **10-ball race** — +1, Run out, Foul; 3 consecutive fouls = rack loss
 - **14/1 continuous** — clear-rack +N, PASS/FOUL (balls-left modal), BREAK −2 on opening; distance + optional innings
+- **14/1 solo training** — same 14/1 scoring with one player (setup Solo toggle); history stays under 14/1
 
 ### Later (only if product asks)
 - Camera / AI ball detection — prerequisite for any automatic shot scoring
@@ -40,8 +41,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 ## 6. Current features
 
 - Create a match (2 names, mode, race length or 14/1 distance/innings, who starts;
-  race: Alternate vs Winner break)
-- Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink)
+  race: Alternate vs Winner break; **14/1 Solo** = one name / no opponent)
+- Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink, Golden)
 - Landscape and portrait (`fullSensor`)
 - Break / shooter indicator; alternate or winner break after each race rack
 - 14/1: `TABLE n` object balls remaining on the shooter’s panel
@@ -84,5 +85,5 @@ find that match in history — without entering shot details.
 
 ## 10. Product version
 
-**1.0.0** — first table-ready product cut. Versioning and GitHub Release notes:
+**1.1.0** — 14/1 solo training. Versioning and GitHub Release notes:
 `docs/07-versioning-and-releases.md`. Binaries ship via app stores (see `LICENSE`).

@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,6 +49,7 @@ fun SetupScreen(
     onPlayer1Change: (String) -> Unit,
     onPlayer2Change: (String) -> Unit,
     onGameModeChange: (GameMode) -> Unit,
+    onSoloTrainingChange: (Boolean) -> Unit = {},
     onRacksChange: (Int) -> Unit,
     onPointsChange: (Int) -> Unit,
     onInningsChange: (Int?) -> Unit,
@@ -68,6 +71,7 @@ fun SetupScreen(
                     onPlayer1Change = onPlayer1Change,
                     onPlayer2Change = onPlayer2Change,
                     onGameModeChange = onGameModeChange,
+                    onSoloTrainingChange = onSoloTrainingChange,
                     onRacksChange = onRacksChange,
                     onPointsChange = onPointsChange,
                     onInningsChange = onInningsChange,
@@ -82,6 +86,7 @@ fun SetupScreen(
                     onPlayer1Change = onPlayer1Change,
                     onPlayer2Change = onPlayer2Change,
                     onGameModeChange = onGameModeChange,
+                    onSoloTrainingChange = onSoloTrainingChange,
                     onRacksChange = onRacksChange,
                     onPointsChange = onPointsChange,
                     onInningsChange = onInningsChange,
@@ -108,6 +113,7 @@ private fun LandscapeSetup(
     onPlayer1Change: (String) -> Unit,
     onPlayer2Change: (String) -> Unit,
     onGameModeChange: (GameMode) -> Unit,
+    onSoloTrainingChange: (Boolean) -> Unit,
     onRacksChange: (Int) -> Unit,
     onPointsChange: (Int) -> Unit,
     onInningsChange: (Int?) -> Unit,
@@ -117,6 +123,7 @@ private fun LandscapeSetup(
     onOpenHistory: () -> Unit,
 ) {
     val felt = LocalFeltPalette.current
+    val solo = state.gameMode.isPointScoring && state.soloTraining
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -138,19 +145,27 @@ private fun LandscapeSetup(
                 color = ScoreWhite.copy(alpha = 0.78f),
             )
             GameModeRow(state = state, onGameModeChange = onGameModeChange, compact = true)
+            if (state.gameMode.isPointScoring) {
+                SoloTrainingRow(
+                    selected = state.soloTraining,
+                    onChange = onSoloTrainingChange,
+                )
+            }
             // Stack names vertically in landscape so the text field stays tall enough to read.
             NameField(
-                label = "Player 1",
+                label = if (solo) "Player" else "Player 1",
                 value = state.player1Name,
                 onValueChange = onPlayer1Change,
                 fieldModifier = Modifier.fillMaxWidth(),
             )
-            NameField(
-                label = "Player 2",
-                value = state.player2Name,
-                onValueChange = onPlayer2Change,
-                fieldModifier = Modifier.fillMaxWidth(),
-            )
+            if (!solo) {
+                NameField(
+                    label = "Player 2",
+                    value = state.player2Name,
+                    onValueChange = onPlayer2Change,
+                    fieldModifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         Column(
@@ -165,11 +180,13 @@ private fun LandscapeSetup(
                 onInningsChange = onInningsChange,
                 compact = true,
             )
-            Text(
-                text = if (state.gameMode.isPointScoring) "Who starts?" else "Who breaks first?",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = true)
+            if (!solo) {
+                Text(
+                    text = if (state.gameMode.isPointScoring) "Who starts?" else "Who breaks first?",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = true)
+            }
             if (!state.gameMode.isPointScoring) {
                 BreakRuleRow(
                     state = state,
@@ -178,7 +195,7 @@ private fun LandscapeSetup(
                 )
             }
             TexturedActionButton(
-                label = "START MATCH",
+                label = if (solo) "START TRAINING" else "START MATCH",
                 base = felt.accent,
                 light = felt.accentLight,
                 dark = felt.accentDark,
@@ -207,6 +224,7 @@ private fun PortraitSetup(
     onPlayer1Change: (String) -> Unit,
     onPlayer2Change: (String) -> Unit,
     onGameModeChange: (GameMode) -> Unit,
+    onSoloTrainingChange: (Boolean) -> Unit,
     onRacksChange: (Int) -> Unit,
     onPointsChange: (Int) -> Unit,
     onInningsChange: (Int?) -> Unit,
@@ -216,6 +234,7 @@ private fun PortraitSetup(
     onOpenHistory: () -> Unit,
 ) {
     val felt = LocalFeltPalette.current
+    val solo = state.gameMode.isPointScoring && state.soloTraining
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -235,19 +254,27 @@ private fun PortraitSetup(
         }
 
         GameModeRow(state = state, onGameModeChange = onGameModeChange, compact = false)
+        if (state.gameMode.isPointScoring) {
+            SoloTrainingRow(
+                selected = state.soloTraining,
+                onChange = onSoloTrainingChange,
+            )
+        }
 
         NameField(
-            label = "Player 1",
+            label = if (solo) "Player" else "Player 1",
             value = state.player1Name,
             onValueChange = onPlayer1Change,
             fieldModifier = Modifier.fillMaxWidth(),
         )
-        NameField(
-            label = "Player 2",
-            value = state.player2Name,
-            onValueChange = onPlayer2Change,
-            fieldModifier = Modifier.fillMaxWidth(),
-        )
+        if (!solo) {
+            NameField(
+                label = "Player 2",
+                value = state.player2Name,
+                onValueChange = onPlayer2Change,
+                fieldModifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         FormatControls(
             state = state,
@@ -257,26 +284,32 @@ private fun PortraitSetup(
             compact = false,
         )
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = if (state.gameMode.isPointScoring) "Who starts?" else "Who breaks first?",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Box(modifier = Modifier.height(10.dp))
-            BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = false)
-            if (!state.gameMode.isPointScoring) {
-                Box(modifier = Modifier.height(10.dp))
-                BreakRuleRow(
-                    state = state,
-                    onBreakRuleChange = onBreakRuleChange,
-                    compact = false,
+        if (!solo) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = if (state.gameMode.isPointScoring) {
+                        "Who starts?"
+                    } else {
+                        "Who breaks first?"
+                    },
+                    style = MaterialTheme.typography.titleLarge,
                 )
+                Box(modifier = Modifier.height(10.dp))
+                BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = false)
+                if (!state.gameMode.isPointScoring) {
+                    Box(modifier = Modifier.height(10.dp))
+                    BreakRuleRow(
+                        state = state,
+                        onBreakRuleChange = onBreakRuleChange,
+                        compact = false,
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
         TexturedActionButton(
-            label = "START MATCH",
+            label = if (solo) "START TRAINING" else "START MATCH",
             base = felt.accent,
             light = felt.accentLight,
             dark = felt.accentDark,
@@ -448,6 +481,38 @@ private fun BreakRuleRow(
                 height = if (compact) 40.dp else 44.dp,
             )
         }
+    }
+}
+
+@Composable
+private fun SoloTrainingRow(
+    selected: Boolean,
+    onChange: (Boolean) -> Unit,
+) {
+    val felt = LocalFeltPalette.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "Solo Training",
+            style = MaterialTheme.typography.titleLarge,
+            color = ScoreWhite,
+            modifier = Modifier.weight(1f),
+        )
+        Switch(
+            checked = selected,
+            onCheckedChange = onChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = ScoreWhite,
+                checkedTrackColor = felt.accent,
+                checkedBorderColor = felt.accentDark,
+                uncheckedThumbColor = ScoreWhite.copy(alpha = 0.85f),
+                uncheckedTrackColor = felt.dark.copy(alpha = 0.55f),
+                uncheckedBorderColor = OutlineWarm.copy(alpha = 0.45f),
+            ),
+        )
     }
 }
 

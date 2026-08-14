@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.data.StoredMatch
+import com.racktrack.domain.MatchSummaryReport
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.formatDuration
@@ -176,12 +177,17 @@ private fun DeleteHistoryConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Delete match?")
+            Text(if (summary.solo) "Delete training?" else "Delete match?")
         },
         text = {
             Text(
-                "${summary.player1Name}  ${summary.score1} – ${summary.score2}  ${summary.player2Name}\n" +
-                    "This cannot be undone.",
+                if (summary.solo) {
+                    "${MatchSummaryReport.opponentsLabel(summary)}  ·  ${summary.score1}\n" +
+                        "This cannot be undone."
+                } else {
+                    "${summary.player1Name}  ${summary.score1} – ${summary.score2}  ${summary.player2Name}\n" +
+                        "This cannot be undone."
+                },
             )
         },
         confirmButton = {
@@ -225,7 +231,7 @@ fun HistoryDetailScreen(
             }
         } else {
             MatchSummaryScaffold(
-                title = "MATCH STATS",
+                title = if (match.summary.solo) "TRAINING STATS" else "MATCH STATS",
                 summary = match.summary,
                 actionLabel = "BACK",
                 onAction = onBack,
@@ -294,7 +300,11 @@ private fun HistoryMatchRow(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${summary.player1Name}  ${summary.score1}  –  ${summary.score2}  ${summary.player2Name}",
+                text = if (summary.solo) {
+                    "${MatchSummaryReport.opponentsLabel(summary)}  ·  ${summary.score1}"
+                } else {
+                    "${summary.player1Name}  ${summary.score1}  –  ${summary.score2}  ${summary.player2Name}"
+                },
                 style = MaterialTheme.typography.titleLarge,
                 color = ScoreWhite,
             )

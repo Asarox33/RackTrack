@@ -35,9 +35,10 @@ In-memory match for races or 14/1.
 | `currentShooterId` | Synced with breaker | Player at the table |
 | `currentRun` / `highRun*` | unused / n/a | Current inning / high run |
 | `objectBallsOnTable` | unused | Object balls left (1–15; continuous re-rack) |
+| `solo` | must be false | 14/1 solo training (placeholder `player2`, no handoff) |
 | `history` | `List<MatchEvent>` for undo + stats | same |
 
-Status: `IN_PROGRESS` | `COMPLETED`. Winner from scores when completed.
+Status: `IN_PROGRESS` | `COMPLETED`. Winner from scores when completed (solo → always player1).
 
 ### `MatchEvent` / `MatchEventType`
 Append-only log used for undo and summaries.
@@ -60,16 +61,16 @@ reaches `racksToWin`; supports undo.
 14/1 only. Adds points (and decrements `objectBallsOnTable` with continuous re-rack), pass,
 classic foul (−1), break foul (−2), three-foul extra (−15, resets table to 15);
 tracks innings / high run / opening break; optional innings overtime; completes at distance
-or innings.
-or innings end; supports undo.
+or innings end; supports undo. When `match.solo`, hand never switches and innings-limit /
+distance use player1 only.
 
 ### `MatchStats` / `MatchSummary`
 Builds `MatchSummary` from a completed (or in-progress) match: scores, counters, racks or
-14/1 reprises, `startedAtMillis` / `endedAtMillis` / `totalDurationMillis`.
+14/1 reprises, `startedAtMillis` / `endedAtMillis` / `totalDurationMillis`, `solo`.
 
 ### `MatchSummaryReport`
 Shared labels, duration formatting, and PDF filename stem
-(`racktrack_<mode>_<p1>_vs_<p2>_<yyyyMMdd_HHmm>` from match start).
+(`racktrack_<mode>_<p1>_vs_<p2>_<yyyyMMdd_HHmm>` from match start; solo uses `_solo_` instead of `_vs_`).
 
 ## 3. Persistence (outside `domain/`)
 

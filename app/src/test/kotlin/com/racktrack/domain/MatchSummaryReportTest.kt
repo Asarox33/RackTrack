@@ -1,7 +1,9 @@
 package com.racktrack.domain
 
+import com.racktrack.domain.MatchSummary
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.MatchEventType
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -117,5 +119,57 @@ class MatchSummaryReportTest {
         assertTrue(paired[0].player1?.points == 14)
         assertTrue(paired[0].player2?.points == 100)
         assertTrue(paired[1].player2 == null)
+    }
+
+    @Test
+    fun `solo report uses solo title stem and single innings column`() {
+        val summary = MatchSummary(
+            gameMode = GameMode.FOURTEEN_ONE,
+            winnerName = "Alex",
+            player1Name = "Alex",
+            player2Name = "solo",
+            score1 = 50,
+            score2 = 0,
+            racksToWin = 1,
+            pointsToWin = 50,
+            inningsLimit = 30,
+            innings1 = 2,
+            innings2 = 0,
+            totalFouls1 = 0,
+            totalFouls2 = 0,
+            runOuts1 = 0,
+            runOuts2 = 0,
+            goldenBreaks1 = 0,
+            goldenBreaks2 = 0,
+            dryBreaks1 = 0,
+            dryBreaks2 = 0,
+            eightBallLosses1 = 0,
+            eightBallLosses2 = 0,
+            highRun1 = 30,
+            highRun2 = 0,
+            average1 = 25.0,
+            average2 = 0.0,
+            inningScores1 = listOf(
+                InningStat(1, 20, MatchEventType.PASS),
+                InningStat(2, 30, null),
+            ),
+            inningScores2 = emptyList(),
+            racks = emptyList(),
+            totalDurationMillis = 60_000L,
+            startedAtMillis = 1_700_000_000_000L,
+            endedAtMillis = 1_700_000_047_000L,
+            solo = true,
+        )
+        assertEquals("Alex — solo", MatchSummaryReport.opponentsLabel(summary))
+        assertEquals("TRAINING OVER", MatchSummaryReport.sessionOverTitle(summary))
+        assertEquals("TRAINING SUMMARY", MatchSummaryReport.sessionSummaryTitle(summary))
+        assertTrue(MatchSummaryReport.subtitle(summary).contains("14/1 solo"))
+        assertTrue(MatchSummaryReport.fileStem(summary).contains("_alex_solo_"))
+        assertTrue(!MatchSummaryReport.fileStem(summary).contains("_vs_"))
+        val text = MatchSummaryReport.lines(summary).joinToString("\n")
+        assertTrue(text.startsWith("TRAINING SUMMARY"))
+        assertTrue(text.contains("#  Alex  End"))
+        assertTrue(!text.contains("SAM"))
+        assertTrue(text.contains("#1  20  pass"))
     }
 }

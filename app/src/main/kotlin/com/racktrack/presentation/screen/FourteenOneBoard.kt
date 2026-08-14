@@ -90,7 +90,27 @@ fun FourteenOneBoardContent(
     var visitEnd by remember { mutableStateOf<VisitEndDraft?>(null) }
 
     Box(modifier = modifier) {
-        if (landscape) {
+        if (match.solo) {
+            FourteenOnePlayerPanel(
+                match = match,
+                player = match.player1,
+                score = match.score1,
+                innings = match.innings1,
+                fouls = match.foul1,
+                highRun = match.highRun1,
+                hasHand = true,
+                handTowardEnd = true,
+                onAddPoints = onAddPoints,
+                onRequestPass = {
+                    visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.PASS)
+                },
+                onRequestFoul = {
+                    visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
+                },
+                onBreakFoul = onBreakFoul,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else if (landscape) {
             Row(modifier = Modifier.fillMaxSize()) {
                 FourteenOnePlayerPanel(
                     match = match,
@@ -208,12 +228,22 @@ fun FourteenOneBoardContent(
 }
 
 fun fourteenOneHeader(match: Match): String {
-    val inningsLabel = match.inningsLimit?.let { limit ->
-        val shown = maxOf(match.innings1, match.innings2)
-        "inning $shown/$limit"
-    } ?: "inning ${maxOf(match.innings1, match.innings2)}"
-    return "14/1  ·  ${match.pointsToWin} pts  ·  $inningsLabel"
+    val inningsLabel = if (match.solo) {
+        match.inningsLimit?.let { limit ->
+            "inn ${match.innings1}/$limit"
+        } ?: "inn ${match.innings1}"
+    } else {
+        match.inningsLimit?.let { limit ->
+            "inn ${match.innings1}–${match.innings2}/$limit"
+        } ?: "inn ${match.innings1}–${match.innings2}"
+    }
+    val mode = if (match.solo) "14/1 solo" else "14/1"
+    return "$mode  ·  ${match.pointsToWin} pts  ·  $inningsLabel"
 }
+
+/** Completed visits for this seat; with a limit, show `Inn 29/30` (not the next visit). */
+fun fourteenOneInningsLine(innings: Int, limit: Int?): String =
+    limit?.let { "Inn $innings/$it" } ?: "Inn $innings"
 
 @Composable
 private fun FourteenOnePlayerPanel(
@@ -350,11 +380,21 @@ private fun FourteenOneScoreCluster(
                 )
             }
             Text(
-                text = "HR $highRun  ·  Inn $innings  ·  Foul $fouls/3",
+                text = fourteenOneInningsLine(
+                    innings = innings,
+                    limit = match.inningsLimit,
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = ScoreWhite.copy(alpha = 0.78f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
+            )
+            Text(
+                text = "HR $highRun  ·  Foul $fouls/3",
+                style = MaterialTheme.typography.bodyLarge,
+                color = ScoreWhite.copy(alpha = 0.78f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 2.dp),
             )
             if (hasHand) {
                 FourteenOneVisitStats(

@@ -1,5 +1,8 @@
 package com.racktrack.presentation.screen
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -65,7 +68,7 @@ fun MatchSummaryModal(
     modifier: Modifier = Modifier,
 ) {
     MatchSummaryScaffold(
-        title = "MATCH OVER",
+        title = MatchSummaryReport.sessionOverTitle(summary),
         summary = summary,
         actionLabel = "BACK",
         onAction = onNewMatch,
@@ -157,6 +160,28 @@ private fun MatchSummaryContent(
     val scope = rememberCoroutineScope()
     val felt = LocalFeltPalette.current
     var sharing by remember { mutableStateOf(false) }
+    var saving by remember { mutableStateOf(false) }
+    val busy = sharing || saving
+    val savePdfLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/pdf"),
+    ) { uri: Uri? ->
+        if (uri == null) {
+            saving = false
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            runCatching {
+                MatchSummaryShare.savePdfToUri(
+                    context = context,
+                    summary = summary,
+                    destination = uri,
+                    title = title,
+                    accentArgb = felt.accent.toArgb(),
+                )
+            }
+            saving = false
+        }
+    }
 
     Column(
         modifier = modifier,
@@ -168,20 +193,29 @@ private fun MatchSummaryContent(
             color = ScoreWhite.copy(alpha = 0.7f),
         )
         Text(
-            text = summary.winnerName.uppercase().ifEmpty { "DRAW" },
+            text = if (summary.solo) {
+                summary.player1Name.uppercase().ifEmpty { "PLAYER" }
+            } else {
+                summary.winnerName.uppercase().ifEmpty { "DRAW" }
+            },
             style = MaterialTheme.typography.displayLarge.copy(fontSize = WINNER_FONT_SP.sp),
             color = ButtonRunOutLight,
             textAlign = TextAlign.Center,
         )
-        if (summary.winnerName.isNotEmpty()) {
-            Text(
+        when {
+            summary.solo -> Text(
+                text = "SOLO",
+                style = MaterialTheme.typography.headlineLarge,
+                color = ScoreWhite,
+            )
+            summary.winnerName.isNotEmpty() -> Text(
                 text = "WINS",
                 style = MaterialTheme.typography.headlineLarge,
                 color = ScoreWhite,
             )
         }
         Text(
-            text = summarySubtitle(summary),
+            text = MatchSummaryReport.subtitle(summary),
             style = MaterialTheme.typography.bodyLarge,
             color = ScoreWhite.copy(alpha = 0.8f),
         )
@@ -210,19 +244,21 @@ private fun MatchSummaryContent(
                 gameMode = summary.gameMode,
                 modifier = Modifier.weight(1f),
             )
-            PlayerSummaryColumn(
-                name = summary.player2Name,
-                fouls = summary.totalFouls2,
-                runOuts = summary.runOuts2,
-                goldenBreaks = summary.goldenBreaks2,
-                dryBreaks = summary.dryBreaks2,
-                eightBallLosses = summary.eightBallLosses2,
-                highRun = summary.highRun2,
-                average = summary.average2,
-                innings = summary.innings2,
-                gameMode = summary.gameMode,
-                modifier = Modifier.weight(1f),
-            )
+            if (!summary.solo) {
+                PlayerSummaryColumn(
+                    name = summary.player2Name,
+                    fouls = summary.totalFouls2,
+                    runOuts = summary.runOuts2,
+                    goldenBreaks = summary.goldenBreaks2,
+                    dryBreaks = summary.dryBreaks2,
+                    eightBallLosses = summary.eightBallLosses2,
+                    highRun = summary.highRun2,
+                    average = summary.average2,
+                    innings = summary.innings2,
+                    gameMode = summary.gameMode,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
 
         if (summary.gameMode.isPointScoring) {
@@ -239,6 +275,7 @@ private fun MatchSummaryContent(
                 player2Name = summary.player2Name,
                 innings1 = summary.inningScores1,
                 innings2 = summary.inningScores2,
+                solo = summary.solo,
             )
         } else {
             Spacer(modifier = Modifier.height(14.dp))
@@ -275,30 +312,51 @@ private fun MatchSummaryContent(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        TexturedActionButton(
-            label = if (sharing) "SHARING…" else "SHARE PDF",
-            base = felt.accent,
-            light = felt.accentLight,
-            dark = felt.accentDark,
-            enabled = !sharing,
-            onClick = {
-                if (sharing) return@TexturedActionButton
-                sharing = true
-                scope.launch {
-                    runCatching {
-                        MatchSummaryShare.sharePdf(
-                            context = context.applicationContext,
-                            summary = summary,
-                            title = title,
-                            accentArgb = felt.accent.toArgb(),
-                        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(min = 240.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            TexturedActionButton(
+                label = if (sharing) "SHARING…" else "SHARE",
+                base = felt.accent,
+                light = felt.accentLight,
+                dark = felt.accentDark,
+                enabled = !busy,
+                onClick = {
+                    if (busy) return@TexturedActionButton
+                    sharing = true
+                    scope.launch {
+                        runCatching {
+                            MatchSummaryShare.sharePdf(
+                                context = context.applicationContext,
+                                summary = summary,
+                                title = title,
+                                accentArgb = felt.accent.toArgb(),
+                            )
+                        }
+                        sharing = false
                     }
-                    sharing = false
-                }
-            },
-            modifier = Modifier.widthIn(min = 240.dp),
-            height = 52.dp,
-        )
+                },
+                modifier = Modifier.weight(1f),
+                height = 52.dp,
+            )
+            TexturedActionButton(
+                label = if (saving) "SAVING…" else "SAVE",
+                base = felt.accent,
+                light = felt.accentLight,
+                dark = felt.accentDark,
+                enabled = !busy,
+                onClick = {
+                    if (busy) return@TexturedActionButton
+                    saving = true
+                    savePdfLauncher.launch(MatchSummaryShare.suggestedFileName(summary))
+                },
+                modifier = Modifier.weight(1f),
+                height = 52.dp,
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
         TexturedActionButton(
             label = actionLabel,
@@ -314,18 +372,7 @@ private fun MatchSummaryContent(
 }
 
 fun summarySubtitle(summary: MatchSummary): String =
-    if (summary.gameMode.isPointScoring) {
-        val innings = summary.inningsLimit?.let { "${summary.innings1}/${summary.innings2} inn · lim $it" }
-            ?: "${summary.innings1}/${summary.innings2} inn"
-        "14/1  ·  ${summary.score1}  –  ${summary.score2}  ·  ${summary.pointsToWin} pts  ·  $innings"
-    } else {
-        when (summary.gameMode) {
-            GameMode.EIGHT_BALL -> "8-BALL"
-            GameMode.NINE_BALL -> "9-BALL"
-            GameMode.TEN_BALL -> "10-BALL"
-            GameMode.FOURTEEN_ONE -> "14/1"
-        } + "  ·  ${summary.score1}  –  ${summary.score2}  ·  race to ${summary.racksToWin}"
-    }
+    MatchSummaryReport.subtitle(summary)
 
 @Composable
 private fun PlayerSummaryColumn(
@@ -438,7 +485,12 @@ private fun FourteenOneInningsTable(
     player2Name: String,
     innings1: List<InningStat>,
     innings2: List<InningStat>,
+    solo: Boolean = false,
 ) {
+    if (solo) {
+        SoloFourteenOneInningsTable(playerName = player1Name, innings = innings1)
+        return
+    }
     val rows = MatchSummaryReport.pairedInningRows(innings1, innings2)
     if (rows.isEmpty()) {
         Text(
@@ -534,6 +586,84 @@ private fun FourteenOneInningsTable(
                 )
                 Text(
                     text = row.player2?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ScoreWhite.copy(alpha = 0.55f),
+                    modifier = Modifier.width(44.dp),
+                    textAlign = TextAlign.End,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SoloFourteenOneInningsTable(
+    playerName: String,
+    innings: List<InningStat>,
+) {
+    if (innings.isEmpty()) {
+        Text(
+            text = "No innings recorded",
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite.copy(alpha = 0.6f),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        return
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "#",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.width(36.dp),
+            )
+            Text(
+                text = playerName,
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+            )
+            Text(
+                text = "End",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.width(44.dp),
+                textAlign = TextAlign.End,
+            )
+        }
+        innings.forEach { inning ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Black.copy(alpha = 0.22f))
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "#${inning.index}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = OutlineWarm,
+                    modifier = Modifier.width(36.dp),
+                )
+                Text(
+                    text = inning.points.toString(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End,
+                )
+                Text(
+                    text = MatchSummaryReport.inningEndLabel(inning.endType),
                     style = MaterialTheme.typography.labelLarge,
                     color = ScoreWhite.copy(alpha = 0.55f),
                     modifier = Modifier.width(44.dp),

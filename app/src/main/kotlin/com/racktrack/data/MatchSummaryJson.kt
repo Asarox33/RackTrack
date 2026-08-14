@@ -73,6 +73,7 @@ object MatchSummaryJson {
             .put("totalDurationMillis", summary.totalDurationMillis)
             .put("startedAtMillis", summary.startedAtMillis)
             .put("endedAtMillis", summary.endedAtMillis)
+            .put("solo", summary.solo)
             .put("racks", encodeRacks(summary.racks))
             .put("inningScores1", encodeInnings(summary.inningScores1))
             .put("inningScores2", encodeInnings(summary.inningScores2))
@@ -116,6 +117,7 @@ object MatchSummaryJson {
             totalDurationMillis = totalDuration,
             startedAtMillis = startedAt,
             endedAtMillis = resolvedEnd.coerceAtLeast(startedAt),
+            solo = obj.optBoolean("solo", false),
         )
     }
 

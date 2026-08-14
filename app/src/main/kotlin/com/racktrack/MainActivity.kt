@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
                         onPlayer1Change = viewModel::updatePlayer1Name,
                         onPlayer2Change = viewModel::updatePlayer2Name,
                         onGameModeChange = viewModel::updateGameMode,
+                        onSoloTrainingChange = viewModel::setSoloTraining,
                         onRacksChange = viewModel::updateRacksToWin,
                         onPointsChange = viewModel::updatePointsToWin,
                         onInningsChange = viewModel::updateInningsLimit,

@@ -19,12 +19,37 @@ object MatchSummaryReport {
             GameMode.FOURTEEN_ONE -> "14/1"
         }
 
+    /** End-of-session modal / PDF hero title. */
+    fun sessionOverTitle(summary: MatchSummary): String =
+        if (summary.solo) "TRAINING OVER" else "MATCH OVER"
+
+    /** Default PDF / text report title. */
+    fun sessionSummaryTitle(summary: MatchSummary): String =
+        if (summary.solo) "TRAINING SUMMARY" else "MATCH SUMMARY"
+
+    fun shareChooserLabel(summary: MatchSummary): String =
+        if (summary.solo) "Share training" else "Share match"
+
+    fun opponentsLabel(summary: MatchSummary): String =
+        if (summary.solo) {
+            "${summary.player1Name} — solo"
+        } else {
+            "${summary.player1Name} vs ${summary.player2Name}"
+        }
+
     fun subtitle(summary: MatchSummary): String =
         if (summary.gameMode.isPointScoring) {
-            val innings = summary.inningsLimit?.let {
-                "${summary.innings1}/${summary.innings2} inn · lim $it"
-            } ?: "${summary.innings1}/${summary.innings2} inn"
-            "14/1  ·  ${summary.score1} – ${summary.score2}  ·  ${summary.pointsToWin} pts  ·  $innings"
+            if (summary.solo) {
+                val innings = summary.inningsLimit?.let {
+                    "${summary.innings1} inn · lim $it"
+                } ?: "${summary.innings1} inn"
+                "14/1 solo  ·  ${summary.score1}  ·  ${summary.pointsToWin} pts  ·  $innings"
+            } else {
+                val innings = summary.inningsLimit?.let {
+                    "${summary.innings1}/${summary.innings2} inn · lim $it"
+                } ?: "${summary.innings1}/${summary.innings2} inn"
+                "14/1  ·  ${summary.score1} – ${summary.score2}  ·  ${summary.pointsToWin} pts  ·  $innings"
+            }
         } else {
             "${modeLabel(summary.gameMode)}  ·  ${summary.score1} – ${summary.score2}  ·  " +
                 "race to ${summary.racksToWin}"
@@ -120,9 +145,13 @@ object MatchSummaryReport {
             GameMode.FOURTEEN_ONE -> "14-1"
         }
         val p1 = sanitize(summary.player1Name)
-        val p2 = sanitize(summary.player2Name)
         val startStamp = fileStartStamp(summary.startedAtMillis)
-        return "racktrack_${mode}_${p1}_vs_${p2}_$startStamp"
+        return if (summary.solo) {
+            "racktrack_${mode}_${p1}_solo_$startStamp"
+        } else {
+            val p2 = sanitize(summary.player2Name)
+            "racktrack_${mode}_${p1}_vs_${p2}_$startStamp"
+        }
     }
 
     /** `yyyyMMdd_HHmm` from match start, for filenames. */
@@ -140,7 +169,7 @@ object MatchSummaryReport {
     /** Compact text form kept for unit tests / debugging. */
     fun lines(
         summary: MatchSummary,
-        title: String = "MATCH SUMMARY",
+        title: String = sessionSummaryTitle(summary),
         startedAtLabel: String? = null,
         endedAtLabel: String? = null,
     ): List<String> =
@@ -157,19 +186,34 @@ object MatchSummaryReport {
             add("")
             add(summary.player1Name.uppercase())
             addAll(playerStatLines(summary, 1).map { "  $it" })
-            add("")
-            add(summary.player2Name.uppercase())
-            addAll(playerStatLines(summary, 2).map { "  $it" })
+            if (!summary.solo) {
+                add("")
+                add(summary.player2Name.uppercase())
+                addAll(playerStatLines(summary, 2).map { "  $it" })
+            }
             add("")
             if (summary.gameMode.isPointScoring) {
                 add("INNINGS")
-                add(
-                    "#  ${summary.player1Name}  End  ${summary.player2Name}  End",
-                )
-                pairedInningRows(summary.inningScores1, summary.inningScores2).forEach { row ->
-                    val p1 = row.player1?.let { "${it.points}  ${inningEndLabel(it.endType)}" } ?: "—  —"
-                    val p2 = row.player2?.let { "${it.points}  ${inningEndLabel(it.endType)}" } ?: "—  —"
-                    add("#${row.index}  $p1  $p2")
+                if (summary.solo) {
+                    add("#  ${summary.player1Name}  End")
+                    summary.inningScores1.forEach { inning ->
+                        add(
+                            "#${inning.index}  ${inning.points}  ${inningEndLabel(inning.endType)}",
+                        )
+                    }
+                } else {
+                    add(
+                        "#  ${summary.player1Name}  End  ${summary.player2Name}  End",
+                    )
+                    pairedInningRows(summary.inningScores1, summary.inningScores2).forEach { row ->
+                        val p1 = row.player1?.let {
+                            "${it.points}  ${inningEndLabel(it.endType)}"
+                        } ?: "—  —"
+                        val p2 = row.player2?.let {
+                            "${it.points}  ${inningEndLabel(it.endType)}"
+                        } ?: "—  —"
+                        add("#${row.index}  $p1  $p2")
+                    }
                 }
             } else {
                 add("RACKS")

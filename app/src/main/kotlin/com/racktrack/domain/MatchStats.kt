@@ -58,6 +58,8 @@ data class MatchSummary(
     val totalDurationMillis: Long,
     val startedAtMillis: Long,
     val endedAtMillis: Long,
+    /** 14/1 solo training snapshot; false for races and duel 14/1. */
+    val solo: Boolean = false,
 )
 
 object MatchStats {
@@ -66,7 +68,11 @@ object MatchStats {
         val inningScores1 =
             if (match.gameMode.isPointScoring) inningScores(match.history, match.player1.id) else emptyList()
         val inningScores2 =
-            if (match.gameMode.isPointScoring) inningScores(match.history, match.player2.id) else emptyList()
+            if (match.gameMode.isPointScoring && !match.solo) {
+                inningScores(match.history, match.player2.id)
+            } else {
+                emptyList()
+            }
         // Include an open winning visit so Inn / avg match the INNINGS table.
         val inningsPlayed1 =
             if (match.gameMode.isPointScoring) inningScores1.size else match.innings1
@@ -80,32 +86,33 @@ object MatchStats {
             player1Name = match.player1.name,
             player2Name = match.player2.name,
             score1 = match.score1,
-            score2 = match.score2,
+            score2 = if (match.solo) 0 else match.score2,
             racksToWin = match.racksToWin,
             pointsToWin = match.pointsToWin,
             inningsLimit = match.inningsLimit,
             innings1 = inningsPlayed1,
             innings2 = inningsPlayed2,
             totalFouls1 = totalFouls(match.history, match.player1.id),
-            totalFouls2 = totalFouls(match.history, match.player2.id),
+            totalFouls2 = if (match.solo) 0 else totalFouls(match.history, match.player2.id),
             runOuts1 = match.runOut1,
-            runOuts2 = match.runOut2,
+            runOuts2 = if (match.solo) 0 else match.runOut2,
             goldenBreaks1 = match.goldenBreak1,
-            goldenBreaks2 = match.goldenBreak2,
+            goldenBreaks2 = if (match.solo) 0 else match.goldenBreak2,
             dryBreaks1 = match.dryBreak1,
-            dryBreaks2 = match.dryBreak2,
+            dryBreaks2 = if (match.solo) 0 else match.dryBreak2,
             eightBallLosses1 = match.eightBallLoss1,
-            eightBallLosses2 = match.eightBallLoss2,
+            eightBallLosses2 = if (match.solo) 0 else match.eightBallLoss2,
             highRun1 = match.highRun1,
-            highRun2 = match.highRun2,
+            highRun2 = if (match.solo) 0 else match.highRun2,
             average1 = average(match.score1, inningsPlayed1),
-            average2 = average(match.score2, inningsPlayed2),
+            average2 = if (match.solo) 0.0 else average(match.score2, inningsPlayed2),
             inningScores1 = inningScores1,
             inningScores2 = inningScores2,
             racks = racks,
             totalDurationMillis = playingDuration(startedAt, endMillis, match.pauseSpans),
             startedAtMillis = startedAt,
             endedAtMillis = endMillis.coerceAtLeast(startedAt),
+            solo = match.solo,
         )
     }
 
