@@ -12,3 +12,9 @@ captures/
 *.ap_
 *.aab
 *.kotlin_module
+
+# Play / signing secrets (never commit)
+*.jks
+*.keystore
+keystore.properties
+play-service-account.json

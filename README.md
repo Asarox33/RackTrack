@@ -49,6 +49,7 @@ redistribution and store listing require permission. Official APKs/AABs are stor
 
 | Document | Content |
 |---|---|
+| [docs/00-release-trains.md](docs/00-release-trains.md) | **Locked** 1.x / 1.2 Play / 2.0 trains |
 | [docs/01-product-specification.md](docs/01-product-specification.md) | Product goal / scope |
 | [docs/02-game-rules-8-ball.md](docs/02-game-rules-8-ball.md) | FFB 8-ball + app coverage |
 | [docs/02-game-rules-9-ball.md](docs/02-game-rules-9-ball.md) | FFB 9-ball + app coverage |
@@ -59,7 +60,9 @@ redistribution and store listing require permission. Official APKs/AABs are stor
 | [docs/05-conventions.md](docs/05-conventions.md) | Conventions |
 | [docs/06-roadmap-todo.md](docs/06-roadmap-todo.md) | Roadmap / backlog |
 | [docs/07-versioning-and-releases.md](docs/07-versioning-and-releases.md) | Semver + release pipeline |
-| [docs/09-monetization.md](docs/09-monetization.md) | Ads + Remove Ads IAP (1.2.0 Play gate) |
+| [docs/08-play-store.md](docs/08-play-store.md) | Play Console / AAB checklist |
+| [docs/09-monetization.md](docs/09-monetization.md) | Ads + Remove Ads IAP (1.2.0) |
+| [docs/privacy-policy.md](docs/privacy-policy.md) | Privacy policy stub (store URL) |
 | [CHANGELOG.md](CHANGELOG.md) | User-facing release notes (Features / Bug fixes) |
 | `resources/code-sportif-americain-2026-2027.pdf` | Official FFB text |
 

@@ -79,14 +79,15 @@ Optional hardening: add a `creation` rule and store an admin `RELEASE_PAT` secre
 
 ## Signing note
 
-CI does not publish binaries. Store builds (Play / other) use a dedicated upload
-keystore configured outside this repo’s public workflows. Local
-`./gradlew :app:assembleRelease` may still use the debug keystore until Play signing
-is wired — fine for device sideload testing only.
+CI does not publish binaries. Store builds use a dedicated upload keystore via local
+`keystore.properties` (see `keystore.properties.example` + `docs/08-play-store.md`).
+Without that file, `assembleRelease` / `bundleRelease` still falls back to the **debug**
+keystore for sideload testing only.
 
 ## Play end-user gate
 
-Closed testing may use current 1.1.x builds. The **first open / production** Play release
-aimed at end users is **1.2.0** and must ship with monetization as specified in
+Closed testing may use current 1.1.x builds (owner choice — confirm in
+`docs/00-release-trains.md`). The **first open / production** Play release aimed at end
+users is **1.2.0** and must ship with monetization as specified in
 `docs/09-monetization.md` (AdMob interstitial on Start Match / Start Training + lifetime
-`remove_ads` IAP ~4,99 € + Restore). See also `docs/06-roadmap-todo.md`.
+`remove_ads` IAP ~4,99 € + Restore).
