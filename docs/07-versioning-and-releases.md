@@ -83,3 +83,10 @@ CI does not publish binaries. Store builds (Play / other) use a dedicated upload
 keystore configured outside this repo’s public workflows. Local
 `./gradlew :app:assembleRelease` may still use the debug keystore until Play signing
 is wired — fine for device sideload testing only.
+
+## Play end-user gate
+
+Closed testing may use current 1.1.x builds. The **first open / production** Play release
+aimed at end users is **1.2.0** and must ship with monetization (AdMob interstitial on
+Start Match / Start Training + lifetime `remove_ads` IAP + Restore). See
+`docs/06-roadmap-todo.md`.

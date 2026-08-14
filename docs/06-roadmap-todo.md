@@ -66,10 +66,27 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
   - Solo board (one score column); same points / PASS / FOUL / BREAK −2 / On Table
   - Summary + history + PDF adapted (one innings column; title like `Alex — solo`)
   - Same HR / avg / innings / fouls stats as duel 14/1
-  - Ship before KMP/`rc/2.0.0`
+  - GitHub / sideload line; **not** the first open Play production build (see 1.2.0)
 
-### Later on 1.x (optional)
-- ⬜ Play Store / dedicated upload keystore (replace debug-keystore release APKs)
+### 1.2.0 — first Play end-user release (monetization required)
+**Product decision (2026-08-15):** the first build published to **open / production
+Play end users** must already include ads + remove-ads IAP. Shipping free without ads
+then adding interstitials later is a bad trust message — do not do that.
+
+Gate: Google Play Console account validated + upload keystore + listing / Data safety /
+privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **production
+(and any open testing aimed at strangers) waits for 1.2.0.**
+
+- ⬜ Play Store upload keystore (replace debug-keystore release signing for store builds)
+- ⬜ **AdMob interstitial** on **START MATCH / START TRAINING** only (never on the live board)
+  - Cap: skip if last interstitial shown &lt; **5 minutes** ago
+  - If no fill / not ready → start match immediately
+  - UMP / consent (EEA) before first ad request
+- ⬜ **IAP** Play Billing one-time `remove_ads` (~1.99 €) — disables all ads for life
+- ⬜ Settings: **Remove ads** purchase + **Restore purchases**
+- ⬜ Privacy / Data safety updated for AdMob + Billing (ads appear from day one on Play)
+
+### Later on 1.x (optional, after Play launch)
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
 - ⬜ **FFB player timeouts** (art. **1.2.16**) — distinct from club pause in 1.0.1
@@ -80,9 +97,12 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ~~PNG share of match summary~~ — PDF only
 - ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
 - ~~Per-shot shot clock / time foul (art. 1.2.13)~~ — fights race/innings scoreboard model
+- ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 
 ## Progress notes
 
+- 2026-08-15: Lock **1.2.0** as first Play end-user release: AdMob interstitial on Start +
+  lifetime `remove_ads` IAP + Restore; do not soft-launch ad-free then monetize.
 - 2026-08-14: **1.1.0** — 14/1 solo training (`Match.solo` / setup SOLO toggle; one-column board;
   summary / history / PDF `Alex — solo`).
 - 2026-08-13: Patch **1.0.2** — scroll hints (fade + ▼) on overflow modals (summary, settings,
@@ -96,6 +116,8 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
   stay visible when balls-left > On Table warning shows (landscape + portrait).
 - 2026-08-12: Patch **1.0.1** — foul clear (9/10): Golden/Dry stay off after clear; foul chip
   shows TAP TO CLEAR; match foul totals still count FOUL events; 8-ball clear remains no-op.
+- 2026-08-10: Monetization design — interstitial on New Match + 5 min cap + lifetime remove-ads
+  IAP (~1.99 €); originally aimed at 1.1.0, reslotted to **1.2.0** after solo took 1.1.0.
 - 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.
 - 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
 - 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.
