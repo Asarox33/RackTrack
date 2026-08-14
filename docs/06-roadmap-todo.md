@@ -93,6 +93,25 @@ privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
 - ⬜ **FFB player timeouts** (art. **1.2.16**) — distinct from club pause in 1.0.1
 
+## On `rc/2.0.0` — next product generation (not on 1.x Play launch)
+
+Develop on branch **`rc/2.0.0`**; merge to `main` only when ready as **2.0.0**.
+UI language (i18n) ≠ rule authority (multi-ruleset).
+
+- ⬜ **i18n (localization)** — English default; also **fr, de, es, it, nl, pt**:
+  - Extract all user-facing UI copy (today mostly hardcoded English in Compose) +
+    summary / PDF strings
+  - Fallback: **English** (`values/` or CMP resources); system locale; optional Settings
+    override later if needed
+  - Short board jargon (**PASS / FOUL / RUN OUT**) may stay English where natural;
+    Settings / About / modals fully translated
+  - Prefer extracting strings **with** Compose Multiplatform so Android + iOS share catalogs
+- ⬜ **Multi-ruleset** — FFB today; later selectable packs (WPA / Matchroom / APA / BCA & CSI)
+  for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
+  concepts separate.
+- ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
+- ⬜ Optional accounts / shared post-match stats (still **never** remote live scoring)
+
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
@@ -103,6 +122,8 @@ privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **
 
 ## Progress notes
 
+- 2026-08-15: Restore **V2 / `rc/2.0.0`** backlog on roadmap: **i18n** (en + fr/de/es/it/nl/pt),
+  multi-ruleset, KMP/CMP (was planned 2026-08-10, dropped from doc during 1.x churn).
 - 2026-08-15: Spec [`docs/09-monetization.md`](09-monetization.md) — interstitial-only,
   Start gate, 5‑min cooldown, never block start, Remove Ads **4,99 €** one-time + Restore;
   first Play end-user release = **1.2.0**.
@@ -123,7 +144,10 @@ privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **
   shows TAP TO CLEAR; match foul totals still count FOUL events; 8-ball clear remains no-op.
 - 2026-08-10: Monetization design — interstitial on New Match + 5 min cap + lifetime remove-ads
   IAP; originally ~1.99 € / 1.1.0 — price **4,99 €** and train **1.2.0** locked 2026-08-15.
-- 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.- 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
+- 2026-08-10: Backlog **i18n** en + fr/de/es/it/nl/pt; **multi-ruleset**; KMP phases — now under
+  **`rc/2.0.0`** (not 1.2.0 Play launch).
+- 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.
+- 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
 - 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.
 - 2026-08-10: 14/1 visit-end modal (balls-left stepper); board clear-rack / hide BREAK −2 off opening.
 - 2026-08-10: Alternate/Winner break for 8/9/10; 14/1 On Table balls remaining.

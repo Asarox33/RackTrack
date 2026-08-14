@@ -70,7 +70,10 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - PNG export of match summary (PDF only)
 
 Accounts + cloud history sync are **not in v1**; they may appear later only for
-identity / find-players / shared post-match stats (see §5 Later) — not for remote play.
+identity / find-players / shared post-match stats — not for remote play.
+
+**Later (2.0 / `rc/2.0.0`, see roadmap):** **i18n** (en default + fr/de/es/it/nl/pt),
+multi-ruleset packs, KMP/CMP / iOS — UI language ≠ rule authority.
 
 ## 8. Constraints
 
