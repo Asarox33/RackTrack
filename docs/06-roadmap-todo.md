@@ -83,8 +83,8 @@ then adding interstitials later is a bad trust message — do not do that.
 (interstitial only, Start gate, 5‑min cooldown, never block start, IAP **4,99 €**, Restore).
 
 Gate: Google Play Console account validated + upload keystore + listing / Data safety /
-privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **production
-(and any open testing aimed at strangers) waits for 1.2.0.**
+privacy URL updated for ads & Billing. **No closed-test track** — owner **internal** smoke
+only. **Open / production for strangers waits for 1.2.0** (with ads).
 
 - ⬜ Play Store upload keystore (see `keystore.properties.example` + `08-play-store.md`)
 - ⬜ Implement monetization per `docs/09-monetization.md`
@@ -94,10 +94,9 @@ privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **
   - UMP / consent (EEA) before first ad request
   - Play Billing one-time `remove_ads` at **~4,99 €** + Settings **Remove ads** / **Restore**
 - ⬜ Host privacy URL (`privacy-policy.md`) + Data safety for AdMob + Billing
-- ⬜ Play listing / closed test → **production 1.2.0**
+- ⬜ Play listing + **internal** smoke → **production 1.2.0**
+
 ### Later on 1.x (optional, after Play launch)
-- ⬜ **FFB player timeouts** (art. **1.2.16**) — distinct from club pause in 1.0.1
-  (candidate **1.3.0** — confirm in `00-release-trains.md`)
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
   (may slip to 2.0 if paired with identity)
@@ -128,13 +127,19 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~PNG share of match summary~~ — PDF only
 - ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
 - ~~Per-shot shot clock / time foul (art. 1.2.13)~~ — fights race/innings scoreboard model
+- ~~FFB player timeouts / match pause quotas (art. 1.2.16)~~ — would pull the app toward
+  per-action officiating; keep **club pause** (duration freeze only) from 1.0.1 instead
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
+- ~~Play closed testing track (12×14)~~ — owner uses **internal** testing only; strangers see
+  production **1.2.0** with monetization
 
 ## Progress notes
 
+- 2026-08-15: Owner lock — **no** Play closed track (internal only); open `rc/2.0.0` **after**
+  1.2.0 production; **drop** FFB player timeouts (1.2.16) as out of product.
 - 2026-08-15: Full audit on PR — restore Play scaffolding (`08`, privacy stub, keystore
   example, conditional signing), `00-release-trains.md`, LICENSE owner-monetization clause,
-  AGENTS / `.cursor/rules` anti-drift. Confirm open questions in `00`.
+  AGENTS / `.cursor/rules` anti-drift.
 - 2026-08-15: Restore **V2 / `rc/2.0.0`** backlog on roadmap: **i18n** (en + fr/de/es/it/nl/pt),
   multi-ruleset, KMP/CMP (was planned 2026-08-10, dropped from doc during 1.x churn).
 - 2026-08-15: Spec [`docs/09-monetization.md`](09-monetization.md) — interstitial-only,

@@ -86,8 +86,6 @@ keystore for sideload testing only.
 
 ## Play end-user gate
 
-Closed testing may use current 1.1.x builds (owner choice — confirm in
-`docs/00-release-trains.md`). The **first open / production** Play release aimed at end
-users is **1.2.0** and must ship with monetization as specified in
-`docs/09-monetization.md` (AdMob interstitial on Start Match / Start Training + lifetime
-`remove_ads` IAP ~4,99 € + Restore).
+Closed testing is **not** used (owner **internal** smoke only). The **first open /
+production** Play release aimed at end users is **1.2.0** and must ship with monetization
+as specified in `docs/09-monetization.md`. See `docs/00-release-trains.md`.

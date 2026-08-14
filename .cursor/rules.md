@@ -41,8 +41,8 @@ You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) fo
 - AGP 9 has built-in Kotlin — do not apply `org.jetbrains.kotlin.android`.
 - Do **not** add Hilt unless the user explicitly asks.
 - Do **not** silently drop backlog items from `docs/06-roadmap-todo.md`.
-- Do **not** publish guidance that ships ad-free Play production then adds ads later.
-- Never commit `keystore.properties`, `*.jks`, or Play service-account JSON.
+- Do **not** implement FFB player timeouts (art. 1.2.16) or shot clock — explicitly dropped.
+- Do **not** assume Play closed testing; owner uses internal smoke only.
 
 ## Enforced quality
 

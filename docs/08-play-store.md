@@ -6,7 +6,9 @@ Publish **binaries via Play** (AAB). GitHub Releases stay **notes-only** (`LICEN
 ([`09-monetization.md`](09-monetization.md)). Do **not** soft-launch ad-free production
 then add ads later. See [`00-release-trains.md`](00-release-trains.md).
 
-Closed testing may use **1.1.x** builds if the owner chooses — confirm in release trains.
+**Testing:** **internal only** (owner device). No Play closed-testing track planned.
+Internal smoke may use 1.1.x or 1.2.0 depending on Google account validation timing;
+strangers still get production **1.2.0** with ads.
 
 ---
 
@@ -32,9 +34,8 @@ Closed testing may use **1.1.x** builds if the owner chooses — confirm in rele
 - [ ] Countries, pricing (**free** + optional IAP `remove_ads` ~4,99 €)
 
 ### Testing → production
-- [ ] Closed testing track (often ≥12 testers × 14 consecutive days for new personal accounts)
-- [ ] Production release = **1.2.0** (ads + Remove Ads) unless product decision changes
-      in `00-release-trains.md`
+- [ ] Internal install / smoke on owner device(s) (no closed-test track)
+- [ ] Production release = **1.2.0** (ads + Remove Ads) — first build for strangers
 
 ---
 
@@ -52,7 +53,7 @@ Closed testing may use **1.1.x** builds if the owner chooses — confirm in rele
 
 ## Data safety (sketch)
 
-**Until ads (sideload / closed 1.1.x):** no accounts; match history on device; no analytics SDK.
+**Until ads (sideload / internal 1.1.x):** no accounts; match history on device; no analytics SDK.
 
 **From 1.2.0 production:** disclose AdMob (ads) + Play Billing (purchase); UMP consent where
 required; still no RackTrack backend accounts in 1.x.
