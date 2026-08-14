@@ -187,4 +187,57 @@ class MatchTest {
             match.copy(player2 = match.player1)
         }
     }
+
+    @Test
+    fun `solo start uses placeholder player2 and forces player1 starter`() {
+        val match = Match.start(
+            player1Name = "Alex",
+            player2Name = "Sam",
+            racksToWin = 1,
+            initialBreakerIsPlayer1 = false,
+            startedAtMillis = 1L,
+            gameMode = GameMode.FOURTEEN_ONE,
+            pointsToWin = 100,
+            inningsLimit = 20,
+            solo = true,
+        )
+        assertTrue(match.solo)
+        assertEquals("Alex", match.player1.name)
+        assertEquals(Match.SOLO_PLAYER2_NAME, match.player2.name)
+        assertEquals(match.player1.id, match.currentShooterId)
+        assertEquals(match.player1.id, match.openingBreakerId)
+    }
+
+    @Test
+    fun `solo completed match winner is always player1`() {
+        val base = Match.start(
+            player1Name = "Alex",
+            player2Name = "Sam",
+            racksToWin = 1,
+            initialBreakerIsPlayer1 = true,
+            startedAtMillis = 1L,
+            gameMode = GameMode.FOURTEEN_ONE,
+            pointsToWin = 50,
+            solo = true,
+        )
+        assertEquals(
+            base.player1,
+            base.copy(score1 = 12, score2 = 0, status = MatchStatus.COMPLETED).winner,
+        )
+    }
+
+    @Test
+    fun `solo flag rejected for race modes`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 5,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+                gameMode = GameMode.TEN_BALL,
+                solo = true,
+            )
+        }
+    }
 }

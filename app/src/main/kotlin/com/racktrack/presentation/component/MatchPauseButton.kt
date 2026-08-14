@@ -29,8 +29,10 @@ fun MatchPauseButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
+    solo: Boolean = false,
 ) {
-    val label = if (paused) "Resume match timing" else "Pause match timing"
+    val timing = if (solo) "training timing" else "match timing"
+    val label = if (paused) "Resume $timing" else "Pause $timing"
     Box(
         modifier = modifier
             .size(size)

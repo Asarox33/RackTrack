@@ -133,6 +133,47 @@ class FourteenOneEngineTest {
     }
 
     @Test
+    fun `p2 starts 30-innings race without tie ends at 30-30 not 30-31`() {
+        var match = Match.start(
+            player1Name = "Alex",
+            player2Name = "Sam",
+            racksToWin = 1,
+            initialBreakerIsPlayer1 = false,
+            startedAtMillis = clock,
+            gameMode = GameMode.FOURTEEN_ONE,
+            pointsToWin = 500,
+            inningsLimit = 30,
+        )
+        // Alternate empty visits; p2 is always one ahead until the final catch-up.
+        repeat(29) {
+            assertEquals(match.player2.id, match.currentShooterId)
+            match = FourteenOneEngine.pass(match, match.player2.id, now())
+            assertEquals(match.player1.id, match.currentShooterId)
+            match = FourteenOneEngine.pass(match, match.player1.id, now())
+        }
+        // After 29 full pairs: both at 29, hand back to p2.
+        assertEquals(29, match.innings1)
+        assertEquals(29, match.innings2)
+        assertEquals(match.player2.id, match.currentShooterId)
+
+        match = FourteenOneEngine.addPoints(match, match.player2.id, 10, now())
+        match = FourteenOneEngine.pass(match, match.player2.id, now())
+        assertEquals(29, match.innings1)
+        assertEquals(30, match.innings2)
+        assertEquals(MatchStatus.IN_PROGRESS, match.status)
+        assertEquals(match.player1.id, match.currentShooterId)
+
+        // Unequal scores so no overtime — p1's 30th visit must close at 30/30.
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 3, now())
+        match = FourteenOneEngine.pass(match, match.player1.id, now())
+
+        assertEquals(MatchStatus.COMPLETED, match.status)
+        assertEquals(30, match.innings1)
+        assertEquals(30, match.innings2)
+        assertEquals(match.player2, match.winner)
+    }
+
+    @Test
     fun `given pass, when undo, then innings and shooter restore`() {
         val match = fresh()
         val passed = FourteenOneEngine.pass(match, match.player1.id, now())
@@ -288,5 +329,79 @@ class FourteenOneEngineTest {
         assertEquals(14 + 4, match.score1)
         assertEquals(11, match.objectBallsOnTable)
         assertEquals(match.player2.id, match.currentShooterId)
+    }
+
+    private fun solo(
+        pointsToWin: Int = 50,
+        inningsLimit: Int? = 30,
+    ): Match =
+        Match.start(
+            player1Name = "Alex",
+            player2Name = "ignored",
+            racksToWin = 1,
+            initialBreakerIsPlayer1 = false,
+            startedAtMillis = clock,
+            gameMode = GameMode.FOURTEEN_ONE,
+            pointsToWin = pointsToWin,
+            inningsLimit = inningsLimit,
+            solo = true,
+        )
+
+    @Test
+    fun `solo pass keeps hand and does not increment opponent innings`() {
+        var match = solo()
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 7, now())
+        match = FourteenOneEngine.pass(match, match.player1.id, now())
+
+        assertEquals(7, match.score1)
+        assertEquals(1, match.innings1)
+        assertEquals(0, match.innings2)
+        assertEquals(match.player1.id, match.currentShooterId)
+        assertEquals(MatchStatus.IN_PROGRESS, match.status)
+    }
+
+    @Test
+    fun `solo foul keeps hand for next visit`() {
+        var live = solo()
+        live = FourteenOneEngine.foul(live, live.player1.id, now())
+
+        assertEquals(-1, live.score1)
+        assertEquals(1, live.innings1)
+        assertEquals(live.player1.id, live.currentShooterId)
+    }
+
+    @Test
+    fun `solo reaches distance on player1 score only`() {
+        var match = solo(pointsToWin = 10, inningsLimit = null)
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 10, now())
+
+        assertEquals(MatchStatus.COMPLETED, match.status)
+        assertEquals(match.player1, match.winner)
+    }
+
+    @Test
+    fun `solo innings limit completes without requiring player2 innings`() {
+        var match = solo(pointsToWin = 100, inningsLimit = 2)
+        match = FourteenOneEngine.pass(match, match.player1.id, now())
+        assertEquals(MatchStatus.IN_PROGRESS, match.status)
+        match = FourteenOneEngine.pass(match, match.player1.id, now())
+
+        assertEquals(2, match.innings1)
+        assertEquals(0, match.innings2)
+        assertEquals(MatchStatus.COMPLETED, match.status)
+        assertEquals(match.player1, match.winner)
+    }
+
+    @Test
+    fun `solo three consecutive fouls keep shooter and force re-break`() {
+        var match = solo(pointsToWin = 100, inningsLimit = null)
+        match = FourteenOneEngine.foul(match, match.player1.id, now())
+        match = FourteenOneEngine.foul(match, match.player1.id, now())
+        match = FourteenOneEngine.foul(match, match.player1.id, now())
+
+        assertEquals(-1 + -1 + -1 + -15, match.score1)
+        assertEquals(match.player1.id, match.currentShooterId)
+        assertTrue(match.awaitingOpeningBreak)
+        assertEquals(0, match.foul1)
     }
 }

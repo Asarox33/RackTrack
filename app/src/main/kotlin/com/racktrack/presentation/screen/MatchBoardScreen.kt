@@ -187,7 +187,7 @@ fun MatchBoardScreen(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     TexturedOutlineAction(
-                        label = "NEW MATCH",
+                        label = if (match.solo) "NEW TRAINING" else "NEW MATCH",
                         onClick = onNewMatch,
                         enabled = true,
                     )
@@ -215,7 +215,11 @@ fun MatchBoardScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Match timing stopped  ·  Tap to resume",
+                            text = if (match.solo) {
+                                "Training timing stopped  ·  Tap to resume"
+                            } else {
+                                "Match timing stopped  ·  Tap to resume"
+                            },
                             style = MaterialTheme.typography.titleLarge,
                             color = ScoreWhite.copy(alpha = 0.85f),
                             textAlign = TextAlign.Center,
@@ -236,6 +240,7 @@ fun MatchBoardScreen(
                     MatchPauseButton(
                         paused = matchPaused,
                         onClick = onTogglePause,
+                        solo = match.solo,
                     )
                 }
                 SettingsGearButton(onClick = onOpenSettings)

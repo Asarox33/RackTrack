@@ -53,6 +53,24 @@ class MatchHistoryFilterTest {
         )
     }
 
+    @Test
+    fun `solo match filters by trainer name under 14-1 mode`() {
+        val solo = StoredMatch(
+            id = "solo-1",
+            completedAtMillis = 1L,
+            summary = sampleSummary("Alex", "solo", GameMode.FOURTEEN_ONE).copy(solo = true),
+        )
+        val duel = stored("Alex", "Sam", GameMode.FOURTEEN_ONE)
+        val filtered = MatchHistoryFilter.apply(
+            matches = listOf(solo, duel),
+            playerQuery1 = "alex",
+            playerQuery2 = "",
+            gameMode = GameMode.FOURTEEN_ONE,
+        )
+        assertEquals(2, filtered.size)
+        assertTrue(filtered.any { it.summary.solo })
+    }
+
     private fun stored(
         player1: String,
         player2: String,

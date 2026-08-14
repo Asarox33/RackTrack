@@ -235,4 +235,56 @@ class MatchCoordinatorTest {
         assertEquals(10_000L, summary.racks[0].durationMillis)
         assertEquals(10_000L, summary.racks[1].durationMillis)
     }
+
+    @Test
+    fun `given solo 14-1 setup, when startMatch, then match is solo with placeholder p2`() {
+        val c = coordinator()
+        c.updateGameMode(GameMode.FOURTEEN_ONE)
+        c.setSoloTraining(true)
+        c.updatePlayer1Name("Alex")
+        c.updatePlayer2Name("Sam")
+        c.setPlayer1BreaksFirst(false)
+
+        c.startMatch()
+
+        val match = c.board().match
+        assertTrue(match.solo)
+        assertEquals("Alex", match.player1.name)
+        assertEquals(Match.SOLO_PLAYER2_NAME, match.player2.name)
+        assertEquals(match.player1.id, match.currentShooterId)
+    }
+
+    @Test
+    fun `leaving 14-1 clears solo training toggle`() {
+        val c = coordinator()
+        c.updateGameMode(GameMode.FOURTEEN_ONE)
+        c.setSoloTraining(true)
+        assertTrue(c.setup.value.soloTraining)
+
+        c.updateGameMode(GameMode.TEN_BALL)
+        assertTrue(!c.setup.value.soloTraining)
+    }
+
+    @Test
+    fun `solo board pass keeps hand and can complete on distance`() {
+        completed.clear()
+        val c = coordinator()
+        c.updateGameMode(GameMode.FOURTEEN_ONE)
+        c.setSoloTraining(true)
+        c.updatePointsToWin(10)
+        c.updateInningsLimit(null)
+        c.updatePlayer1Name("Alex")
+        c.startMatch()
+        val p1 = c.board().match.player1.id
+
+        c.addPoints(p1, 5)
+        c.pass(p1)
+        assertEquals(p1, c.board().match.currentShooterId)
+        assertEquals(MatchStatus.IN_PROGRESS, c.board().match.status)
+
+        c.addPoints(p1, 5)
+        assertEquals(MatchStatus.COMPLETED, c.board().match.status)
+        assertEquals(1, completed.size)
+        assertTrue(completed.single().solo)
+    }
 }

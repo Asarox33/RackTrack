@@ -55,7 +55,7 @@ object FourteenOneEngine {
         val ended = endInning(
             match = afterRun,
             playerId = playerId,
-            nextShooterId = match.otherPlayerId(playerId),
+            nextShooterId = nextShooterAfterVisit(match, playerId),
             awaitingOpeningBreak = false,
             historyEvent = MatchEvent(MatchEventType.PASS, playerId, nowMillis),
         )
@@ -108,7 +108,7 @@ object FourteenOneEngine {
             val ended = endInning(
                 match = withFoulEvent,
                 playerId = playerId,
-                nextShooterId = match.otherPlayerId(playerId),
+                nextShooterId = nextShooterAfterVisit(match, playerId),
                 awaitingOpeningBreak = false,
                 historyEvent = null,
             )
@@ -202,7 +202,7 @@ object FourteenOneEngine {
         val ended = endInning(
             match = withEvent,
             playerId = playerId,
-            nextShooterId = match.otherPlayerId(playerId),
+            nextShooterId = nextShooterAfterVisit(match, playerId),
             awaitingOpeningBreak = false,
             historyEvent = null,
         )
@@ -399,15 +399,24 @@ object FourteenOneEngine {
             else -> match.copy(score2 = match.score2 + delta)
         }
 
+    private fun nextShooterAfterVisit(match: Match, playerId: PlayerId): PlayerId =
+        if (match.solo) playerId else match.otherPlayerId(playerId)
+
     private fun finishIfDistanceReached(match: Match): Match {
-        if (match.score1 >= match.pointsToWin || match.score2 >= match.pointsToWin) {
-            return match.copy(status = MatchStatus.COMPLETED)
+        val reached = if (match.solo) {
+            match.score1 >= match.pointsToWin
+        } else {
+            match.score1 >= match.pointsToWin || match.score2 >= match.pointsToWin
         }
-        return match
+        return if (reached) match.copy(status = MatchStatus.COMPLETED) else match
     }
 
     private fun resolveInningsLimit(match: Match): Match {
         val limit = match.inningsLimit ?: return finishIfDistanceReached(match)
+        if (match.solo) {
+            if (match.innings1 < limit) return finishIfDistanceReached(match)
+            return match.copy(status = MatchStatus.COMPLETED)
+        }
         if (match.innings1 < limit || match.innings2 < limit) {
             return finishIfDistanceReached(match)
         }
@@ -503,6 +512,7 @@ object FourteenOneEngine {
         match: Match,
     ): Int? {
         if (base == null) return null
+        if (match.solo) return base
         var limit = base
         var i1 = 0
         var i2 = 0

@@ -115,7 +115,25 @@ class MatchCoordinator(
     }
 
     fun updateGameMode(value: GameMode) {
-        _setup.update { it.copy(gameMode = value) }
+        _setup.update {
+            it.copy(
+                gameMode = value,
+                soloTraining = if (value.isPointScoring) it.soloTraining else false,
+            )
+        }
+    }
+
+    fun setSoloTraining(value: Boolean) {
+        _setup.update {
+            if (!it.gameMode.isPointScoring) {
+                it.copy(soloTraining = false)
+            } else {
+                it.copy(
+                    soloTraining = value,
+                    player1BreaksFirst = if (value) true else it.player1BreaksFirst,
+                )
+            }
+        }
     }
 
     fun updateRacksToWin(value: Int) {
@@ -147,11 +165,12 @@ class MatchCoordinator(
                 player1Name = s.player1Name,
                 player2Name = s.player2Name,
                 racksToWin = 1,
-                initialBreakerIsPlayer1 = s.player1BreaksFirst,
+                initialBreakerIsPlayer1 = if (s.soloTraining) true else s.player1BreaksFirst,
                 startedAtMillis = now,
                 gameMode = s.gameMode,
                 pointsToWin = s.pointsToWin,
                 inningsLimit = s.inningsLimit,
+                solo = s.soloTraining,
             )
         } else {
             Match.start(

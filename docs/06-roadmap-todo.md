@@ -61,9 +61,9 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ Modal scroll hints (fade + ▼) on match summary, settings, 14/1 visit-end
 
 ### 1.1.0 — 14/1 solo training
-- ⬜ **Solo training (14/1 only)** — practice scorekeeping without an opponent:
-  - Setup: when mode is 14/1, toggle **Solo training** (single name; hide player 2)
-  - Dedicated solo board (one score column); same points / PASS / FOUL / BREAK −2 / On Table
+- ✅ **Solo training (14/1 only)** — practice scorekeeping without an opponent:
+  - Setup: when mode is 14/1, toggle **Solo** (single name; hide player 2)
+  - Solo board (one score column); same points / PASS / FOUL / BREAK −2 / On Table
   - Summary + history + PDF adapted (one innings column; title like `Alex — solo`)
   - Same HR / avg / innings / fouls stats as duel 14/1
   - Ship before KMP/`rc/2.0.0`
@@ -83,6 +83,8 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Progress notes
 
+- 2026-08-14: **1.1.0** — 14/1 solo training (`Match.solo` / setup SOLO toggle; one-column board;
+  summary / history / PDF `Alex — solo`).
 - 2026-08-13: Patch **1.0.2** — scroll hints (fade + ▼) on overflow modals (summary, settings,
   14/1 visit-end).
 - 2026-08-12: Backlog **1.1.0** — 14/1 solo training; keep off 1.0.x patches; before KMP.

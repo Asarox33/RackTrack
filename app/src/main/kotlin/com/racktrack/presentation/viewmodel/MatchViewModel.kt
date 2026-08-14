@@ -33,6 +33,8 @@ data class SetupUiState(
     val inningsLimit: Int? = 30,
     val player1BreaksFirst: Boolean = true,
     val breakRule: BreakRule = BreakRule.ALTERNATE,
+    /** 14/1 only — practice without an opponent. */
+    val soloTraining: Boolean = false,
 )
 
 data class HistoryUiState(
@@ -121,6 +123,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun updatePlayer2Name(value: String) = coordinator.updatePlayer2Name(value)
 
     fun updateGameMode(value: GameMode) = coordinator.updateGameMode(value)
+
+    fun setSoloTraining(value: Boolean) = coordinator.setSoloTraining(value)
 
     fun updateRacksToWin(value: Int) = coordinator.updateRacksToWin(value)
 

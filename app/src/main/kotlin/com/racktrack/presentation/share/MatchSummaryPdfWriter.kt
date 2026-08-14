@@ -23,12 +23,19 @@ object MatchSummaryPdfWriter {
     fun writeToFile(
         summary: MatchSummary,
         output: File,
-        title: String = "MATCH SUMMARY",
+        title: String = MatchSummaryReport.sessionSummaryTitle(summary),
         accentArgb: Int = DEFAULT_ACCENT,
+        versionName: String = "",
+        versionCode: Int = 0,
     ): File {
         val document = PdfDocument()
         val theme = Theme(accentArgb)
-        val session = Session(document, theme)
+        val session = Session(
+            document = document,
+            theme = theme,
+            versionName = versionName,
+            versionCode = versionCode,
+        )
         session.drawFullReport(summary, title)
         FileOutputStream(output).use { stream ->
             document.writeTo(stream)
@@ -54,6 +61,8 @@ object MatchSummaryPdfWriter {
     private class Session(
         private val document: PdfDocument,
         private val theme: Theme,
+        private val versionName: String,
+        private val versionCode: Int,
     ) {
         private var pageNumber = 0
         private var page: PdfDocument.Page? = null
@@ -69,7 +78,7 @@ object MatchSummaryPdfWriter {
         private val bodyPaint = paint(theme.ink, 11f)
         private val mutedPaint = paint(theme.muted, 10f)
         private val namePaint = paint(theme.ink, 13f, bold = true)
-        private val footerPaint = paint(theme.muted, 9f)
+        private val footerPaint = paint(theme.muted, 8.5f)
 
         fun drawFullReport(summary: MatchSummary, title: String) {
             startPage(fullHeader = true)
@@ -84,9 +93,6 @@ object MatchSummaryPdfWriter {
                 drawSectionTitle("RACKS")
                 drawRacksTable(summary)
             }
-            y += 20f
-            ensureSpace(28f)
-            canvas!!.drawText("Shared from RackTrack", MARGIN_LEFT, y, footerPaint)
             finishPage()
         }
 
@@ -97,31 +103,64 @@ object MatchSummaryPdfWriter {
             // Accent stripe
             c.drawRect(0f, headerBottom - 4f, PAGE_WIDTH.toFloat(), headerBottom, paint(theme.accent))
 
-            var hy = 32f
-            c.drawText("RACKTRACK", MARGIN_LEFT, hy, brandPaint)
-            hy += 26f
-            c.drawText(title.uppercase(Locale.getDefault()), MARGIN_LEFT, hy, titlePaint)
-            hy += 18f
-            c.drawText("Started  ${formatDateTime(summary.startedAtMillis)}", MARGIN_LEFT, hy, onFeltMuted)
-            hy += 14f
-            c.drawText("Ended  ${formatDateTime(summary.endedAtMillis)}", MARGIN_LEFT, hy, onFeltMuted)
-            hy += 14f
-            c.drawText(
-                "Duration  ${MatchSummaryReport.formatDuration(summary.totalDurationMillis)}",
-                MARGIN_LEFT,
-                hy,
-                onFeltMuted,
+            val rightEdge = PAGE_WIDTH - MARGIN_RIGHT
+            var ry = 28f
+            drawRightMeta(
+                c,
+                rightEdge,
+                ry,
+                "Started",
+                formatDateTime(summary.startedAtMillis),
             )
-            hy += 24f
-            val winner = summary.winnerName.ifEmpty { "DRAW" }.uppercase(Locale.getDefault())
-            c.drawText(winner, MARGIN_LEFT, hy, winnerPaint)
-            if (summary.winnerName.isNotEmpty()) {
+            ry += 14f
+            drawRightMeta(
+                c,
+                rightEdge,
+                ry,
+                "Ended",
+                formatDateTime(summary.endedAtMillis),
+            )
+            ry += 14f
+            drawRightMeta(
+                c,
+                rightEdge,
+                ry,
+                "Duration",
+                MatchSummaryReport.formatDuration(summary.totalDurationMillis),
+            )
+
+            c.drawText("RACKTRACK", MARGIN_LEFT, 32f, brandPaint)
+
+            var hy = ry + 22f
+            c.drawText(title.uppercase(Locale.getDefault()), MARGIN_LEFT, hy, titlePaint)
+            hy += 28f
+            if (summary.solo) {
+                val name = summary.player1Name.ifEmpty { "Player" }.uppercase(Locale.getDefault())
+                c.drawText(name, MARGIN_LEFT, hy, winnerPaint)
                 hy += 16f
-                c.drawText("WINS", MARGIN_LEFT, hy, onFeltBody)
+                c.drawText("SOLO", MARGIN_LEFT, hy, onFeltBody)
+            } else {
+                val winner = summary.winnerName.ifEmpty { "DRAW" }.uppercase(Locale.getDefault())
+                c.drawText(winner, MARGIN_LEFT, hy, winnerPaint)
+                if (summary.winnerName.isNotEmpty()) {
+                    hy += 16f
+                    c.drawText("WINS", MARGIN_LEFT, hy, onFeltBody)
+                }
             }
             hy += 18f
             c.drawText(MatchSummaryReport.subtitle(summary), MARGIN_LEFT, hy, onFeltBody)
             y = headerBottom + 28f
+        }
+
+        private fun drawRightMeta(
+            c: Canvas,
+            rightEdge: Float,
+            baseline: Float,
+            label: String,
+            value: String,
+        ) {
+            val text = "$label  $value"
+            c.drawText(text, rightEdge - onFeltMuted.measureText(text), baseline, onFeltMuted)
         }
 
         private fun formatDateTime(millis: Long): String =
@@ -144,6 +183,11 @@ object MatchSummaryPdfWriter {
         }
 
         private fun drawPlayerCards(summary: MatchSummary) {
+            if (summary.solo) {
+                drawOnePlayerCard(summary, side = 1, MARGIN_LEFT, y, CONTENT_WIDTH)
+                y += PLAYER_CARD_HEIGHT
+                return
+            }
             val gap = 12f
             val cardWidth = (CONTENT_WIDTH - gap) / 2f
             val left = MARGIN_LEFT
@@ -211,6 +255,10 @@ object MatchSummaryPdfWriter {
         }
 
         private fun drawInningsTable(summary: MatchSummary) {
+            if (summary.solo) {
+                drawSoloInningsTable(summary)
+                return
+            }
             val rows = MatchSummaryReport.pairedInningRows(
                 summary.inningScores1,
                 summary.inningScores2,
@@ -242,6 +290,36 @@ object MatchSummaryPdfWriter {
                     weights = weights,
                     alt = index % 2 == 1,
                     separatorAfterColumns = INNINGS_SEPARATOR_AFTER,
+                )
+            }
+        }
+
+        private fun drawSoloInningsTable(summary: MatchSummary) {
+            val innings = summary.inningScores1
+            if (innings.isEmpty()) {
+                ensureSpace(20f)
+                canvas!!.drawText("No innings recorded", MARGIN_LEFT, y, mutedPaint)
+                y += 16f
+                return
+            }
+            val name = truncateHeaderName(summary.player1Name)
+            val weights = SOLO_INNINGS_WEIGHTS
+            drawTableHeader(
+                cells = listOf("#", name, "End"),
+                weights = weights,
+                separatorAfterColumns = SOLO_INNINGS_SEPARATOR_AFTER,
+            )
+            innings.forEachIndexed { index, inning ->
+                ensureSpace(ROW_HEIGHT + 4f)
+                drawTableRow(
+                    cells = listOf(
+                        "#${inning.index}",
+                        inning.points.toString(),
+                        MatchSummaryReport.inningEndLabel(inning.endType),
+                    ),
+                    weights = weights,
+                    alt = index % 2 == 1,
+                    separatorAfterColumns = SOLO_INNINGS_SEPARATOR_AFTER,
                 )
             }
         }
@@ -343,15 +421,31 @@ object MatchSummaryPdfWriter {
 
         private fun finishPage() {
             val c = canvas!!
+            val footerY = PAGE_HEIGHT - 22f
+            c.drawText(generatorFooter(), MARGIN_LEFT, footerY, footerPaint)
+            val pageLabel = "Page $pageNumber"
+            val pageWidth = footerPaint.measureText(pageLabel)
             c.drawText(
-                "Page $pageNumber",
-                PAGE_WIDTH - MARGIN_LEFT - 48f,
-                PAGE_HEIGHT - 24f,
+                pageLabel,
+                PAGE_WIDTH - MARGIN_RIGHT - pageWidth,
+                footerY,
                 footerPaint,
             )
             document.finishPage(page!!)
             page = null
             canvas = null
+        }
+
+        private fun generatorFooter(): String {
+            val version = versionName.trim()
+            return when {
+                version.isNotEmpty() && versionCode > 0 ->
+                    "Generated by RackTrack $version (build $versionCode)"
+                version.isNotEmpty() ->
+                    "Generated by RackTrack $version"
+                else ->
+                    "Generated by RackTrack"
+            }
         }
     }
 
@@ -386,7 +480,7 @@ object MatchSummaryPdfWriter {
     private const val MARGIN_RIGHT = 40f
     private const val MARGIN_BOTTOM = 40f
     private const val CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT
-    private const val HEADER_HEIGHT = 210f
+    private const val HEADER_HEIGHT = 188f
     private const val CONTINUED_HEADER = 44f
     private const val PLAYER_CARD_HEIGHT = 118f
     private const val ROW_HEIGHT = 22f
@@ -395,4 +489,6 @@ object MatchSummaryPdfWriter {
     private val INNINGS_WEIGHTS = floatArrayOf(0.10f, 0.22f, 0.18f, 0.22f, 0.28f)
     /** After `#` and after player-1 End (columns 0 and 2). */
     private val INNINGS_SEPARATOR_AFTER = intArrayOf(0, 2)
+    private val SOLO_INNINGS_WEIGHTS = floatArrayOf(0.12f, 0.58f, 0.30f)
+    private val SOLO_INNINGS_SEPARATOR_AFTER = intArrayOf(0)
 }

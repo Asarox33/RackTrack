@@ -99,4 +99,86 @@ class MatchSummaryJsonTest {
         val decoded = MatchSummaryJson.decodeStored(MatchSummaryJson.encodeStored(stored))
         assertEquals(stored, decoded)
     }
+
+    @Test
+    fun `round trip preserves solo flag`() {
+        val summary = MatchSummary(
+            gameMode = GameMode.FOURTEEN_ONE,
+            winnerName = "Alex",
+            player1Name = "Alex",
+            player2Name = "solo",
+            score1 = 50,
+            score2 = 0,
+            racksToWin = 1,
+            pointsToWin = 50,
+            inningsLimit = 20,
+            innings1 = 1,
+            innings2 = 0,
+            totalFouls1 = 0,
+            totalFouls2 = 0,
+            runOuts1 = 0,
+            runOuts2 = 0,
+            goldenBreaks1 = 0,
+            goldenBreaks2 = 0,
+            dryBreaks1 = 0,
+            dryBreaks2 = 0,
+            eightBallLosses1 = 0,
+            eightBallLosses2 = 0,
+            highRun1 = 50,
+            highRun2 = 0,
+            average1 = 50.0,
+            average2 = 0.0,
+            inningScores1 = listOf(InningStat(1, 50, null)),
+            inningScores2 = emptyList(),
+            racks = emptyList(),
+            totalDurationMillis = 30_000L,
+            startedAtMillis = 1_700_000_000_000L,
+            endedAtMillis = 1_700_000_030_000L,
+            solo = true,
+        )
+        val decoded = MatchSummaryJson.decodeSummary(MatchSummaryJson.encodeSummary(summary))
+        assertEquals(true, decoded.solo)
+        assertEquals(summary, decoded)
+    }
+
+    @Test
+    fun `decode without solo field defaults to false`() {
+        val summary = MatchSummary(
+            gameMode = GameMode.FOURTEEN_ONE,
+            winnerName = "Sam",
+            player1Name = "Alex",
+            player2Name = "Sam",
+            score1 = 40,
+            score2 = 100,
+            racksToWin = 1,
+            pointsToWin = 100,
+            inningsLimit = 30,
+            innings1 = 2,
+            innings2 = 2,
+            totalFouls1 = 1,
+            totalFouls2 = 0,
+            runOuts1 = 0,
+            runOuts2 = 0,
+            goldenBreaks1 = 0,
+            goldenBreaks2 = 0,
+            dryBreaks1 = 0,
+            dryBreaks2 = 0,
+            eightBallLosses1 = 0,
+            eightBallLosses2 = 0,
+            highRun1 = 14,
+            highRun2 = 50,
+            average1 = 20.0,
+            average2 = 50.0,
+            inningScores1 = emptyList(),
+            inningScores2 = emptyList(),
+            racks = emptyList(),
+            totalDurationMillis = 90_000L,
+            startedAtMillis = 1_700_000_000_000L,
+            endedAtMillis = 1_700_000_047_000L,
+        )
+        val obj = MatchSummaryJson.encodeSummary(summary)
+        obj.remove("solo")
+        val decoded = MatchSummaryJson.decodeSummary(obj)
+        assertEquals(false, decoded.solo)
+    }
 }

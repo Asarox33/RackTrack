@@ -5,6 +5,7 @@ import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEventType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class FourteenOneMatchStatsTest {
@@ -106,5 +107,31 @@ class FourteenOneMatchStatsTest {
         assertEquals(MatchEventType.FOUL, summary.inningScores2.single().endType)
         assertEquals(summary.score1, summary.inningScores1.sumOf { it.points })
         assertEquals(summary.score2, summary.inningScores2.sumOf { it.points })
+    }
+
+    @Test
+    fun `solo summarize zeros side-2 and copies solo flag`() {
+        var match = Match.start(
+            player1Name = "Alex",
+            player2Name = "Sam",
+            racksToWin = 1,
+            initialBreakerIsPlayer1 = true,
+            startedAtMillis = clock,
+            gameMode = GameMode.FOURTEEN_ONE,
+            pointsToWin = 20,
+            inningsLimit = 30,
+            solo = true,
+        )
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 14, now())
+        match = FourteenOneEngine.pass(match, match.player1.id, now())
+        match = FourteenOneEngine.addPoints(match, match.player1.id, 6, now())
+
+        val summary = MatchStats.summarize(match)
+        assertTrue(summary.solo)
+        assertEquals(listOf(14, 6), summary.inningScores1.map { it.points })
+        assertEquals(0, summary.inningScores2.size)
+        assertEquals(0, summary.score2)
+        assertEquals(0, summary.totalFouls2)
+        assertEquals("Alex", summary.winnerName)
     }
 }

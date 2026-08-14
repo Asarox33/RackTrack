@@ -38,7 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.racktrack.BuildConfig
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
@@ -114,19 +116,29 @@ fun SettingsSheet(
             Spacer(modifier = Modifier.height(14.dp))
             SectionLabel("Cloth color")
             Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(SWATCH_ROW_GAP),
             ) {
-                FeltTone.entries.forEach { tone ->
-                    FeltSwatch(
-                        tone = tone,
-                        selected = tone == settings.feltTone,
-                        onClick = { onFeltSelected(tone) },
-                    )
+                FeltTone.entries.chunked(SWATCHES_PER_ROW).forEach { rowTones ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(SWATCH_GAP),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        rowTones.forEach { tone ->
+                            FeltSwatch(
+                                tone = tone,
+                                selected = tone == settings.feltTone,
+                                onClick = { onFeltSelected(tone) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        // Keep columns aligned when the last row is short.
+                        repeat(SWATCHES_PER_ROW - rowTones.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
                 }
             }
 
@@ -405,15 +417,20 @@ private fun FeltSwatch(
     tone: FeltTone,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.clickable(onClick = onClick),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = onClick,
+        ),
     ) {
         Box(
             modifier = Modifier
-                .size(if (selected) 44.dp else 38.dp)
+                .size(SWATCH_CIRCLE)
                 .clip(CircleShape)
                 .background(
                     Brush.radialGradient(
@@ -421,15 +438,19 @@ private fun FeltSwatch(
                     ),
                 )
                 .border(
-                    width = if (selected) 3.dp else 1.dp,
+                    width = if (selected) 3.dp else 1.5.dp,
                     color = if (selected) ScoreWhite else OutlineWarm.copy(alpha = 0.45f),
                     shape = CircleShape,
                 ),
         )
         Text(
             text = tone.label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
             color = if (selected) ScoreWhite else ScoreWhite.copy(alpha = 0.65f),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -441,3 +462,7 @@ private const val PANEL_WIDTH = 0.88f
 private const val PANEL_MAX_HEIGHT = 0.92f
 private const val PANEL_TOP_ALPHA = 0.97f
 private const val PANEL_BORDER_ALPHA = 0.55f
+private const val SWATCHES_PER_ROW = 3
+private val SWATCH_CIRCLE = 40.dp
+private val SWATCH_GAP = 8.dp
+private val SWATCH_ROW_GAP = 12.dp

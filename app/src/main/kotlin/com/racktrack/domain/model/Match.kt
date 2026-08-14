@@ -58,9 +58,15 @@ data class Match(
      */
     val pauseSpans: List<PauseSpan> = emptyList(),
     val history: List<MatchEvent> = emptyList(),
+    /**
+     * 14/1 solo training — one shooter, placeholder [player2], no handoff.
+     * Ignored for race modes (must stay false).
+     */
+    val solo: Boolean = false,
 ) {
     init {
         require(player1.id != player2.id) { "players must be distinct" }
+        require(!solo || gameMode.isPointScoring) { "solo is only valid for 14/1" }
         require(currentBreakerId == player1.id || currentBreakerId == player2.id) {
             "breaker must be one of the match players"
         }
@@ -72,6 +78,10 @@ data class Match(
             require(opening == player1.id || opening == player2.id) {
                 "opening breaker must be one of the match players"
             }
+        }
+        if (solo) {
+            require(currentBreakerId == player1.id) { "solo breaker must be player1" }
+            require(currentShooterId == player1.id) { "solo shooter must be player1" }
         }
         if (gameMode.isPointScoring) {
             require(pointsToWin > 0) { "pointsToWin must be positive for 14/1" }
@@ -93,6 +103,7 @@ data class Match(
         get() = when {
             status != MatchStatus.COMPLETED -> null
             gameMode.isPointScoring -> when {
+                solo -> player1
                 score1 > score2 -> player1
                 score2 > score1 -> player2
                 else -> null
@@ -115,6 +126,9 @@ data class Match(
     }
 
     companion object {
+        /** Placeholder [player2] name for 14/1 solo training matches. */
+        const val SOLO_PLAYER2_NAME = "solo"
+
         fun start(
             player1Name: String,
             player2Name: String,
@@ -125,10 +139,17 @@ data class Match(
             pointsToWin: Int = 0,
             inningsLimit: Int? = null,
             breakRule: BreakRule = BreakRule.ALTERNATE,
+            solo: Boolean = false,
         ): Match {
+            require(!solo || gameMode.isPointScoring) { "solo is only valid for 14/1" }
             val p1 = Player(PlayerId("p1"), player1Name.trim().ifEmpty { "Player 1" })
-            val p2 = Player(PlayerId("p2"), player2Name.trim().ifEmpty { "Player 2" })
-            val starter = if (initialBreakerIsPlayer1) p1.id else p2.id
+            val p2Name = if (solo) SOLO_PLAYER2_NAME else player2Name
+            val p2 = Player(PlayerId("p2"), p2Name.trim().ifEmpty { "Player 2" })
+            val starter = when {
+                solo -> p1.id
+                initialBreakerIsPlayer1 -> p1.id
+                else -> p2.id
+            }
             return Match(
                 player1 = p1,
                 player2 = p2,
@@ -144,6 +165,7 @@ data class Match(
                 currentShooterId = starter,
                 awaitingOpeningBreak = gameMode.isPointScoring,
                 startedAtMillis = startedAtMillis,
+                solo = solo,
             )
         }
 
