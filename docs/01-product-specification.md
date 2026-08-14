@@ -89,5 +89,6 @@ find that match in history — without entering shot details.
 `docs/07-versioning-and-releases.md`. Binaries for end users ship via app stores (see `LICENSE`).
 
 **Play production gate:** first open / production release to strangers is **1.2.0** and must
-include AdMob interstitial on Start + lifetime remove-ads IAP (see `docs/06-roadmap-todo.md`).
+include monetization per `docs/09-monetization.md` (AdMob interstitial on Start only,
+5‑min cooldown, never block start, lifetime Remove Ads ~**4,99 €** + Restore).
 Do not publish an ad-free Play build then add ads later.

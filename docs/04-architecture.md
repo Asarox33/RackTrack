@@ -69,12 +69,24 @@ MatchBoardScreen
 14/1 follows the same path via `FourteenOneEngine`. History list filters by current setup
 `GameMode` + optional player-name queries (`MatchHistoryFilter`).
 
-## 5. What agents must NOT do on their own
+## 5. Planned 1.2.0 — ads & billing
 
-- Add a backend, auth, or network dependency.
+Product rules: `docs/09-monetization.md`. Keep `domain/` free of AdMob / Billing SDKs.
+
+Suggested seams (Android `presentation` / thin helpers only):
+
+- Ad preload + show-or-skip gate on Start Match / Start Training (5‑min cooldown in prefs).
+- Play Billing purchase / restore for `remove_ads`; persist entitlement; re-query on launch.
+- UMP consent before first ad request where required.
+
+## 6. What agents must NOT do on their own
+
+- Add a backend, auth, or **general** network/API layer (AdMob / Play Billing / UMP only
+  when implementing `docs/09-monetization.md` for **1.2.0**).
 - Reintroduce shot-by-shot / deep FFB referee UI without an explicit product request (+ camera).
 - Use XML layouts (Compose only).
 - Make `domain/` depend on Android, Room, or Compose.
 - Invent game rules not backed by the PDF / existing engines.
-- Introduce a new external library without flagging it.
+- Introduce a new external library without flagging it (monetization SDKs are expected for 1.2.0).
 - Use `!!`, mutable public state, or global singletons.
+- Add banner ads, mid-board ads, or subscriptions contrary to `docs/09-monetization.md`.

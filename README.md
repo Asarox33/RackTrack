@@ -59,6 +59,7 @@ redistribution and store listing require permission. Official APKs/AABs are stor
 | [docs/05-conventions.md](docs/05-conventions.md) | Conventions |
 | [docs/06-roadmap-todo.md](docs/06-roadmap-todo.md) | Roadmap / backlog |
 | [docs/07-versioning-and-releases.md](docs/07-versioning-and-releases.md) | Semver + release pipeline |
+| [docs/09-monetization.md](docs/09-monetization.md) | Ads + Remove Ads IAP (1.2.0 Play gate) |
 | [CHANGELOG.md](CHANGELOG.md) | User-facing release notes (Features / Bug fixes) |
 | `resources/code-sportif-americain-2026-2027.pdf` | Official FFB text |
 

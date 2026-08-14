@@ -73,19 +73,21 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 Play end users** must already include ads + remove-ads IAP. Shipping free without ads
 then adding interstitials later is a bad trust message — do not do that.
 
+**Full UX / rules:** [`docs/09-monetization.md`](09-monetization.md)
+(interstitial only, Start gate, 5‑min cooldown, never block start, IAP **4,99 €**, Restore).
+
 Gate: Google Play Console account validated + upload keystore + listing / Data safety /
 privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **production
 (and any open testing aimed at strangers) waits for 1.2.0.**
 
 - ⬜ Play Store upload keystore (replace debug-keystore release signing for store builds)
-- ⬜ **AdMob interstitial** on **START MATCH / START TRAINING** only (never on the live board)
-  - Cap: skip if last interstitial shown &lt; **5 minutes** ago
-  - If no fill / not ready → start match immediately
+- ⬜ Implement monetization per `docs/09-monetization.md`
+  - AdMob **interstitial only** (no banners) on **START MATCH / START TRAINING**
+  - 5‑minute cooldown from last **shown** ad; no cooldown UI
+  - Never wait on no-fill / load failure → board immediately
   - UMP / consent (EEA) before first ad request
-- ⬜ **IAP** Play Billing one-time `remove_ads` (~1.99 €) — disables all ads for life
-- ⬜ Settings: **Remove ads** purchase + **Restore purchases**
+  - Play Billing one-time `remove_ads` at **~4,99 €** + Settings **Remove ads** / **Restore**
 - ⬜ Privacy / Data safety updated for AdMob + Billing (ads appear from day one on Play)
-
 ### Later on 1.x (optional, after Play launch)
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
@@ -101,6 +103,9 @@ privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **
 
 ## Progress notes
 
+- 2026-08-15: Spec [`docs/09-monetization.md`](09-monetization.md) — interstitial-only,
+  Start gate, 5‑min cooldown, never block start, Remove Ads **4,99 €** one-time + Restore;
+  first Play end-user release = **1.2.0**.
 - 2026-08-15: Lock **1.2.0** as first Play end-user release: AdMob interstitial on Start +
   lifetime `remove_ads` IAP + Restore; do not soft-launch ad-free then monetize.
 - 2026-08-14: **1.1.0** — 14/1 solo training (`Match.solo` / setup SOLO toggle; one-column board;
@@ -117,9 +122,8 @@ privacy URL updated for ads & Billing. Closed testing may use pre-1.2 builds; **
 - 2026-08-12: Patch **1.0.1** — foul clear (9/10): Golden/Dry stay off after clear; foul chip
   shows TAP TO CLEAR; match foul totals still count FOUL events; 8-ball clear remains no-op.
 - 2026-08-10: Monetization design — interstitial on New Match + 5 min cap + lifetime remove-ads
-  IAP (~1.99 €); originally aimed at 1.1.0, reslotted to **1.2.0** after solo took 1.1.0.
-- 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.
-- 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
+  IAP; originally ~1.99 € / 1.1.0 — price **4,99 €** and train **1.2.0** locked 2026-08-15.
+- 2026-08-10: Backlog player timeouts (1×5 min / player / match, all modes); keep shot clock dropped.- 2026-08-10: Product boundary — never remote live scoring; optional future accounts only for shared stats.
 - 2026-08-10: Declare **v1.0.0**; semver + cut-release / tag protection.
 - 2026-08-10: 14/1 visit-end modal (balls-left stepper); board clear-rack / hide BREAK −2 off opening.
 - 2026-08-10: Alternate/Winner break for 8/9/10; 14/1 On Table balls remaining.

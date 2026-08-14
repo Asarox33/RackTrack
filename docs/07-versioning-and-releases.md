@@ -87,6 +87,6 @@ is wired — fine for device sideload testing only.
 ## Play end-user gate
 
 Closed testing may use current 1.1.x builds. The **first open / production** Play release
-aimed at end users is **1.2.0** and must ship with monetization (AdMob interstitial on
-Start Match / Start Training + lifetime `remove_ads` IAP + Restore). See
-`docs/06-roadmap-todo.md`.
+aimed at end users is **1.2.0** and must ship with monetization as specified in
+`docs/09-monetization.md` (AdMob interstitial on Start Match / Start Training + lifetime
+`remove_ads` IAP ~4,99 € + Restore). See also `docs/06-roadmap-todo.md`.
