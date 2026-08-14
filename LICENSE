@@ -32,9 +32,13 @@ Without prior written permission from the copyright holder, you may **not**:
 3. Official binaries
 --------------------
 
-Official builds are distributed only through channels designated by the
-copyright holder (for example, authorized app stores). GitHub Releases for
-this project publish release notes only; they are not an install channel.
+The **copyright holder** may distribute official builds through any channel they
+designate (including paid app stores), with or without advertising and in-app
+purchases. That commercial distribution is an exercise of ownership — it is **not**
+a grant of rights to third parties under this license.
+
+GitHub Releases for this project publish release notes only; they are not an
+install channel for end users.
 
 4. No trademark license
 -----------------------

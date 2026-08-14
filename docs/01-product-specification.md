@@ -34,7 +34,6 @@ or share past match stats.
 - Optional **accounts / player identity** so each player can find others and **retrieve
   stats for matches they played**, even when the scoreboard run was on someone else’s
   phone — **still one device scores the live match** (never remote two-table play)
-- **Player timeouts / match pauses** (FFB art. 1.2.16) — see roadmap post-v1; not a per-shot timer
 
 Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
@@ -48,7 +47,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - 14/1: `TABLE n` object balls remaining on the shooter’s panel
 - Undo last action; end-of-match summary (**SHARE PDF** + **BACK** to setup)
 - Club **pause** (top-right, next to settings): stops match/rack duration accounting for a
-  break (toilet / smoke / drink) — no max length, not recorded in stats/PDF; not FFB timeout
+  break (toilet / smoke / drink) — no max length, not recorded in stats/PDF; **not** an FFB
+  player timeout (those are out of product — see Explicitly dropped / roadmap)
 - Local match history:
   - Entry from setup (**HISTORY**, felt color), scoped to the selected game mode
   - Filter by player names (either seat); reopen the same stats as end-of-match
@@ -65,12 +65,15 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - Push-out UI, full illegal-break geometry checks
 - iOS
 - Shot clock / per-shot timing (art. 1.2.13) and disciplinary / federal competition machinery
-  (player **match pauses / timeouts** are a separate optional backlog item — art. 1.2.16)
+- FFB **player timeouts** / pause quotas (art. 1.2.16) — club duration **pause** only
 - Screenshot / UI golden tests
 - PNG export of match summary (PDF only)
 
 Accounts + cloud history sync are **not in v1**; they may appear later only for
-identity / find-players / shared post-match stats (see §5 Later) — not for remote play.
+identity / find-players / shared post-match stats — not for remote play.
+
+**Later (2.0 / `rc/2.0.0`, see roadmap):** **i18n** (en default + fr/de/es/it/nl/pt),
+multi-ruleset packs, KMP/CMP / iOS — UI language ≠ rule authority.
 
 ## 8. Constraints
 
@@ -85,5 +88,10 @@ find that match in history — without entering shot details.
 
 ## 10. Product version
 
-**1.1.0** — 14/1 solo training. Versioning and GitHub Release notes:
-`docs/07-versioning-and-releases.md`. Binaries ship via app stores (see `LICENSE`).
+**1.1.0** — 14/1 solo training (GitHub / sideload). Versioning and GitHub Release notes:
+`docs/07-versioning-and-releases.md`. Binaries for end users ship via app stores (see `LICENSE`).
+
+**Play production gate:** first open / production release to strangers is **1.2.0** and must
+include monetization per `docs/09-monetization.md` (AdMob interstitial on Start only,
+5‑min cooldown, never block start, lifetime Remove Ads ~**4,99 €** + Restore).
+Do not publish an ad-free Play build then add ads later.
