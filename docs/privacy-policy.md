@@ -1,7 +1,8 @@
 # Privacy policy — RackTrack
 
 **Last updated:** 2026-08-15  
-**Contact:** repository owner via https://github.com/Asarox33/RackTrack
+**Publisher:** MappM  
+**Contact:** mappm.pro@gmail.com · https://github.com/Asarox33/RackTrack
 
 This page is the draft / publishable privacy text for Google Play. Host it at a stable
 **HTTPS** URL (e.g. GitHub Pages) and paste that URL into Play Console.
@@ -10,8 +11,8 @@ This page is the draft / publishable privacy text for Google Play. Host it at a 
 
 ## Who we are
 
-RackTrack is a local American-pool scoreboard app published by the copyright holder of
-the RackTrack project.
+RackTrack is a local American-pool scoreboard app published by **MappM**
+(source repository: Asarox33/RackTrack).
 
 ## What the app stores
 
