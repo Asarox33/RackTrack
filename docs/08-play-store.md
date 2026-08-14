@@ -10,6 +10,24 @@ then add ads later. See [`00-release-trains.md`](00-release-trains.md).
 Internal smoke may use 1.1.x or 1.2.0 depending on Google account validation timing;
 strangers still get production **1.2.0** with ads.
 
+### Public identity (Personal account) — what users may see
+
+Google distinguishes **private account contact** (for Google only) from **public** profile /
+store fields. Typical Personal-account picture (confirm in Console / Help Center):
+
+| Field | Usually public on Play? | Practical tip |
+|-------|-------------------------|---------------|
+| Support **email** (store listing) | **Yes** (required) | Use `mappm.pro@gmail.com` |
+| Support **phone** (store listing) | **Only if you fill it** | Leave **empty** — no secondary number needed if the goal is just “no perso phone online” |
+| Account contact phone (Google ↔ you) | **No** | Can stay your real number for OTP / Google |
+| **Legal name** / **legal address** (Personal) | **May be shown**; with **monetization**, Google may show the **full address** | Expected trade-off of a Personal + monetized account |
+| Developer display name | **Yes** | **MappM** on Play; GitHub remains Asarox33 |
+
+If the goal is **no personally identifiable legal name/address** on the store at all, a
+Personal account is the wrong tool — that is when a **micro-entreprise / société**
+(Organization Play account) becomes relevant (different verification, public org details
+instead of home address). That is a business choice, not required for 1.2.0 launch.
+
 ---
 
 ## Checklist (owner)
