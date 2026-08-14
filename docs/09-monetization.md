@@ -187,14 +187,92 @@ APIs). Settings must expose:
 
 ---
 
-## 9. Implementation sketch (non-binding)
+## 9. Architecture (locked)
 
-Suggested seams (keep domain pure):
+Ads and billing stay **outside** the pool engines. `FourteenOneEngine` / `MatchEngine` /
+`MatchCoordinator` domain logic must not import AdMob, Play Billing, or UMP.
 
-- `presentation` / thin `ads` helper: preload, show-or-skip, cooldown timestamp in prefs.
-- `billing` helper: query/purchase/restore `remove_ads`; persist owned flag locally +
-  re-query on launch.
-- Setup start button: call gate → then existing `startMatch` / training path.
+### 9.1 Components
 
-Unit-test the cooldown / skip decision tree with fake clock + fake “loaded” / “owned”
-flags; do not unit-test AdMob/Billing SDKs.
+| Component | Role |
+|-----------|------|
+| **`RemoveAdsStore`** (name flexible) | Owns Premium entitlement: purchase, restore, local cache, re-query on launch. No AdMob. |
+| **`InterstitialAdManager`** | Load interstitial, 5‑min cooldown, show-or-skip, callbacks on dismiss/fail. Asks `RemoveAdsStore` before any ad work. |
+| **Setup / start path** | Calls a single gate (e.g. `runWithOptionalInterstitial { startMatch… }`) then existing coordinator start. |
+
+Preferred package (Android app module only), e.g.:
+
+```text
+com.racktrack.monetization/
+  InterstitialAdManager.kt   # AdMob interstitial + cooldown
+  RemoveAdsStore.kt          # Play Billing remove_ads + restore
+  MonetizationGate.kt        # glue: premium? → skip; else maybe show ad → then action
+```
+
+No Hilt required unless we later introduce DI project-wide — constructor injection from
+`MainActivity` / ViewModel factory is enough for 1.2.0.
+
+### 9.2 `InterstitialAdManager` responsibilities
+
+- Preload an interstitial (setup appear / after previous show).
+- Decide whether one **may** be shown (not Premium, cooldown elapsed, ad loaded).
+- Show the interstitial when appropriate.
+- Notify the app when the ad is **closed** or **fails** so the pending start can continue.
+- **Bypass immediately** if not loaded / no fill / error.
+- **Do nothing** (no load, no show) when the user owns Remove Ads — short-circuit via
+  `RemoveAdsStore` (or the gate checks Premium first and never calls the manager).
+
+Cooldown clock and “last shown” timestamp live here (or in prefs owned by this manager),
+not in domain.
+
+### 9.3 Start-match flow
+
+UI / ViewModel keeps a simple intent:
+
+```text
+onStartMatchClicked()
+  → MonetizationGate.runAfterAdOpportunity {
+        matchViewModel.startMatch(...)   // or start training — unchanged domain call
+     }
+```
+
+The gate decides ad vs skip; the billiard start API stays “just start”. Domains and
+boards never know why there was a delay.
+
+```text
+Setup  →  Gate  →  (optional AdMob UI)  →  existing startMatch / board
+              ↘________________↗
+                 skip / Premium
+```
+
+### 9.4 Premium (Remove Ads owned)
+
+```text
+START MATCH / START TRAINING → board immediately
+```
+
+- No interstitial load attempt.
+- No show attempt.
+- No cooldown bookkeeping required for that tap.
+- Entitlement must survive reinstall / new device via **Restore purchases** + store
+  re-query on cold start (Play Billing; later App Store for iOS).
+
+Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
+`RemoveAdsStore`, which notifies the gate / ad manager (e.g. clear loaded ad, stop preload).
+
+### 9.5 Tests
+
+- Unit-test the **gate / cooldown / Premium skip** decision tree with fakes
+  (`adsRemoved`, `lastShownAt`, `isLoaded`, fake clock).
+- Do **not** unit-test the AdMob or Play Billing SDKs themselves.
+
+---
+
+## 10. Implementation checklist (1.2.0)
+
+- [ ] `RemoveAdsStore` + Settings buy / restore / owned UI
+- [ ] `InterstitialAdManager` + preload + 5‑min cooldown
+- [ ] `MonetizationGate` wired on START MATCH / START TRAINING only
+- [ ] UMP consent before first ad request
+- [ ] Privacy / Data safety / listing updated
+- [ ] Gate unit tests (Premium, cooldown, not loaded → immediate start)

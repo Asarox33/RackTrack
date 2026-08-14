@@ -71,13 +71,18 @@ MatchBoardScreen
 
 ## 5. Planned 1.2.0 — ads & billing
 
-Product rules: `docs/09-monetization.md`. Keep `domain/` free of AdMob / Billing SDKs.
+**Locked architecture:** `docs/09-monetization.md` §9.
 
-Suggested seams (Android `presentation` / thin helpers only):
+Keep `domain/` and match engines free of AdMob / Billing / UMP.
 
-- Ad preload + show-or-skip gate on Start Match / Start Training (5‑min cooldown in prefs).
-- Play Billing purchase / restore for `remove_ads`; persist entitlement; re-query on launch.
-- UMP consent before first ad request where required.
+| Seam | Responsibility |
+|------|----------------|
+| `monetization/RemoveAdsStore` | IAP `remove_ads`, restore, entitlement cache |
+| `monetization/InterstitialAdManager` | Preload, 5‑min cooldown, show / bypass |
+| `monetization/MonetizationGate` | Premium? → skip ads; else maybe interstitial; then run start callback |
+| Setup start buttons | `gate.runAfterAdOpportunity { viewModel.start… }` only |
+
+Premium owned ⇒ **no** interstitial load or show; Start → board immediately.
 
 ## 6. What agents must NOT do on their own
 
