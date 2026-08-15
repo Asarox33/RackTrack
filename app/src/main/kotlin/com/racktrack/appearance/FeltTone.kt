@@ -86,7 +86,7 @@ enum class FeltTone(
             accentDark = Color(0xFFB03E68),
         ),
     ),
-    /** Warm mustard-gold cloth, in the spirit of Predator Arcadia Select Gold. */
+    /** Warm mustard-gold cloth. */
     GOLDEN(
         label = "Golden",
         palette = FeltPalette(
