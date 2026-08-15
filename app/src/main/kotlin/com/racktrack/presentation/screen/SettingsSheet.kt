@@ -315,6 +315,12 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
         AboutMetaRow(label = "Build", value = buildKind)
         AboutMetaRow(label = "Built", value = builtAt)
         Text(
+            text = "Fonts · Bebas Neue & Outfit (SIL OFL 1.1)",
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite.copy(alpha = 0.55f),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
             text = "GitHub · Asarox33/RackTrack",
             style = MaterialTheme.typography.bodyLarge,
             color = felt.accentLight,

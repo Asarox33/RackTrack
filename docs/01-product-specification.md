@@ -88,7 +88,7 @@ find that match in history — without entering shot details.
 
 ## 10. Product version
 
-**1.1.0** — 14/1 solo training (GitHub / sideload). Versioning and GitHub Release notes:
+**1.1.1** — OFL font attribution (Bebas Neue, Outfit). Versioning and GitHub Release notes:
 `docs/07-versioning-and-releases.md`. Binaries for end users ship via app stores (see `LICENSE`).
 
 **Play production gate:** first open / production release to strangers is **1.2.0** and must

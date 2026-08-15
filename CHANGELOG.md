@@ -6,6 +6,14 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.1.1 — 2026-08-15
+
+### Improvements
+
+- **Font licenses (OFL)** — ship SIL Open Font License texts for **Bebas Neue** and **Outfit**
+  in the APK (`assets/licenses/`) and credit them in Settings → About (required for embedding
+  OFL fonts in a distributable / monetized app).
+
 ## 1.1.0 — 2026-08-14
 
 ### Features

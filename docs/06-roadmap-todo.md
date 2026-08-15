@@ -1,6 +1,6 @@
 # Roadmap & TODO
 
-Overall status: ✅ **1.1.0** on GitHub · ⬜ **1.2.0** first Play end-user (monetization) ·
+Overall status: ✅ **1.1.1** on GitHub · ⬜ **1.2.0** first Play end-user (monetization) ·
 ⬜ **2.0** on `rc/2.0.0`
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
@@ -62,6 +62,10 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ### 1.0.2 — scroll discoverability
 - ✅ Modal scroll hints (fade + ▼) on match summary, settings, 14/1 visit-end
+
+### 1.1.1 — font OFL attribution
+- ✅ Bundle SIL OFL 1.1 texts for Bebas Neue + Outfit (`assets/licenses/`)
+- ✅ Credit fonts in Settings → About
 
 ### 1.1.0 — 14/1 solo training
 - ✅ **Solo training (14/1 only)** — practice scorekeeping without an opponent:
@@ -135,6 +139,7 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ## Progress notes
 
+- 2026-08-15: **1.1.1** — OFL attribution for Bebas Neue + Outfit (assets + About).
 - 2026-08-15: Owner lock — **no** Play closed track (internal only); open `rc/2.0.0` **after**
   1.2.0 production; **drop** FFB player timeouts (1.2.16) as out of product.
 - 2026-08-15: Full audit on PR — restore Play scaffolding (`08`, privacy stub, keystore
