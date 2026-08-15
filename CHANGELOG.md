@@ -23,7 +23,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
   use a single innings column titled like `Alex — solo` (same HR / avg / Inn / fouls stats).
 - **Save PDF** — summary modal has SHARE and SAVE; SAVE opens the system file picker
   (Downloads or any folder) without needing a share target app.
-- **Golden felt** — new cloth tone in settings (Predator Arcadia Gold–inspired).
+- **Golden felt** — new warm mustard-gold cloth tone in settings.
 
 ### Improvements
 
