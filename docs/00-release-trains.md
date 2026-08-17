@@ -11,7 +11,7 @@ Canonical backlog detail: [`06-roadmap-todo.md`](06-roadmap-todo.md).
 | Train | Channel | Contents |
 |-------|---------|----------|
 | **1.0.x – 1.1.1** | GitHub notes + sideload / **internal** smoke | Table product; **1.1.0** solo/PDF/Golden; **1.1.1** OFL font notices |
-| **1.2.0** | **First open / production Play** for strangers | Monetization (`09-monetization.md`) + upload keystore + privacy/Data safety for ads |
+| **1.2.0** | **First open / production Play** for strangers | Monetization (`09-monetization.md`) + upload keystore + privacy/Data safety for ads + R8 mapping + native debug symbols |
 | **1.2.x** | Play hotfixes after launch | Crash / store-review fixes only (no new optional feature trains planned) |
 | **2.0.0** on `rc/2.0.0` | Merge to `main` only when ready | i18n, multi-ruleset, KMP/CMP/iOS, optional accounts |
 
@@ -63,7 +63,7 @@ main (1.x patchable)
 | 2 | Human | Create upload keystore locally; fill `keystore.properties` (never commit) |
 | 3 | Repo | Privacy URL live (see `privacy-policy.md` + `08-play-store.md`) |
 | 4 | Code | Implement **1.2.0** monetization per `09-monetization.md` |
-| 5 | Human | Internal smoke on device → **production 1.2.0** (first stranger-facing build with ads) |
+| 5 | Human | Internal smoke monetized build → update Console per `08` §E → **production 1.2.0** |
 | 6 | Repo | Open `rc/2.0.0` **after** 1.2.0 is live on Play |
 
 ---

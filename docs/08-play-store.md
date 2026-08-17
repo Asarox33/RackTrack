@@ -6,7 +6,8 @@ Publish **binaries via Play** (AAB). GitHub Releases stay **notes-only** (`LICEN
 ([`09-monetization.md`](09-monetization.md)). Do **not** soft-launch ad-free production
 then add ads later. See [`00-release-trains.md`](00-release-trains.md).
 
-**Testing:** **internal only** (owner device). No Play closed-testing track planned.
+**Testing:** **internal only** (owner device). No Play closed-testing track planned
+(owner-only closed would only help preview the public listing — skipped as overhead).
 Internal smoke may use **1.1.1** (this doc) or 1.2.0 depending on timing;
 strangers still get production **1.2.0** with ads.
 
@@ -102,10 +103,44 @@ Decode helper: [`.github/scripts/setup-upload-signing.sh`](../.github/scripts/se
    - Setup → match / solo → summary SHARE/SAVE
    - No ads (expected on 1.1.1)
 
-### E. Production (later — not this train)
+### Release notes format (owner preference)
 
-- First stranger-facing production = **1.2.0** with AdMob + Remove Ads IAP
-- Update privacy + Data safety before that ship
+When drafting Play “notes de version”, always use locale tags (≤500 chars each):
+
+```text
+<fr-FR>
+…
+</fr-FR>
+<en-US>
+…
+</en-US>
+```
+
+### E. Production 1.2.0 — promote from Internal (do not forget)
+
+First stranger-facing production = **1.2.0** with AdMob + Remove Ads IAP.
+Listing / icons / screenshots / category from Internal **1.1.1** mostly carry over —
+revisit the declarations below when promoting the monetized build (before **2.0.0** /
+`rc/2.0.0`).
+
+**Console — update before / with production release**
+
+- [ ] **Annonces** → Oui (Contains ads)
+- [ ] **Data safety** → Oui + disclose AdMob + Play Billing (was Non / local-only on 1.1.1)
+- [ ] **Privacy policy** URL still live; expand text if needed for ads / Billing
+- [ ] **App access / login** — still Non unless something is truly gated (optional IAP ≠ gate)
+- [ ] **Content rating** — re-check “contenu en ligne” if AdMob changes answers
+- [ ] **Play Billing** products (`remove_ads`) + Console Billing protection as needed
+- [ ] **Protégé avec Play** — device integrity **recommandé** (was Aucun on Internal);
+      Play Integrity API in-app only if product asks
+- [ ] Promote Internal → **Production** (not Closed); countries / pricing free + IAP
+
+**Build / crash quality (with monetization AAB)**
+
+- [ ] Enable **R8** minify; upload **mapping** + **native debug symbols** with the AAB
+  (Internal 1.1.1 Console warnings were deferred on purpose — see `06-roadmap-todo.md`)
+
+**Code** — full UX: [`09-monetization.md`](09-monetization.md).
 
 ---
 

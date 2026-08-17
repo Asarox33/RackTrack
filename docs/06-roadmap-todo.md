@@ -90,15 +90,22 @@ Gate: Google Play Console account validated + upload keystore + listing / Data s
 privacy URL updated for ads & Billing. **No closed-test track** — owner **internal** smoke
 only. **Open / production for strangers waits for 1.2.0** (with ads).
 
-- ⬜ Play Store upload keystore (see `keystore.properties.example` + `08-play-store.md`)
+- ✅ Play Store upload keystore + Internal **1.1.1** listing / Data safety local-only
+  (see `08-play-store.md`; privacy URL live)
 - ⬜ Implement monetization per `docs/09-monetization.md`
   - AdMob **interstitial only** (no banners) on **START MATCH / START TRAINING**
   - 5‑minute cooldown from last **shown** ad; no cooldown UI
   - Never wait on no-fill / load failure → board immediately
   - UMP / consent (EEA) before first ad request
   - Play Billing one-time `remove_ads` at **~4,99 €** + Settings **Remove ads** / **Restore**
-- ⬜ Host privacy URL (`privacy-policy.md`) + Data safety for AdMob + Billing
-- ⬜ Play listing + **internal** smoke → **production 1.2.0**
+- ⬜ **Promote Internal → Production 1.2.0** — Console checklist in `08-play-store.md` §E
+  (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
+  recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
+- ⬜ Play crash diagnostics for production: enable **R8 minify** + upload
+  **deobfuscation (mapping)** with the AAB; upload **native debug symbols**
+  (Play Console warnings seen on Internal 1.1.1 — safe to ignore for smoke;
+  required quality for stranger-facing **1.2.0**, before opening `rc/2.0.0`)
+- ⬜ Internal smoke of monetized build → **production 1.2.0** for strangers
 
 ### Later on 1.x (optional, after Play launch)
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
@@ -139,6 +146,12 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ## Progress notes
 
+- 2026-08-17: Internal **1.1.1** live (owner). When promoting to **production 1.2.0**, do not
+  forget Console updates in `08-play-store.md` §E (ads, Data safety, Billing, integrity,
+  R8 mapping/symbols) — listing assets mostly already done.
+- 2026-08-17: Owner — before **1.2.0** production (with monetization, before `rc/2.0.0`):
+  ship R8 mapping + native debug symbols with the Play AAB (Console warnings OK to skip on
+  Internal 1.1.1 only).
 - 2026-08-15: **1.1.1** — OFL attribution for Bebas Neue + Outfit (assets + About).
 - 2026-08-15: Owner lock — **no** Play closed track (internal only); open `rc/2.0.0` **after**
   1.2.0 production; **drop** FFB player timeouts (1.2.16) as out of product.

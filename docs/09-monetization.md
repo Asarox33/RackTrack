@@ -274,5 +274,7 @@ Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
 - [ ] `InterstitialAdManager` + preload + 5‑min cooldown
 - [ ] `MonetizationGate` wired on START MATCH / START TRAINING only
 - [ ] UMP consent before first ad request
-- [ ] Privacy / Data safety / listing updated
+- [ ] Privacy / Data safety / listing updated (**promote checklist:** `08-play-store.md` §E)
+- [ ] R8 minify + Play **mapping** upload + **native debug symbols** with production AAB
+  (deferred from Internal 1.1.1 warnings; do before strangers see 1.2.0)
 - [ ] Gate unit tests (Premium, cooldown, not loaded → immediate start)

@@ -1,0 +1,25 @@
+---
+description: Play Console release notes format (fr-FR + en-US locale tags)
+alwaysApply: true
+---
+
+# Play release notes format
+
+When the owner asks for **Google Play release notes** (Internal, Closed, Production, or any track), always answer with **both** locales in this exact wrapper — ready to paste:
+
+```text
+<fr-FR>
+…notes en français…
+</fr-FR>
+<en-US>
+…notes in English…
+</en-US>
+```
+
+## Constraints
+
+- Each language block: **under 500 characters** (Play Console limit).
+- Lead with `RackTrack X.Y.Z` and a one-line intent (e.g. internal test / production).
+- User-facing, concise; no git SHAs or CI jargon.
+- Do not wrap the blocks in Markdown code fences unless the owner asks for a fenced copy.
+- Default languages are **fr-FR** then **en-US**; add other locales only if requested.
