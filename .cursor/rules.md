@@ -43,6 +43,8 @@ You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) fo
 - Do **not** silently drop backlog items from `docs/06-roadmap-todo.md`.
 - Do **not** implement FFB player timeouts (art. 1.2.16) or shot clock — explicitly dropped.
 - Do **not** assume Play closed testing; owner uses internal smoke only.
+- Play release notes: always `<fr-FR>` / `<en-US>` blocks (≤500 chars each) — see
+  `.cursor/rules/play-release-notes.mdc` and `docs/08-play-store.md`.
 
 ## Enforced quality
 
