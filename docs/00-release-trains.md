@@ -20,7 +20,7 @@ main (1.x patchable)
   │
   ├─ 1.1.0 ✅ shipped (GitHub)
   ├─ 1.1.1 ✅ OFL font attribution
-  ├─ 1.2.0 ⬜ Play end-user gate (ads + IAP)   ← next product code
+  ├─ 1.2.0 🔧 monetization code (Internal → then production)   ← current
   └─ 1.2.x hotfixes if needed
        │
        └── branch rc/2.0.0  (open AFTER 1.2.0 is on Play production)
