@@ -2,6 +2,7 @@ package com.racktrack.monetization
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -31,6 +32,9 @@ class RemoveAdsStore(
     private val _adsRemoved = MutableStateFlow(prefs.getBoolean(KEY_ADS_REMOVED, false))
     val adsRemoved: StateFlow<Boolean> = _adsRemoved.asStateFlow()
 
+    private val _statusMessage = MutableStateFlow<String?>(null)
+    val statusMessage: StateFlow<String?> = _statusMessage.asStateFlow()
+
     private var productDetails: ProductDetails? = null
 
     private val billingClient: BillingClient =
@@ -42,12 +46,21 @@ class RemoveAdsStore(
             .build()
 
     fun start() {
+        if (billingClient.isReady) {
+            queryProductDetails()
+            refreshPurchases()
+            return
+        }
         billingClient.startConnection(
             object : BillingClientStateListener {
                 override fun onBillingSetupFinished(result: BillingResult) {
                     if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                         queryProductDetails()
                         refreshPurchases()
+                    } else {
+                        Log.w(TAG, "Billing setup failed: ${result.debugMessage}")
+                        _statusMessage.value =
+                            "Billing unavailable (${result.responseCode}). Use Play Internal install."
                     }
                 }
 
@@ -62,37 +75,65 @@ class RemoveAdsStore(
         billingClient.endConnection()
     }
 
+    fun consumeStatusMessage() {
+        _statusMessage.value = null
+    }
+
     fun launchPurchase(activity: Activity) {
+        if (!billingClient.isReady) {
+            _statusMessage.value = "Connecting to Play Billing…"
+            start()
+            return
+        }
         val details = productDetails
         if (details == null) {
             queryProductDetails()
+            _statusMessage.value =
+                "Product not ready. Install from Play Internal (not sideload) and retry."
             return
         }
-        val productParams =
+        val offerToken = details.oneTimePurchaseOfferDetails?.offerToken
+        val productParamsBuilder =
             BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(details)
-                .build()
+        if (!offerToken.isNullOrEmpty()) {
+            productParamsBuilder.setOfferToken(offerToken)
+        }
         val flowParams =
             BillingFlowParams.newBuilder()
-                .setProductDetailsParamsList(listOf(productParams))
+                .setProductDetailsParamsList(listOf(productParamsBuilder.build()))
                 .build()
-        billingClient.launchBillingFlow(activity, flowParams)
+        val launchResult = billingClient.launchBillingFlow(activity, flowParams)
+        if (launchResult.responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "launchBillingFlow: ${launchResult.debugMessage}")
+            _statusMessage.value = "Purchase UI failed (${launchResult.responseCode})."
+        }
     }
 
     fun restorePurchases() {
         if (!billingClient.isReady) {
+            _statusMessage.value = "Connecting to Play Billing…"
             start()
             return
         }
-        refreshPurchases()
+        refreshPurchases(showEmptyFeedback = true)
     }
 
     override fun onPurchasesUpdated(
         result: BillingResult,
         purchases: MutableList<Purchase>?,
     ) {
-        if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-            handlePurchases(purchases)
+        when (result.responseCode) {
+            BillingClient.BillingResponseCode.OK -> {
+                if (purchases != null) handlePurchases(purchases)
+            }
+            BillingClient.BillingResponseCode.USER_CANCELED -> {
+                // No toast needed.
+            }
+            else -> {
+                Log.w(TAG, "onPurchasesUpdated: ${result.debugMessage}")
+                _statusMessage.value = "Purchase failed (${result.responseCode})."
+            }
         }
     }
 
@@ -109,18 +150,34 @@ class RemoveAdsStore(
         billingClient.queryProductDetailsAsync(params) { result, detailsResult ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 productDetails = detailsResult.productDetailsList.firstOrNull()
+                if (productDetails == null) {
+                    Log.w(TAG, "No productDetails for remove_ads")
+                }
+            } else {
+                Log.w(TAG, "queryProductDetails: ${result.debugMessage}")
             }
         }
     }
 
-    private fun refreshPurchases() {
+    private fun refreshPurchases(showEmptyFeedback: Boolean = false) {
         val params =
             QueryPurchasesParams.newBuilder()
                 .setProductType(BillingClient.ProductType.INAPP)
                 .build()
         billingClient.queryPurchasesAsync(params) { result, purchases ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                val before = _adsRemoved.value
                 handlePurchases(purchases)
+                if (showEmptyFeedback && before == _adsRemoved.value && !_adsRemoved.value) {
+                    _statusMessage.value = "No purchases to restore."
+                } else if (showEmptyFeedback && _adsRemoved.value) {
+                    _statusMessage.value = "Ads removed restored."
+                }
+            } else {
+                Log.w(TAG, "queryPurchases: ${result.debugMessage}")
+                if (showEmptyFeedback) {
+                    _statusMessage.value = "Restore failed (${result.responseCode})."
+                }
             }
         }
     }
@@ -153,6 +210,7 @@ class RemoveAdsStore(
     }
 
     companion object {
+        private const val TAG = "RemoveAdsStore"
         private const val PREFS_NAME = "racktrack_monetization"
         private const val KEY_ADS_REMOVED = "ads_removed"
     }

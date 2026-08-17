@@ -23,6 +23,7 @@ class MonetizationFacade(
         )
 
     val adsRemoved: StateFlow<Boolean> = removeAdsStore.adsRemoved
+    val billingStatusMessage: StateFlow<String?> = removeAdsStore.statusMessage
 
     fun start(activity: Activity) {
         removeAdsStore.start()
@@ -58,6 +59,10 @@ class MonetizationFacade(
 
     fun restorePurchases() {
         removeAdsStore.restorePurchases()
+    }
+
+    fun consumeBillingStatusMessage() {
+        removeAdsStore.consumeStatusMessage()
     }
 
     fun onSetupVisible() {

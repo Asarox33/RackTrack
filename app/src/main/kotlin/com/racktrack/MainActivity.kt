@@ -2,6 +2,7 @@ package com.racktrack
 
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -38,6 +39,13 @@ class MainActivity : ComponentActivity() {
             val settings by viewModel.settings.collectAsStateWithLifecycle()
             val settingsOpen by viewModel.settingsOpen.collectAsStateWithLifecycle()
             val adsRemoved by monetization.adsRemoved.collectAsStateWithLifecycle()
+            val billingStatus by monetization.billingStatusMessage.collectAsStateWithLifecycle()
+
+            LaunchedEffect(billingStatus) {
+                val message = billingStatus ?: return@LaunchedEffect
+                Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                monetization.consumeBillingStatusMessage()
+            }
 
             LaunchedEffect(settings.keepScreenOn) {
                 if (settings.keepScreenOn) {
