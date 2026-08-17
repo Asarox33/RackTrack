@@ -69,7 +69,9 @@ base64 -w0 racktrack-upload.p12 | pbcopy   # or clip.exe / xclip
 
 Workflow: [`.github/workflows/signed-aab.yml`](../.github/workflows/signed-aab.yml)  
 Triggers: **`workflow_dispatch`** or tag **`v*`**.  
-Output: Actions artifact `app-release-aab` (14 days). **Not** attached to GitHub Releases.
+Output: **Actions** artifact `app-release-aab` only (private to the repo, expires in **14 days**).
+That is intentional CI backup — **not** a public download.
+**Never** attach an AAB/APK to a GitHub **Release** (notes-only / `LICENSE`).
 
 Decode helper: [`.github/scripts/setup-upload-signing.sh`](../.github/scripts/setup-upload-signing.sh).
 
