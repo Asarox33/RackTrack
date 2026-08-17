@@ -14,6 +14,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
+import com.android.billingclient.api.UnfetchedProduct
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,8 @@ class RemoveAdsStore(
     val statusMessage: StateFlow<String?> = _statusMessage.asStateFlow()
 
     private var productDetails: ProductDetails? = null
+    /** Last human-readable catalog failure (toast when purchase tapped too early). */
+    private var lastCatalogHint: String? = null
 
     private val billingClient: BillingClient =
         BillingClient.newBuilder(appContext)
@@ -89,10 +92,16 @@ class RemoveAdsStore(
         if (details == null) {
             queryProductDetails()
             _statusMessage.value =
-                "Product not ready. Install from Play Internal (not sideload) and retry."
+                lastCatalogHint
+                    ?: "remove_ads not in Play catalog yet. Retry in a minute."
             return
         }
-        val offerToken = details.oneTimePurchaseOfferDetails?.offerToken
+        // Billing 8+: prefer offer list; fall back to single legacy offer.
+        val offerToken =
+            details.oneTimePurchaseOfferDetailsList
+                ?.firstOrNull()
+                ?.offerToken
+                ?: details.oneTimePurchaseOfferDetails?.offerToken
         val productParamsBuilder =
             BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(details)
@@ -150,11 +159,34 @@ class RemoveAdsStore(
         billingClient.queryProductDetailsAsync(params) { result, detailsResult ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 productDetails = detailsResult.productDetailsList.firstOrNull()
-                if (productDetails == null) {
-                    Log.w(TAG, "No productDetails for remove_ads")
+                if (productDetails != null) {
+                    lastCatalogHint = null
+                    Log.i(TAG, "Loaded productDetails for remove_ads")
+                    return@queryProductDetailsAsync
                 }
+                val unfetched = detailsResult.unfetchedProductList
+                val status =
+                    unfetched
+                        .firstOrNull {
+                            it.productId == MonetizationPolicy.REMOVE_ADS_PRODUCT_ID
+                        }?.statusCode
+                Log.w(
+                    TAG,
+                    "No productDetails for remove_ads; unfetched=$unfetched status=$status",
+                )
+                lastCatalogHint =
+                    when (status) {
+                        UnfetchedProduct.StatusCode.NO_ELIGIBLE_OFFER ->
+                            "No eligible offer for remove_ads. In Play Console, activate the buy option (legacy-compatible)."
+                        UnfetchedProduct.StatusCode.PRODUCT_NOT_FOUND ->
+                            "remove_ads not found. Confirm product id Active in Play Console."
+                        else ->
+                            "remove_ads not in catalog (status=$status). Retry later or check Console."
+                    }
             } else {
                 Log.w(TAG, "queryProductDetails: ${result.debugMessage}")
+                lastCatalogHint =
+                    "Billing catalog error (${result.responseCode}). Retry later."
             }
         }
     }
