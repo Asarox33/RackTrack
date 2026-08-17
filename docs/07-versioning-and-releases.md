@@ -5,15 +5,28 @@
 Product version lives in [`gradle.properties`](../gradle.properties):
 
 ```properties
-racktrack.versionName=1.1.1
-racktrack.versionCode=10101
+racktrack.versionName=1.2.0
+racktrack.versionCode=10201
 ```
 
 - **versionName** — classic semver `X.Y.Z` (users + GitHub Releases).
-- **versionCode** — Android integer: `major*10000 + minor*100 + patch`
-  (e.g. `1.2.3` → `10203`). Always bump together with versionName.
+- **versionCode** — Android integer, always strictly increasing for Play uploads.
 
-The app module reads these properties in `app/build.gradle.kts`.
+**Formula (from 1.2.0 onward):** `major*10000 + minor*100 + patch*10`
+
+| versionName | Base versionCode | Notes |
+|-------------|------------------|-------|
+| `1.2.0` | `10200` | First AAB for that name |
+| Internal rebuilds of `1.2.0` | `10201`…`10209` | Same name, new Play upload |
+| `1.2.1` | `10210` | Next patch — **no collision** with rebuilds |
+| `1.2.2` | `10220` | … |
+
+Older 1.0.x / 1.1.x used `major*10000 + minor*100 + patch` (no ×10). Do not rewrite history;
+new bumps follow the ×10 formula so Internal smoke can iterate without stealing the next
+patch’s code.
+
+Always bump `versionCode` for every Play AAB; bump `versionName` only for a user-facing
+release (and add `CHANGELOG.md`).
 
 ## Semver meaning
 
