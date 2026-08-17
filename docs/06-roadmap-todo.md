@@ -108,6 +108,8 @@ only. **Open / production for strangers waits for 1.2.0** (with ads).
 - ⬜ Internal smoke of monetized build → **production 1.2.0** for strangers
 
 ### Later on 1.x (optional, after Play launch)
+- ⬜ **CI → Play Internal upload** (SA + Publisher API + workflow step) — today CI only
+  produces a signed AAB artifact; see `08-play-store.md` “Later — CI upload…”
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
   (may slip to 2.0 if paired with identity)
@@ -146,6 +148,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ## Progress notes
 
+- 2026-08-17: Backlog — CI auto-upload to Play **Internal** (service account + Publisher
+  API + workflow); keep manual/artifact-only until owner asks (`08-play-store.md`).
 - 2026-08-17: Internal **1.1.1** live (owner). When promoting to **production 1.2.0**, do not
   forget Console updates in `08-play-store.md` §E (ads, Data safety, Billing, integrity,
   R8 mapping/symbols) — listing assets mostly already done.
