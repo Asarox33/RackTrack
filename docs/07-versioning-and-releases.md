@@ -12,18 +12,24 @@ racktrack.versionCode=10201
 - **versionName** — classic semver `X.Y.Z` (users + GitHub Releases).
 - **versionCode** — Android integer, always strictly increasing for Play uploads.
 
-**Formula (from 1.2.0 onward):** `major*10000 + minor*100 + patch*10`
+**Formula (from 1.2.1 onward):** `major*100000 + minor*1000 + patch*10`
 
 | versionName | Base versionCode | Notes |
 |-------------|------------------|-------|
-| `1.2.0` | `10200` | First AAB for that name |
-| Internal rebuilds of `1.2.0` | `10201`…`10209` | Same name, new Play upload |
-| `1.2.1` | `10210` | Next patch — **no collision** with rebuilds |
-| `1.2.2` | `10220` | … |
+| `1.2.1` | `102010` | First AAB for that name |
+| Internal rebuilds of `1.2.1` | `102011`…`102019` | Same name, new Play upload |
+| `1.2.10` | `102100` | Patch 10 — no clash with `1.2.1` |
+| `1.2.99` | `102990` | Soft cap: patch ≤ 99, minor ≤ 99 |
+| `1.3.0` | `103000` | Next minor |
 
-Older 1.0.x / 1.1.x used `major*10000 + minor*100 + patch` (no ×10). Do not rewrite history;
-new bumps follow the ×10 formula so Internal smoke can iterate without stealing the next
-patch’s code.
+Room for 99 patches and 99 minors per major; Play only cares that each upload’s
+`versionCode` is **strictly greater** than the previous one.
+
+**1.2.0 exception (already on Play):** used the short range `10200`–`10209` for the
+first monetization Internal smokes. Do not reuse those numbers; next user-facing bump
+is `1.2.1` → `102010` (or keep climbing `10202`… only while still on name `1.2.0`).
+
+Older 1.0.x / 1.1.x used `major*10000 + minor*100 + patch`. Do not rewrite history.
 
 Always bump `versionCode` for every Play AAB; bump `versionName` only for a user-facing
 release (and add `CHANGELOG.md`).
