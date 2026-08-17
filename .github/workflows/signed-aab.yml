@@ -1,0 +1,66 @@
+name: Signed release AAB
+
+# Builds a Play-uploadable release AAB when upload-key secrets are configured.
+# Does NOT attach the AAB to GitHub Releases (notes-only policy).
+#
+# Triggers: manual dispatch, or push of tag v*
+# Secrets (repo Settings → Secrets → Actions):
+#   RACKTRACK_KEYSTORE_BASE64   — base64 of racktrack-upload.p12
+#   RACKTRACK_KEYSTORE_PASSWORD
+#   RACKTRACK_KEY_ALIAS         — usually racktrack
+#   RACKTRACK_KEY_PASSWORD
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  bundle-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Require signing secrets
+        env:
+          RACKTRACK_KEYSTORE_BASE64: ${{ secrets.RACKTRACK_KEYSTORE_BASE64 }}
+        run: |
+          if [[ -z "${RACKTRACK_KEYSTORE_BASE64:-}" ]]; then
+            echo "::error::Missing RACKTRACK_KEYSTORE_BASE64 (and related signing secrets). See docs/08-play-store.md"
+            exit 1
+          fi
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Decode upload keystore
+        env:
+          RACKTRACK_KEYSTORE_BASE64: ${{ secrets.RACKTRACK_KEYSTORE_BASE64 }}
+          RACKTRACK_KEYSTORE_PASSWORD: ${{ secrets.RACKTRACK_KEYSTORE_PASSWORD }}
+          RACKTRACK_KEY_ALIAS: ${{ secrets.RACKTRACK_KEY_ALIAS }}
+          RACKTRACK_KEY_PASSWORD: ${{ secrets.RACKTRACK_KEY_PASSWORD }}
+        run: bash .github/scripts/setup-upload-signing.sh
+
+      - name: Quality gates
+        run: ./gradlew ktlintCheck detekt :app:domainCoverage
+
+      - name: Bundle release AAB
+        run: ./gradlew :app:bundleRelease
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14

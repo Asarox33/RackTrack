@@ -1,0 +1,17 @@
+title: RackTrack
+description: American pool scoreboard by MappM
+theme: jekyll-theme-cayman
+exclude:
+  - 02-game-rules-8-ball.md
+  - 02-game-rules-9-ball.md
+  - 02-game-rules-10-ball.md
+  - 02-game-rules-14-1.md
+  - 03-domain-model.md
+  - 04-architecture.md
+  - 05-conventions.md
+  - 06-roadmap-todo.md
+  - 07-versioning-and-releases.md
+  - 00-release-trains.md
+  - 08-play-store.md
+  - 09-monetization.md
+  - 01-product-specification.md

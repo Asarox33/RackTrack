@@ -18,3 +18,7 @@ captures/
 *.keystore
 keystore.properties
 play-service-account.json
+
+keystore.BACKUP.local.txt
+
+*.p12

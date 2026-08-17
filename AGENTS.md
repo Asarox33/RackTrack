@@ -37,6 +37,12 @@ When editing `docs/06-roadmap-todo.md` or related plans:
 - Under Gradle 9, keep `testRuntimeOnly` JUnit Platform launcher
 - Release signing: `keystore.properties` (gitignored) → upload key; else debug fallback
   (`keystore.properties.example`, `docs/08-play-store.md`)
+- Play privacy HTTPS: GitHub Pages from `docs/` →
+  `https://asarox33.github.io/RackTrack/privacy-policy.html`
+- Signed AAB CI: workflow **Signed release AAB** (`workflow_dispatch` or tag `v*`).
+  Secrets: `RACKTRACK_KEYSTORE_BASE64`, `RACKTRACK_KEYSTORE_PASSWORD`,
+  `RACKTRACK_KEY_ALIAS`, `RACKTRACK_KEY_PASSWORD`. Artifact only — never attach AAB
+  to GitHub Releases. See `docs/08-play-store.md`.
 
 ### Commands
 

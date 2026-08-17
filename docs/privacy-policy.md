@@ -1,13 +1,15 @@
+---
+title: Privacy policy
+permalink: /privacy-policy.html
+---
+
 # Privacy policy — RackTrack
 
 **Last updated:** 2026-08-15  
 **Publisher:** MappM  
 **Contact:** mappm.pro@gmail.com · https://github.com/Asarox33/RackTrack
 
-This page is the draft / publishable privacy text for Google Play. Host it at a stable
-**HTTPS** URL (e.g. GitHub Pages) and paste that URL into Play Console.
-
----
+This page is the publishable privacy text for Google Play.
 
 ## Who we are
 
