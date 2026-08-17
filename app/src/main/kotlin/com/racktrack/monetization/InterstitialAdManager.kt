@@ -62,6 +62,10 @@ class InterstitialAdManager(
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     loading = false
                     interstitial = null
+                    android.util.Log.w(
+                        "InterstitialAds",
+                        "Failed to load (${error.code}): ${error.message}",
+                    )
                 }
             },
         )

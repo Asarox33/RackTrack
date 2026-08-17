@@ -5,15 +5,41 @@
 Product version lives in [`gradle.properties`](../gradle.properties):
 
 ```properties
-racktrack.versionName=1.1.1
-racktrack.versionCode=10101
+racktrack.versionName=1.2.0
+racktrack.versionCode=10201
 ```
 
 - **versionName** — classic semver `X.Y.Z` (users + GitHub Releases).
-- **versionCode** — Android integer: `major*10000 + minor*100 + patch`
-  (e.g. `1.2.3` → `10203`). Always bump together with versionName.
+- **versionCode** — Android integer, always strictly increasing for Play uploads.
 
-The app module reads these properties in `app/build.gradle.kts`.
+**Formula (from 1.2.1 onward):**
+
+```text
+versionCode = major*100000 + minor*1000 + patch*10 + smoke
+```
+
+- **smoke** = `0` for the first AAB of that `versionName`, then `1`…`9` for Internal rebuilds of the same name.
+
+| versionName | smoke | versionCode |
+|-------------|-------|-------------|
+| `1.2.1` | 0 | `102010` |
+| `1.2.1` | 1…9 | `102011`…`102019` |
+| `1.2.10` | 0 | `102100` |
+| `1.2.99` | 0 | `102990` |
+| `1.3.0` | 0 | `103000` |
+
+Soft caps: patch ≤ 99, minor ≤ 99, smoke ≤ 9. Play only cares that each upload’s
+`versionCode` is **strictly greater** than the previous one.
+
+**1.2.0 exception (already on Play):** short range `10200`–`10209` for the first
+monetization Internal smokes (does not match the formula above). Do not reuse those
+numbers; next user-facing bump is `1.2.1` → `102010` (or keep climbing `10202`… only
+while still on name `1.2.0`).
+
+Older 1.0.x / 1.1.x used `major*10000 + minor*100 + patch`. Do not rewrite history.
+
+Always bump `versionCode` for every Play AAB; bump `versionName` only for a user-facing
+release (and add `CHANGELOG.md`).
 
 ## Semver meaning
 
