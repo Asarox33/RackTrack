@@ -92,12 +92,13 @@ only. **Open / production for strangers waits for 1.2.0** (with ads).
 
 - ✅ Play Store upload keystore + Internal **1.1.1** listing / Data safety local-only
   (see `08-play-store.md`; privacy URL live)
-- ⬜ Implement monetization per `docs/09-monetization.md`
+- ✅ Implement monetization per `docs/09-monetization.md` (code on **1.2.0**)
   - AdMob **interstitial only** (no banners) on **START MATCH / START TRAINING**
   - 5‑minute cooldown from last **shown** ad; no cooldown UI
   - Never wait on no-fill / load failure → board immediately
   - UMP / consent (EEA) before first ad request
   - Play Billing one-time `remove_ads` at **~4,99 €** + Settings **Remove ads** / **Restore**
+  - Still need: real AdMob IDs + Play product `remove_ads` before production
 - ⬜ **Promote Internal → Production 1.2.0** — Console checklist in `08-play-store.md` §E
   (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
   recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
@@ -148,6 +149,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ## Progress notes
 
+- 2026-08-17: **1.2.0** code — AdMob interstitial + UMP + Play Billing `remove_ads` + Settings
+  UI + gate unit tests (Google sample ad IDs until real units); Console promote still open.
 - 2026-08-17: Backlog — CI auto-upload to Play **Internal** (service account + Publisher
   API + workflow); keep manual/artifact-only until owner asks (`08-play-store.md`).
 - 2026-08-17: Internal **1.1.1** live (owner). When promoting to **production 1.2.0**, do not

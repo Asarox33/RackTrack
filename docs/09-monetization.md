@@ -270,11 +270,13 @@ Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
 
 ## 10. Implementation checklist (1.2.0)
 
-- [ ] `RemoveAdsStore` + Settings buy / restore / owned UI
-- [ ] `InterstitialAdManager` + preload + 5‑min cooldown
-- [ ] `MonetizationGate` wired on START MATCH / START TRAINING only
-- [ ] UMP consent before first ad request
+- [x] `RemoveAdsStore` + Settings buy / restore / owned UI
+- [x] `InterstitialAdManager` + preload + 5‑min cooldown
+- [x] `MonetizationGate` wired on START MATCH / START TRAINING only
+- [x] UMP consent before first ad request
 - [ ] Privacy / Data safety / listing updated (**promote checklist:** `08-play-store.md` §E)
 - [ ] R8 minify + Play **mapping** upload + **native debug symbols** with production AAB
   (deferred from Internal 1.1.1 warnings; do before strangers see 1.2.0)
-- [ ] Gate unit tests (Premium, cooldown, not loaded → immediate start)
+- [x] Gate unit tests (Premium, cooldown, not loaded → immediate start)
+- [ ] Create Play Billing product `remove_ads` (~4,99 €) + real AdMob app/unit IDs
+  (sample Google test IDs in `gradle.properties` until then)

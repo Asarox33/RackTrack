@@ -17,8 +17,7 @@ Orientation: `fullSensor`. No per-shot ball/pocket entry.
 
 Read **`docs/00-release-trains.md`** first.
 
-- **1.1.0** — current GitHub line (solo, etc.)
-- **1.2.0** — first **Play production** for strangers = monetization (`docs/09-monetization.md`)
+- **1.2.0** — monetization implementation (`docs/09-monetization.md`); first Play production gate
 - **2.0.0** on `rc/2.0.0` — i18n, multi-ruleset, KMP/CMP — **not** on the 1.2 Play gate
 
 ### Anti-drift (mandatory)

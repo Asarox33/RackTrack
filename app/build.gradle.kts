@@ -34,6 +34,17 @@ android {
             "REPO_URL",
             "\"https://github.com/Asarox33/RackTrack\"",
         )
+        val admobAppId =
+            providers.gradleProperty("racktrack.admobAppId").orElse(
+                "ca-app-pub-3940256099942544~3347511713",
+            ).get()
+        val admobInterstitialUnitId =
+            providers.gradleProperty("racktrack.admobInterstitialUnitId").orElse(
+                "ca-app-pub-3940256099942544/1033173712",
+            ).get()
+        buildConfigField("String", "ADMOB_APP_ID", "\"$admobAppId\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", "\"$admobInterstitialUnitId\"")
+        manifestPlaceholders["adMobAppId"] = admobAppId
     }
 
     signingConfigs {
@@ -99,6 +110,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
+    implementation(libs.billing.ktx)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

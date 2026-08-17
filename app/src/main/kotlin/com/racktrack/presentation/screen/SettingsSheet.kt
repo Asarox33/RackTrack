@@ -60,6 +60,9 @@ import java.util.TimeZone
 @Composable
 fun SettingsSheet(
     settings: UserSettings,
+    adsRemoved: Boolean = false,
+    onRemoveAds: () -> Unit = {},
+    onRestorePurchases: () -> Unit = {},
     onFeltSelected: (FeltTone) -> Unit,
     onKeepScreenOnChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
@@ -154,6 +157,39 @@ fun SettingsSheet(
                 label = "Haptics",
                 checked = settings.hapticsEnabled,
                 onCheckedChange = onHapticsChange,
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+            SectionLabel("Ads")
+            Spacer(modifier = Modifier.height(8.dp))
+            if (adsRemoved) {
+                Text(
+                    text = "Ads removed",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ScoreWhite.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                TexturedActionButton(
+                    label = "REMOVE ADS",
+                    base = felt.accent,
+                    light = felt.accentLight,
+                    dark = felt.accentDark,
+                    enabled = true,
+                    onClick = onRemoveAds,
+                    height = 44.dp,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            TexturedActionButton(
+                label = "RESTORE PURCHASES",
+                base = felt.mid,
+                light = felt.accentLight,
+                dark = felt.dark,
+                enabled = true,
+                onClick = onRestorePurchases,
+                height = 44.dp,
             )
 
             Spacer(modifier = Modifier.height(14.dp))

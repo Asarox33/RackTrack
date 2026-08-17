@@ -12,6 +12,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.racktrack.monetization.MonetizationFacade
 import com.racktrack.presentation.screen.HistoryDetailScreen
 import com.racktrack.presentation.screen.HistoryScreen
 import com.racktrack.presentation.screen.MatchBoardScreen
@@ -23,15 +25,19 @@ import com.racktrack.presentation.viewmodel.MatchViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MatchViewModel by viewModels()
+    private lateinit var monetization: MonetizationFacade
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        monetization = MonetizationFacade(this, lifecycleScope)
+        monetization.start(this)
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
         setContent {
             val settings by viewModel.settings.collectAsStateWithLifecycle()
             val settingsOpen by viewModel.settingsOpen.collectAsStateWithLifecycle()
+            val adsRemoved by monetization.adsRemoved.collectAsStateWithLifecycle()
 
             LaunchedEffect(settings.keepScreenOn) {
                 if (settings.keepScreenOn) {
@@ -51,21 +57,30 @@ class MainActivity : ComponentActivity() {
                 val selectedHistory by viewModel.selectedHistoryMatch.collectAsStateWithLifecycle()
 
                 when (val current = screen) {
-                    AppScreen.Setup -> SetupScreen(
-                        state = setup,
-                        onPlayer1Change = viewModel::updatePlayer1Name,
-                        onPlayer2Change = viewModel::updatePlayer2Name,
-                        onGameModeChange = viewModel::updateGameMode,
-                        onSoloTrainingChange = viewModel::setSoloTraining,
-                        onRacksChange = viewModel::updateRacksToWin,
-                        onPointsChange = viewModel::updatePointsToWin,
-                        onInningsChange = viewModel::updateInningsLimit,
-                        onBreakerChange = viewModel::setPlayer1BreaksFirst,
-                        onBreakRuleChange = viewModel::setBreakRule,
-                        onStart = viewModel::startMatch,
-                        onOpenHistory = viewModel::openHistory,
-                        onOpenSettings = viewModel::openSettings,
-                    )
+                    AppScreen.Setup -> {
+                        LaunchedEffect(Unit) {
+                            monetization.onSetupVisible()
+                        }
+                        SetupScreen(
+                            state = setup,
+                            onPlayer1Change = viewModel::updatePlayer1Name,
+                            onPlayer2Change = viewModel::updatePlayer2Name,
+                            onGameModeChange = viewModel::updateGameMode,
+                            onSoloTrainingChange = viewModel::setSoloTraining,
+                            onRacksChange = viewModel::updateRacksToWin,
+                            onPointsChange = viewModel::updatePointsToWin,
+                            onInningsChange = viewModel::updateInningsLimit,
+                            onBreakerChange = viewModel::setPlayer1BreaksFirst,
+                            onBreakRuleChange = viewModel::setBreakRule,
+                            onStart = {
+                                monetization.runAfterAdOpportunity(this@MainActivity) {
+                                    viewModel.startMatch()
+                                }
+                            },
+                            onOpenHistory = viewModel::openHistory,
+                            onOpenSettings = viewModel::openSettings,
+                        )
+                    }
                     is AppScreen.MatchBoard -> {
                         val matchPaused by viewModel.matchPaused.collectAsStateWithLifecycle()
                         MatchBoardScreen(
@@ -105,6 +120,9 @@ class MainActivity : ComponentActivity() {
                 if (settingsOpen) {
                     SettingsSheet(
                         settings = settings,
+                        adsRemoved = adsRemoved,
+                        onRemoveAds = { monetization.launchRemoveAdsPurchase(this@MainActivity) },
+                        onRestorePurchases = { monetization.restorePurchases() },
                         onFeltSelected = viewModel::setFeltTone,
                         onKeepScreenOnChange = viewModel::setKeepScreenOn,
                         onHapticsChange = viewModel::setHapticsEnabled,
@@ -117,6 +135,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (::monetization.isInitialized) {
+            monetization.stop()
+        }
+        super.onDestroy()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
