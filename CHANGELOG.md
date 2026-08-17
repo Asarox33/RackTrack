@@ -6,6 +6,22 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.2.0 — 2026-08-17
+
+### Features
+
+- **AdMob interstitial** — optional full-screen ad when starting a match or solo training
+  (not during live scoring). At most one shown every 5 minutes; never blocks start if the ad
+  is missing, fails, or is still loading.
+- **Remove ads (IAP)** — one-time Play purchase `remove_ads` (~4,99 €) plus Settings
+  **Remove ads** / **Restore purchases**.
+- **UMP consent** — Google User Messaging Platform before ad requests where required (e.g. EEA).
+
+### Notes
+
+- First Play production candidate for strangers must ship with this monetization stack
+  (see `docs/09-monetization.md`). Internal testing may use Google/sample or real AdMob units.
+
 ## 1.1.1 — 2026-08-15
 
 ### Improvements
