@@ -153,7 +153,23 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 | `app/build.gradle.kts` release signing if properties present | yes |
 | `:app:bundleRelease` local | yes |
 | CI signed AAB artifact (`signed-aab.yml`) | yes — needs secrets |
-| Fastlane / auto Play upload | **out of scope** for 1.1.1 |
+| Fastlane / auto Play upload | **out of scope** for 1.1.1 — see backlog below |
+
+### Later — CI upload to Play Internal (not built yet)
+
+Today `signed-aab.yml` only uploads a **GitHub Actions artifact**. To publish the AAB
+straight to **Internal testing** from CI, still need:
+
+1. Google Cloud project linked to Play + **Android Publisher API** enabled
+2. Service account invited in Play Console (Users & permissions) with release rights
+   on the Internal track
+3. GitHub secret for SA JSON (or Workload Identity Federation)
+4. Workflow step after `bundleRelease` (e.g. `r0adkll/upload-google-play` or Fastlane
+   `supply`) — `packageName: com.racktrack`, `track: internal`, release notes
+   (`<fr-FR>` / `<en-US>`)
+
+Prereq already met: upload keystore secrets + first manual Internal release.
+Defer until owner wants less manual Internal shipping (can wait for **1.2.0** cadence).
 
 ---
 
