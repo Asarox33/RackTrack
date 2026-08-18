@@ -99,13 +99,15 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
   - Never wait on no-fill / load failure → board immediately
   - UMP / consent (EEA) before first ad request
   - Play Billing one-time `remove_ads` at **~4,99 €** + Settings **Remove ads** / **Restore**
-  - Still need: real AdMob unit (after store link / AdMob review) before relying on fill
+  - Still need: **AdMob real unit** after Production + store link / AdMob review
+    (`08` §E “After Production”; sample unit OK until then)
 - ✅ Play product `remove_ads` Active + Internal IAP smoke (license testers)
 - ⬜ **Closed testing** — ≥12 opted-in testers for ≥14 consecutive days (Play production gate)
 - ⬜ **Promote → Production 1.2.0** after Closed eligibility + Console `08` §E
   (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
   recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
-- ⬜ Play crash diagnostics for production: enable **R8 minify** + upload
+- ⬜ **Post-prod AdMob patch** — link Play in AdMob → switch `gradle.properties` to real
+  interstitial unit + version bump- ⬜ Play crash diagnostics for production: enable **R8 minify** + upload
   **deobfuscation (mapping)** with the AAB; upload **native debug symbols**
   (Play Console warnings seen on Internal 1.1.1 — safe to ignore for smoke;
   required quality for stranger-facing **1.2.0**, before opening `rc/2.0.0`)

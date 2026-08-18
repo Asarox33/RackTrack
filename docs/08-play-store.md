@@ -142,8 +142,18 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 - [ ] **Play Billing** products (`remove_ads`) + Console Billing protection as needed
 - [ ] **Protégé avec Play** — device integrity **recommandé** (was Aucun on Internal);
       Play Integrity API in-app only if product asks
-- [ ] Link Play listing in **AdMob** → request AdMob app review (real interstitial unit)
 - [ ] Promote → **Production** once access granted; countries / pricing free + IAP
+  (**OK to ship first with Google SAMPLE interstitial** in `gradle.properties` — gate
+  already skips when no fill; do **not** leave sample IDs once AdMob serves)
+
+**After Production is live — AdMob real unit (patch)**
+
+1. AdMob → app RackTrack → **lier la fiche Google Play** (`com.racktrack`)
+2. Demander / attendre l’**examen** AdMob jusqu’à fill réel
+3. Patch `gradle.properties`: set `racktrack.admobInterstitialUnitId` to the real unit
+   `ca-app-pub-5352846919427815/1720927691` (sample id out)
+4. Bump `versionCode` (1.2.0 smoke or **1.2.1**) + Play release (Closed or Production)
+5. Smoke: interstitial on Start for a non‑Remove‑ads install
 
 **Build / crash quality (with monetization AAB)**
 
