@@ -42,7 +42,8 @@ You are working on RackTrack, a native Android app (Kotlin + Jetpack Compose) fo
 - Do **not** add Hilt unless the user explicitly asks.
 - Do **not** silently drop backlog items from `docs/06-roadmap-todo.md`.
 - Do **not** implement FFB player timeouts (art. 1.2.16) or shot clock — explicitly dropped.
-- Do **not** assume Play closed testing; owner uses internal smoke only.
+- Play production access on this account needs **Closed testing 12×14**; Internal = owner
+  smoke only (see `docs/00-release-trains.md`, `docs/08-play-store.md` §E).
 - Play release notes: always `<fr-FR>` / `<en-US>` blocks (≤500 chars each) — see
   `.cursor/rules/play-release-notes.mdc` and `docs/08-play-store.md`.
 
