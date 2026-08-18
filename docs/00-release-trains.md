@@ -20,7 +20,7 @@ main (1.x patchable)
   │
   ├─ 1.1.0 ✅ shipped (GitHub)
   ├─ 1.1.1 ✅ OFL font attribution
-  ├─ 1.2.0 🔧 monetization code (Internal → then production)   ← current
+  ├─ 1.2.0 🔧 monetization (Internal smoke → Closed 12×14 → production)  ← current
   └─ 1.2.x hotfixes if needed
        │
        └── branch rc/2.0.0  (open AFTER 1.2.0 is on Play production)
@@ -31,10 +31,11 @@ main (1.x patchable)
 
 ## Owner decisions (locked)
 
-1. **No Play closed testing track.** Validation = **internal** (owner device(s) only).
-   Whether the first Console upload is still **1.1.x** or already **1.2.0** depends on
-   Google account validation timing — either is fine for internal smoke. **Open /
-   production for strangers still requires 1.2.0 with ads** (do not soft-launch ad-free).
+1. **Play Closed testing is required for production access** on this developer account
+   (Google policy: ≥12 closed testers opted in for ≥14 consecutive days). **Internal**
+   remains owner smoke only and does **not** unlock production. Put monetized **1.2.0**
+   on Closed while the clock runs; **open / production for strangers still = 1.2.0 with
+   ads** (do not soft-launch ad-free).
 2. **`rc/2.0.0` opens after 1.2.0 is on Play production** (not in parallel with the
    monetization rush).
 3. **FFB player timeouts (art. 1.2.16) are out of product** — too close to per-action
@@ -51,7 +52,8 @@ main (1.x patchable)
 4. Pool **domain** never imports AdMob / Billing / UMP (`09-monetization.md` §9).
 5. Official binaries = **stores** (or local build). GitHub Releases = **notes only** (`LICENSE`).
 6. **Do not** implement FFB player timeouts / shot-clock-like pause quotas (dropped).
-7. Play testing is **internal only** — do not assume a closed-test (12×14) requirement in plans.
+7. Production access needs **Closed 12×14** on this account; keep **Internal** for owner
+   smoke. Do not skip Closed hoping Internal alone unlocks Production.
 
 ---
 
@@ -63,7 +65,7 @@ main (1.x patchable)
 | 2 | Human | Create upload keystore locally; fill `keystore.properties` (never commit) |
 | 3 | Repo | Privacy URL live (see `privacy-policy.md` + `08-play-store.md`) |
 | 4 | Code | Implement **1.2.0** monetization per `09-monetization.md` |
-| 5 | Human | Internal smoke monetized build → update Console per `08` §E → **production 1.2.0** |
+| 5 | Human | Internal smoke → **Closed** (≥12 testers, 14 days) → Console `08` §E → **production 1.2.0** |
 | 6 | Repo | Open `rc/2.0.0` **after** 1.2.0 is live on Play |
 
 ---

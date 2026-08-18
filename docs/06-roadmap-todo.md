@@ -87,8 +87,9 @@ then adding interstitials later is a bad trust message — do not do that.
 (interstitial only, Start gate, 5‑min cooldown, never block start, IAP **4,99 €**, Restore).
 
 Gate: Google Play Console account validated + upload keystore + listing / Data safety /
-privacy URL updated for ads & Billing. **No closed-test track** — owner **internal** smoke
-only. **Open / production for strangers waits for 1.2.0** (with ads).
+privacy URL updated for ads & Billing. **Closed 12×14** required before Production on
+this account (Internal = owner smoke only). **Open / production for strangers waits for
+1.2.0** (with ads).
 
 - ✅ Play Store upload keystore + Internal **1.1.1** listing / Data safety local-only
   (see `08-play-store.md`; privacy URL live)
@@ -98,15 +99,20 @@ only. **Open / production for strangers waits for 1.2.0** (with ads).
   - Never wait on no-fill / load failure → board immediately
   - UMP / consent (EEA) before first ad request
   - Play Billing one-time `remove_ads` at **~4,99 €** + Settings **Remove ads** / **Restore**
-  - Still need: real AdMob IDs + Play product `remove_ads` before production
-- ⬜ **Promote Internal → Production 1.2.0** — Console checklist in `08-play-store.md` §E
+  - Still need: **AdMob real unit** after Production + store link / AdMob review
+    (`08` §E “After Production”; sample unit OK until then)
+- ✅ Play product `remove_ads` Active + Internal IAP smoke (license testers)
+- ⬜ **Closed testing** — ≥12 opted-in testers for ≥14 consecutive days (Play production gate)
+- ⬜ **Promote → Production 1.2.0** after Closed eligibility + Console `08` §E
   (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
   recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
+- ⬜ **Post-prod AdMob patch** — link Play in AdMob → switch `gradle.properties` to real
+  interstitial unit + version bump
 - ⬜ Play crash diagnostics for production: enable **R8 minify** + upload
   **deobfuscation (mapping)** with the AAB; upload **native debug symbols**
   (Play Console warnings seen on Internal 1.1.1 — safe to ignore for smoke;
   required quality for stranger-facing **1.2.0**, before opening `rc/2.0.0`)
-- ⬜ Internal smoke of monetized build → **production 1.2.0** for strangers
+- ⬜ Closed smoke OK → **production 1.2.0** for strangers (after 12×14 + §E)
 
 ### Later on 1.x (optional, after Play launch)
 - ⬜ **CI → Play Internal upload** (SA + Publisher API + workflow step) — today CI only
@@ -144,11 +150,11 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~FFB player timeouts / match pause quotas (art. 1.2.16)~~ — would pull the app toward
   per-action officiating; keep **club pause** (duration freeze only) from 1.0.1 instead
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
-- ~~Play closed testing track (12×14)~~ — owner uses **internal** testing only; strangers see
-  production **1.2.0** with monetization
-
 ## Progress notes
 
+- 2026-08-18: **Closed testing required** — Play blocks Production until ≥12 closed testers
+  opted in for ≥14 consecutive days (personal/new-account policy). Reversed earlier “no
+  closed track” lock; Internal stays owner smoke. Start Closed with monetized **1.2.0** now.
 - 2026-08-17: **1.2.0** code — AdMob interstitial + UMP + Play Billing `remove_ads` + Settings
   UI + gate unit tests (Google sample ad IDs until real units); Console promote still open.
 - 2026-08-17: Backlog — CI auto-upload to Play **Internal** (service account + Publisher
@@ -160,8 +166,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   ship R8 mapping + native debug symbols with the Play AAB (Console warnings OK to skip on
   Internal 1.1.1 only).
 - 2026-08-15: **1.1.1** — OFL attribution for Bebas Neue + Outfit (assets + About).
-- 2026-08-15: Owner lock — **no** Play closed track (internal only); open `rc/2.0.0` **after**
-  1.2.0 production; **drop** FFB player timeouts (1.2.16) as out of product.
+- 2026-08-15: Owner lock — internal smoke preferred; **superseded 2026-08-18** (Play requires
+  Closed 12×14 for Production). Open `rc/2.0.0` **after** 1.2.0 production; **drop** FFB
+  player timeouts (1.2.16) as out of product.
 - 2026-08-15: Full audit on PR — restore Play scaffolding (`08`, privacy stub, keystore
   example, conditional signing), `00-release-trains.md`, LICENSE owner-monetization clause,
   AGENTS / `.cursor/rules` anti-drift.

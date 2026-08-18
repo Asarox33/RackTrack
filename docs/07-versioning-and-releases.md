@@ -112,6 +112,7 @@ keystore for sideload testing only.
 
 ## Play end-user gate
 
-Closed testing is **not** used (owner **internal** smoke only). The **first open /
-production** Play release aimed at end users is **1.2.0** and must ship with monetization
-as specified in `docs/09-monetization.md`. See `docs/00-release-trains.md`.
+**Internal** = owner smoke. **Closed testing (12×14)** is required on this Play account
+before Production access. The **first open / production** release for strangers remains
+**1.2.0** with monetization (`docs/09-monetization.md`). See `docs/00-release-trains.md`
+and `docs/08-play-store.md`.

@@ -6,10 +6,10 @@ Publish **binaries via Play** (AAB). GitHub Releases stay **notes-only** (`LICEN
 ([`09-monetization.md`](09-monetization.md)). Do **not** soft-launch ad-free production
 then add ads later. See [`00-release-trains.md`](00-release-trains.md).
 
-**Testing:** **internal only** (owner device). No Play closed-testing track planned
-(owner-only closed would only help preview the public listing — skipped as overhead).
-Internal smoke may use **1.1.1** (this doc) or 1.2.0 depending on timing;
-strangers still get production **1.2.0** with ads.
+**Testing:** **Internal** = owner smoke. **Closed** = mandatory before production on this
+account (Google: ≥**12** closed testers opted in ≥**14** consecutive days + Console
+questionnaire). Internal alone does **not** unlock Production. Put monetized **1.2.0** on
+Closed while waiting; strangers only after production access.
 
 ---
 
@@ -116,12 +116,21 @@ When drafting Play “notes de version”, always use locale tags (≤500 chars 
 </en-US>
 ```
 
-### E. Production 1.2.0 — promote from Internal (do not forget)
+### E. Production 1.2.0 — after Closed 12×14 (do not forget)
 
 First stranger-facing production = **1.2.0** with AdMob + Remove Ads IAP.
+**Prerequisite:** Closed testing track with ≥12 opted-in testers for ≥14 consecutive days,
+then answer Play’s production-access questionnaire (Internal does not count).
+
 Listing / icons / screenshots / category from Internal **1.1.1** mostly carry over —
 revisit the declarations below when promoting the monetized build (before **2.0.0** /
 `rc/2.0.0`).
+
+**Closed track (start the clock now)**
+
+- [ ] Create **Closed testing** release with current monetized **1.2.0** AAB
+- [ ] Add ≥12 testers (email list); each must open the opt-in link and stay enrolled
+- [ ] Wait ≥14 consecutive days with ≥12 still enrolled → request production access
 
 **Console — update before / with production release**
 
@@ -133,7 +142,18 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 - [ ] **Play Billing** products (`remove_ads`) + Console Billing protection as needed
 - [ ] **Protégé avec Play** — device integrity **recommandé** (was Aucun on Internal);
       Play Integrity API in-app only if product asks
-- [ ] Promote Internal → **Production** (not Closed); countries / pricing free + IAP
+- [ ] Promote → **Production** once access granted; countries / pricing free + IAP
+  (**OK to ship first with Google SAMPLE interstitial** in `gradle.properties` — gate
+  already skips when no fill; do **not** leave sample IDs once AdMob serves)
+
+**After Production is live — AdMob real unit (patch)**
+
+1. AdMob → app RackTrack → **lier la fiche Google Play** (`com.racktrack`)
+2. Demander / attendre l’**examen** AdMob jusqu’à fill réel
+3. Patch `gradle.properties`: set `racktrack.admobInterstitialUnitId` to the real unit
+   `ca-app-pub-5352846919427815/1720927691` (sample id out)
+4. Bump `versionCode` (1.2.0 smoke or **1.2.1**) + Play release (Closed or Production)
+5. Smoke: interstitial on Start for a non‑Remove‑ads install
 
 **Build / crash quality (with monetization AAB)**
 

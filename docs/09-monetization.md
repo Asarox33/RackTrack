@@ -278,5 +278,7 @@ Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
 - [ ] R8 minify + Play **mapping** upload + **native debug symbols** with production AAB
   (deferred from Internal 1.1.1 warnings; do before strangers see 1.2.0)
 - [x] Gate unit tests (Premium, cooldown, not loaded → immediate start)
-- [ ] Create Play Billing product `remove_ads` (~4,99 €) + real AdMob app/unit IDs
-  (sample Google test IDs in `gradle.properties` until then)
+- [x] Play Billing product `remove_ads` Active (~4,99 € HT / TTC per store)
+- [ ] **AdMob real interstitial** — after Production listing is linkable: associate Play in
+  AdMob → review → switch `gradle.properties` off Google SAMPLE onto
+  `ca-app-pub-5352846919427815/1720927691` (see `08-play-store.md` §E “After Production”)
