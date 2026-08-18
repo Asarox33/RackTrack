@@ -107,11 +107,12 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
   (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
   recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
 - ⬜ **Post-prod AdMob patch** — link Play in AdMob → switch `gradle.properties` to real
-  interstitial unit + version bump- ⬜ Play crash diagnostics for production: enable **R8 minify** + upload
+  interstitial unit + version bump
+- ⬜ Play crash diagnostics for production: enable **R8 minify** + upload
   **deobfuscation (mapping)** with the AAB; upload **native debug symbols**
   (Play Console warnings seen on Internal 1.1.1 — safe to ignore for smoke;
   required quality for stranger-facing **1.2.0**, before opening `rc/2.0.0`)
-- ⬜ Internal smoke of monetized build → **production 1.2.0** for strangers
+- ⬜ Closed smoke OK → **production 1.2.0** for strangers (after 12×14 + §E)
 
 ### Later on 1.x (optional, after Play launch)
 - ⬜ **CI → Play Internal upload** (SA + Publisher API + workflow step) — today CI only
