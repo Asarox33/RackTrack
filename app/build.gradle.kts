@@ -119,6 +119,8 @@ dependencies {
     implementation(libs.play.services.ads)
     implementation(libs.user.messaging.platform)
     implementation(libs.billing.ktx)
+    // Play Console: play-services-basement still pulls fragment:1.1.0 — force a current line.
+    implementation(libs.androidx.fragment)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

@@ -16,6 +16,7 @@ orgJson = "20250517"
 playServicesAds = "24.5.0"
 ump = "3.2.0"
 billing = "8.0.0"
+fragment = "1.8.9"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,7 @@ org-json = { module = "org.json:json", version.ref = "orgJson" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 user-messaging-platform = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
