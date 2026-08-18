@@ -275,7 +275,8 @@ Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
 - [x] `MonetizationGate` wired on START MATCH / START TRAINING only
 - [x] UMP consent before first ad request
 - [ ] Privacy / Data safety / listing updated (**promote checklist:** `08-play-store.md` §E)
-- [ ] R8 minify + Play **mapping** upload + **native debug symbols** with production AAB
+- [x] R8 minify + shrink + native `SYMBOL_TABLE` in release AAB (mapping at
+  `app/build/outputs/mapping/release/`); verify on next Play upload
   (deferred from Internal 1.1.1 warnings; do before strangers see 1.2.0)
 - [x] Gate unit tests (Premium, cooldown, not loaded → immediate start)
 - [x] Play Billing product `remove_ads` Active (~4,99 € HT / TTC per store)

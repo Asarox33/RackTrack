@@ -63,7 +63,12 @@ android {
             enableUnitTestCoverage = true
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            // Play: deobfuscation mapping + native symbols (AdMob / GMS .so) with the AAB.
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
             // Play upload key when keystore.properties exists; otherwise debug for local sideload.
             signingConfig =
                 if (keystorePropertiesFile.exists()) {
