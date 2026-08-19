@@ -54,6 +54,7 @@ import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
@@ -263,59 +264,55 @@ private fun FourteenOnePlayerPanel(
     compact: Boolean = false,
 ) {
     val enabled = match.status == MatchStatus.IN_PROGRESS && hasHand
-    val actionHeight = if (compact) 40.dp else 44.dp
-    val actionGap = if (compact) 6.dp else 8.dp
     val showBreakFoul = enabled && match.awaitingOpeningBreak
-    // Continuous clear: pocket until keyball alone → re-rack to 15 (= onTable - 1).
     val clearRackPoints = (match.objectBallsOnTable - 1).coerceAtLeast(1)
 
-    Column(
-        modifier = modifier.padding(
-            horizontal = if (compact) 8.dp else 10.dp,
-            vertical = 4.dp,
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = player.name.uppercase(),
-            style = if (compact) {
-                MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp)
-            } else {
-                MaterialTheme.typography.headlineLarge
-            },
-            textAlign = TextAlign.Center,
-        )
-        if (compact) {
-            Spacer(modifier = Modifier.height(6.dp))
-        }
-
-        FourteenOneScoreCluster(
-            match = match,
-            score = score,
-            innings = innings,
-            fouls = fouls,
-            highRun = highRun,
-            hasHand = hasHand,
-            handTowardEnd = handTowardEnd,
-            compact = compact,
+    BoxWithConstraints(modifier = modifier) {
+        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight)
+        Column(
             modifier = Modifier
-                .weight(1f, fill = true)
-                .fillMaxWidth(),
-        )
+                .fillMaxSize()
+                .padding(
+                    horizontal = metrics.panelPaddingH,
+                    vertical = metrics.panelPaddingV,
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = player.name.uppercase(),
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp),
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(metrics.nameToScoreGap))
 
-        Spacer(modifier = Modifier.height(if (compact) 8.dp else 6.dp))
+            FourteenOneScoreCluster(
+                match = match,
+                score = score,
+                innings = innings,
+                fouls = fouls,
+                highRun = highRun,
+                hasHand = hasHand,
+                handTowardEnd = handTowardEnd,
+                metrics = metrics,
+                modifier = Modifier
+                    .weight(1f, fill = true)
+                    .fillMaxWidth(),
+            )
 
-        FourteenOneActionButtons(
-            enabled = enabled,
-            showBreakFoul = showBreakFoul,
-            clearRackPoints = clearRackPoints,
-            actionHeight = actionHeight,
-            actionGap = actionGap,
-            onAddPoints = { onAddPoints(player.id, clearRackPoints) },
-            onRequestPass = onRequestPass,
-            onRequestFoul = onRequestFoul,
-            onBreakFoul = { onBreakFoul(player.id) },
-        )
+            Spacer(modifier = Modifier.height(metrics.scoreToActionsGap))
+
+            FourteenOneActionButtons(
+                enabled = enabled,
+                showBreakFoul = showBreakFoul,
+                clearRackPoints = clearRackPoints,
+                actionHeight = metrics.actionHeight,
+                actionGap = metrics.actionGap,
+                onAddPoints = { onAddPoints(player.id, clearRackPoints) },
+                onRequestPass = onRequestPass,
+                onRequestFoul = onRequestFoul,
+                onBreakFoul = { onBreakFoul(player.id) },
+            )
+        }
     }
 }
 
@@ -328,12 +325,9 @@ private fun FourteenOneScoreCluster(
     highRun: Int,
     hasHand: Boolean,
     handTowardEnd: Boolean,
-    compact: Boolean,
+    metrics: BoardMetrics,
     modifier: Modifier = Modifier,
 ) {
-    val scoreSize = if (compact) 56.sp else 76.sp
-    val cueSize = if (compact) 36.dp else 44.dp
-    val visitStatSize = if (compact) 18.sp else 22.sp
     val foulWarn = fouls == FourteenOneEngine.CONSECUTIVE_FOULS_TO_PENALTY - 1
     val felt = LocalFeltPalette.current
     val handAlpha by animateFloatAsState(
@@ -344,7 +338,6 @@ private fun FourteenOneScoreCluster(
         targetValue = if (foulWarn && hasHand) 1f else 0f,
         label = "fourteen-foul-warn",
     )
-    val cueInset = if (compact) 20.dp else 28.dp
 
     Box(
         modifier = modifier,
@@ -362,7 +355,7 @@ private fun FourteenOneScoreCluster(
                 ) { value ->
                     Text(
                         text = value.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = metrics.scoreSp),
                     )
                 }
                 CueBallBreakIndicator(
@@ -370,13 +363,13 @@ private fun FourteenOneScoreCluster(
                         .align(if (handTowardEnd) Alignment.CenterEnd else Alignment.CenterStart)
                         .padding(
                             if (handTowardEnd) {
-                                PaddingValues(end = cueInset)
+                                PaddingValues(end = metrics.cueInset)
                             } else {
-                                PaddingValues(start = cueInset)
+                                PaddingValues(start = metrics.cueInset)
                             },
                         )
                         .alpha(handAlpha),
-                    size = cueSize,
+                    size = metrics.cueBallSize,
                 )
             }
             Text(
@@ -384,14 +377,14 @@ private fun FourteenOneScoreCluster(
                     innings = innings,
                     limit = match.inningsLimit,
                 ),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = metrics.visitStatSp),
                 color = ScoreWhite.copy(alpha = 0.78f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
+                modifier = Modifier.padding(top = metrics.nameToScoreGap),
             )
             Text(
                 text = "HR $highRun  ·  Foul $fouls/3",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = metrics.visitStatSp),
                 color = ScoreWhite.copy(alpha = 0.78f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 2.dp),
@@ -400,15 +393,23 @@ private fun FourteenOneScoreCluster(
                 FourteenOneVisitStats(
                     objectBallsOnTable = match.objectBallsOnTable,
                     currentRun = match.currentRun,
-                    visitStatSize = visitStatSize,
+                    visitStatSize = metrics.visitStatSp,
                     accent = felt.accentLight,
-                    modifier = Modifier.padding(top = if (compact) 4.dp else 6.dp),
+                    modifier = Modifier.padding(top = metrics.nameToScoreGap),
+                )
+            }
+            if (match.awaitingOpeningBreak && hasHand) {
+                Text(
+                    text = "OPENING BREAK",
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
+                    color = felt.accentLight,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
             }
             if (foulWarn && hasHand) {
                 Text(
                     text = "NEXT FOUL = −15",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
                     color = ButtonFoulLight.copy(alpha = warnAlpha),
                     modifier = Modifier
                         .padding(top = 4.dp)

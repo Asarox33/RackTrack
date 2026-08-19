@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.MatchPauseButton
 import com.racktrack.presentation.component.PlayerStatIcons
@@ -422,13 +424,6 @@ private fun PlayerPanel(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
 ) {
-    val nameStyle = if (compact) {
-        MaterialTheme.typography.headlineLarge.copy(fontSize = 28.sp)
-    } else {
-        MaterialTheme.typography.headlineLarge
-    }
-    val actionHeight = if (compact) ActionRowHeightCompact else ActionRowHeight
-    val actionGap = if (compact) 6.dp else 8.dp
     val canRunOut = MatchEngine.canBreakAndClear(match, player.id)
     val canGolden = MatchEngine.canRecordGoldenBreak(match, player.id)
     val canDry = MatchEngine.canRecordDryBreak(match, player.id)
@@ -439,57 +434,63 @@ private fun PlayerPanel(
             match.gameMode.supportsDryBreak ||
             match.gameMode.supportsEightBallLoss
 
-    Column(
-        modifier = modifier.padding(
-            horizontal = if (compact) 8.dp else 12.dp,
-            vertical = 4.dp,
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = player.name.uppercase(),
-            style = nameStyle,
-            textAlign = TextAlign.Center,
-        )
-        if (compact) {
-            Spacer(modifier = Modifier.height(6.dp))
-        }
+    BoxWithConstraints(modifier = modifier) {
+        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight)
+        val nameStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp)
 
-        RaceScoreCluster(
-            match = match,
-            score = score,
-            fouls = fouls,
-            runOuts = runOuts,
-            hasBreak = hasBreak,
-            breakAnchor = breakAnchor,
-            enabled = enabled,
-            showFoulWarning = showFoulWarning,
-            onClearFouls = onClearFouls,
-            compact = compact,
+        Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-        )
+                .fillMaxSize()
+                .padding(
+                    horizontal = metrics.panelPaddingH,
+                    vertical = metrics.panelPaddingV,
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = player.name.uppercase(),
+                style = nameStyle,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(metrics.nameToScoreGap))
 
-        Spacer(modifier = Modifier.height(8.dp))
+            RaceScoreCluster(
+                match = match,
+                score = score,
+                fouls = fouls,
+                runOuts = runOuts,
+                hasBreak = hasBreak,
+                breakAnchor = breakAnchor,
+                enabled = enabled,
+                showFoulWarning = showFoulWarning,
+                onClearFouls = onClearFouls,
+                metrics = metrics,
+                compact = compact,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+            )
 
-        RaceActionButtons(
-            gameMode = match.gameMode,
-            enabled = enabled,
-            canRunOut = canRunOut,
-            canGolden = canGolden,
-            canDry = canDry,
-            canEarlyEight = canEarlyEight,
-            showModeExtras = showModeExtras,
-            actionHeight = actionHeight,
-            actionGap = actionGap,
-            onPlusOne = onPlusOne,
-            onRunOut = onRunOut,
-            onGoldenBreak = onGoldenBreak,
-            onDryBreak = onDryBreak,
-            onEightBallLoss = onEightBallLoss,
-            onFoul = onFoul,
-        )
+            Spacer(modifier = Modifier.height(metrics.scoreToActionsGap))
+
+            RaceActionButtons(
+                gameMode = match.gameMode,
+                enabled = enabled,
+                canRunOut = canRunOut,
+                canGolden = canGolden,
+                canDry = canDry,
+                canEarlyEight = canEarlyEight,
+                showModeExtras = showModeExtras,
+                actionHeight = metrics.actionHeight,
+                actionGap = metrics.actionGap,
+                onPlusOne = onPlusOne,
+                onRunOut = onRunOut,
+                onGoldenBreak = onGoldenBreak,
+                onDryBreak = onDryBreak,
+                onEightBallLoss = onEightBallLoss,
+                onFoul = onFoul,
+            )
+        }
     }
 }
 
@@ -504,11 +505,10 @@ private fun RaceScoreCluster(
     enabled: Boolean,
     showFoulWarning: Boolean,
     onClearFouls: () -> Unit,
+    metrics: BoardMetrics,
     compact: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val scoreSize = if (compact) 56.sp else 76.sp
-    val cueSize = if (compact) BreakCueBallSizeCompact else BreakCueBallSize
     val nearRackLoss =
         showFoulWarning && fouls == MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK - 1
     val breakAlpha by animateFloatAsState(
@@ -536,15 +536,15 @@ private fun RaceScoreCluster(
                 ) { value ->
                     Text(
                         text = value.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = scoreSize),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = metrics.scoreSp),
                     )
                 }
                 CueBallBreakIndicator(
                     modifier = Modifier
                         .align(breakAnchor.alignment())
-                        .padding(breakAnchor.inset(compact))
+                        .padding(breakAnchor.inset(metrics.cueInset))
                         .alpha(breakAlpha),
-                    size = cueSize,
+                    size = metrics.cueBallSize,
                 )
             }
             PlayerStatIcons(
@@ -557,12 +557,15 @@ private fun RaceScoreCluster(
                     0
                 },
                 onClearFouls = if (enabled && showFoulWarning) onClearFouls else null,
-                modifier = Modifier.padding(top = if (compact) 6.dp else 10.dp),
+                iconSize = metrics.statIconSize,
+                iconGap = metrics.statIconGap,
+                clearHintSp = metrics.clearHintSp,
+                modifier = Modifier.padding(top = metrics.nameToScoreGap),
             )
             if (nearRackLoss) {
                 Text(
                     text = "1 MORE FOUL = RACK LOSS",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
                     color = ButtonFoulLight.copy(alpha = warnAlpha),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -710,13 +713,11 @@ private fun BreakAnchor.alignment(): Alignment =
         BreakAnchor.TowardStart -> Alignment.CenterStart
     }
 
-private fun BreakAnchor.inset(compact: Boolean = false): PaddingValues {
-    val inset = if (compact) BreakMedianInsetCompact else BreakMedianInset
-    return when (this) {
+private fun BreakAnchor.inset(inset: Dp): PaddingValues =
+    when (this) {
         BreakAnchor.TowardEnd -> PaddingValues(end = inset)
         BreakAnchor.TowardStart -> PaddingValues(start = inset)
     }
-}
 
 private fun GameMode.shortLabel(): String =
     when (this) {
@@ -726,14 +727,8 @@ private fun GameMode.shortLabel(): String =
         GameMode.FOURTEEN_ONE -> "14/1"
     }
 
-private val BreakCueBallSize: Dp = 48.dp
-private val BreakCueBallSizeCompact: Dp = 36.dp
-private val BreakMedianInset: Dp = 28.dp
-private val BreakMedianInsetCompact: Dp = 20.dp
 private val PortraitMedianInset: Dp = 16.dp
 private val PortraitNameTopInset: Dp = 8.dp
-private val ActionRowHeight: Dp = 44.dp
-private val ActionRowHeightCompact: Dp = 40.dp
 
 @Preview(widthDp = 820, heightDp = 380, showBackground = true)
 @Composable

@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.domain.model.GameMode
@@ -168,12 +169,16 @@ fun PlayerStatIcons(
     maxConsecutiveFouls: Int,
     modifier: Modifier = Modifier,
     onClearFouls: (() -> Unit)? = null,
+    iconSize: Dp = StatIconSize,
+    iconGap: Dp = 22.dp,
+    clearHintSp: TextUnit = 11.sp,
 ) {
     val performHaptic = rememberClickHaptic()
     val foulClearable = consecutiveFouls > 0 && onClearFouls != null
+    val safeIconSize = iconSize.coerceAtLeast(24.dp)
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(22.dp),
+        horizontalArrangement = Arrangement.spacedBy(iconGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StatIconChip(
@@ -184,7 +189,7 @@ fun PlayerStatIcons(
             RunOutIcon(
                 gameMode = gameMode,
                 muted = runOuts == 0,
-                size = StatIconSize,
+                size = safeIconSize,
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -212,13 +217,13 @@ fun PlayerStatIcons(
                         consecutiveFouls > 0 -> ButtonFoul
                         else -> ScoreWhite.copy(alpha = MUTED_ICON_ALPHA)
                     },
-                    size = StatIconSize,
+                    size = safeIconSize,
                 )
             }
             if (foulClearable) {
                 Text(
                     text = "TAP TO CLEAR",
-                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 11.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = clearHintSp),
                     color = ButtonFoulLight.copy(alpha = 0.95f),
                 )
             }
