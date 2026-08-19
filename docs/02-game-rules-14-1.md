@@ -18,7 +18,7 @@ geometry and call-shot are **not** enforced — players enter points in chunks.
 | Optional innings (reprises) limit + +5 OT on tie (1.6.05) | **Yes** |
 | Add points during a visit | **Yes** — board **+(n−1)** clear-to-re-rack from On Table n; PASS/FOUL modal syncs last partial |
 | Object balls remaining (scoreboard approx.) | **Yes** — start 15; −n on points; at 1 left → re-rack to 15; PASS/FOUL modal sets **2–15**; 3-foul → 15 |
-| Legal end of turn (pass hand) | **Yes** — **PASS** → balls-left stepper modal |
+| Legal end of turn (pass hand) | **Yes** — **PASS** → balls-left swipe picker (2–15) |
 | Classic foul −1, hand to opponent, no BIH (1.6.07) | **Yes** — **FOUL** |
 | Legal shot / pass clears consecutive fouls | **Yes** — via `addPoints` / `PASS` (no separate clear chip) |
 | 3 consecutive fouls → −1 then extra **−15**, re-break (1.6.07) | **Yes** — `THREE_FOUL_PENALTY`; same player opens again |

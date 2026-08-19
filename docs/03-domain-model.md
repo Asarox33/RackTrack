@@ -81,7 +81,7 @@ Shared labels, duration formatting, and PDF filename stem
 
 ## 4. Deliberately not modeled
 
-- Ball positions, call ball/pocket, push-out, 10-ball respot geometry
+- Ball positions, call ball/pocket, 10-ball respot geometry, ball-in-hand state machine
 - Camera / automated refereeing
 - Deep FFB shot-by-shot referee UI (needs camera to be useful)
 

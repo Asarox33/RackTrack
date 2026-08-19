@@ -1,7 +1,7 @@
 # Roadmap & TODO
 
-Overall status: ✅ **1.1.1** on GitHub · ⬜ **1.2.0** first Play end-user (monetization) ·
-⬜ **2.0** on `rc/2.0.0`
+Overall status: ✅ **1.1.1** on GitHub · 🟨 **1.2.0** Play gate (Closed 12×14) ·
+✅ **1.2.1** board/rules UX on PR · ⬜ **2.0** on `rc/2.0.0`
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
@@ -26,7 +26,7 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 ## Step 3 — Boards & settings
 - ✅ Setup (modes, race/distance/innings, who starts)
 - ✅ Split boards (landscape + portrait), felt tones, cloth grain
-- ✅ Settings (felt, screen on, haptics, defaults, FFB link)
+- ✅ Settings **page** (felt, screen on, haptics, defaults, ads, FFB link) — not a modal sheet
 - ✅ End-of-match summary modal (SHARE PDF + BACK to setup)
 - ✅ Launcher icon (adaptive + round)
 
@@ -48,7 +48,7 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ## Step 7 — 14/1 PASS / FOUL modal
 - ✅ Board: dynamic **+(On Table − 1)** clear-to-re-rack (was fixed +14); no +1/+5/+15; **BREAK −2** only while opening break
-- ✅ PASS / FOUL open end-of-inning modal: stepper for balls left (**2–15**), preview visit points
+- ✅ PASS / FOUL open end-of-inning modal: swipe picker for balls left (**2–15**), preview visit points
 - ✅ Sync formula allows at most one continuous re-rack after live clear-rack taps
 
 ## Step 8 — v1.0.0 release pipeline
@@ -62,6 +62,13 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ### 1.0.2 — scroll discoverability
 - ✅ Modal scroll hints (fade + ▼) on match summary, settings, 14/1 visit-end
+
+### 1.2.1 — adaptive boards & table rules UX
+- ✅ Live boards scale from pane/screen % (touch floor + tablet ceiling)
+- ✅ Race-to swipe picker (1–15) + **Tap to set** affordance; 14/1 balls-left same strip
+- ✅ Settings as full `AppScreen` (return to Setup or live match)
+- ✅ 14/1 illegal open ACCEPT / RE-BREAK; 9/10 push-out FFB tree
+- ✅ Tall-phone score cluster keeps run-out / foul chips visible
 
 ### 1.1.1 — font OFL attribution
 - ✅ Bundle SIL OFL 1.1 texts for Bebas Neue + Outfit (`assets/licenses/`)
@@ -153,9 +160,10 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
-- 2026-08-19: Board adaptive % layout (all devices); race-to stepper modal (1–15, default 6);
-  14/1 illegal open ACCEPT / RE-BREAK (stacking −2); 9/10 push-out FFB decision tree.
-  User-facing **1.2.1** (`versionCode` **102010**) + `CHANGELOG.md`.
+- 2026-08-19: **1.2.1** — adaptive board metrics (floor + ceiling); race-to / 14-1 **swipe**
+  pickers with neighbor strip; Settings **page**; race-to Tap-to-set row; 14/1 ACCEPT /
+  RE-BREAK; 9/10 push-out tree; tall-phone foul/run-out chips. `versionCode` **102010** +
+  `CHANGELOG.md`.
 - 2026-08-18: **R8** enabled for release (minify + shrinkResources + native SYMBOL_TABLE);
   versionCode **10203** for next Closed/Internal AAB with mapping/symbols.
 - 2026-08-18: **Closed testing required** — Play blocks Production until ≥12 closed testers

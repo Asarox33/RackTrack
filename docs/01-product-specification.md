@@ -24,9 +24,11 @@ or share past match stats.
 
 ### Current
 - **8-ball race** — +1, Run out, Foul, Early 8, Dry break
-- **9-ball race** — +1, Run out, Foul, Golden break, Dry break; 3 consecutive fouls = rack loss
-- **10-ball race** — +1, Run out, Foul; 3 consecutive fouls = rack loss
-- **14/1 continuous** — clear-rack +N, PASS/FOUL (balls-left modal), BREAK −2 on opening; distance + optional innings
+- **9-ball race** — +1, Run out, Foul, Golden break, Dry break; 3 consecutive fouls = rack loss;
+  **push-out** decision tree after a legal break
+- **10-ball race** — +1, Run out, Foul; 3 consecutive fouls = rack loss; **push-out** (same tree)
+- **14/1 continuous** — clear-rack +N, PASS/FOUL (balls-left swipe picker), BREAK −2 on opening
+  with ACCEPT / RE-BREAK; distance + optional innings
 - **14/1 solo training** — same 14/1 scoring with one player (setup Solo toggle); history stays under 14/1
 
 ### Later (only if product asks)
@@ -41,8 +43,10 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
 - Create a match (2 names, mode, race length or 14/1 distance/innings, who starts;
   race: Alternate vs Winner break; **14/1 Solo** = one name / no opponent)
+- Race length via **Tap to set** + swipe picker modal (1–15, default 6)
 - Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink, Golden)
-- Landscape and portrait (`fullSensor`)
+- Landscape and portrait (`fullSensor`); live boards scale from available pane size
+  (touch floor + tablet ceiling)
 - Break / shooter indicator; alternate or winner break after each race rack
 - 14/1: `TABLE n` object balls remaining on the shooter’s panel
 - Undo last action; end-of-match summary (**SHARE PDF** + **BACK** to setup)
@@ -54,7 +58,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
   - Filter by player names (either seat); reopen the same stats as end-of-match
   - Delete with red ✕ + confirmation
 - Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
-- Settings: felt, keep screen on, haptics, default race/distance/innings/break rule, open FFB PDF rules link
+- **Settings** full screen (like History): felt, keep screen on, haptics, default
+  race/distance/innings/break rule, Remove ads / Restore, open FFB PDF rules link
 - About (in Settings): version, build type/time, GitHub repo link
 
 ## 7. Explicitly out of scope
@@ -62,7 +67,7 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - **Remote / distant live scoring** (two players on two tables or two phones driving
   one match) — forever out of product sense; **one device is the scoreboard of record**
 - Per-shot call ball + pocket entry (and any deep FFB referee UI without camera)
-- Push-out UI, full illegal-break geometry checks
+- Illegal-break geometry automation, respot geometry, ball-in-hand state machine
 - iOS
 - Shot clock / per-shot timing (art. 1.2.13) and disciplinary / federal competition machinery
 - FFB **player timeouts** / pause quotas (art. 1.2.16) — club duration **pause** only
@@ -88,10 +93,12 @@ find that match in history — without entering shot details.
 
 ## 10. Product version
 
-**1.1.1** — OFL font attribution (Bebas Neue, Outfit). Versioning and GitHub Release notes:
+**1.2.1** — adaptive boards, race/14-1 swipe pickers, Settings page, 14/1 ACCEPT/RE-BREAK,
+9/10 push-out tree (on top of **1.2.0** monetization). Versioning and GitHub Release notes:
 `docs/07-versioning-and-releases.md`. Binaries for end users ship via app stores (see `LICENSE`).
 
 **Play production gate:** first open / production release to strangers is **1.2.0** and must
 include monetization per `docs/09-monetization.md` (AdMob interstitial on Start only,
 5‑min cooldown, never block start, lifetime Remove Ads ~**4,99 €** + Restore).
-Do not publish an ad-free Play build then add ads later.
+Do not publish an ad-free Play build then add ads later. **1.2.1** may ship on Closed /
+Internal as the next named build while that gate runs.

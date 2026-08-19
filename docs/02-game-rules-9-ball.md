@@ -87,6 +87,5 @@ Unlike 10-ball, FFB 9-ball is generally **without call**, except special cases (
 
 ## 10. Deliberately not modeled (deep mode / later)
 
-- Push-out UI and illegal-break choice tree
-- Three-ball soft-break automation
+- Illegal-break choice tree / three-ball soft-break automation
 - Respot geometry, BIH state, shot clock, disciplinary / federal machinery

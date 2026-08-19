@@ -21,15 +21,16 @@ app/src/main/kotlin/com/racktrack/
 ├── MainActivity.kt
 ├── appearance/            # FeltTone / FeltPalette / LocalFeltPalette (shared UI + prefs)
 ├── presentation/
-│   ├── screen/            # Setup, boards, Summary, History, Settings, FeltBackground
+│   ├── screen/            # Setup, boards, Summary, History, SettingsScreen, FeltBackground
 │   ├── share/             # MatchSummaryPdfWriter + MatchSummaryShare
-│   ├── component/         # Icons, textured controls, felt noise, haptics, gear
+│   ├── component/         # BoardMetrics, SwipeIntPicker, icons, textured controls, haptics
 │   ├── theme/             # Typography, action colors, RackTrackTheme
 │   ├── viewmodel/         # MatchViewModel + MatchCoordinator
 │   └── MatchFormatOptions.kt
 ├── domain/
-│   ├── model/             # Match, Player, GameMode, events, status
+│   ├── model/             # Match, Player, GameMode, events, status, PushOutPhase
 │   ├── MatchEngine.kt
+│   ├── PushOutEngine.kt
 │   ├── FourteenOneEngine.kt
 │   ├── MatchStats.kt      # MatchSummary DTO + summarize()
 │   └── MatchSummaryReport.kt  # shared labels / filename stem for PDF

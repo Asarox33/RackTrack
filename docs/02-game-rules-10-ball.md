@@ -107,4 +107,4 @@ Main fouls to model (see article 1.2.09 of the sporting code, full list in the P
 - Disciplinary cards and sanctions (article 1.2.17)
 - Masters category specific rules (break box)
 - Federal context (leagues, rankings, official competitions — Title III of the sporting code)
-- Per-shot call/pocket entry, push-out UI, respot geometry, ball-in-hand state
+- Per-shot call/pocket entry, respot geometry, ball-in-hand state
