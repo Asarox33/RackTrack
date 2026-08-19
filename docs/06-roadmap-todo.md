@@ -1,7 +1,7 @@
 # Roadmap & TODO
 
 Overall status: ✅ **1.1.1** on GitHub · 🟨 **1.2.x** Play gate (Internal live · Closed
-en validation · 12×14) · ✅ **1.2.1** code · ⬜ **2.0** on `rc/2.0.0`
+live · **12×14 clock from 2026-08-20**) · ✅ **1.2.1** code · ⬜ **2.0** on `rc/2.0.0`
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
@@ -110,8 +110,9 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
   - Still need: **AdMob real unit** after Production + store link / AdMob review
     (`08` §E “After Production”; sample unit OK until then)
 - ✅ Play product `remove_ads` Active + Internal IAP smoke (license testers)
-- 🟨 **Closed testing** — release **1.2.1** (`102012`) submitted (Console validation);
-  then ≥12 opted-in testers for ≥14 consecutive days (Play production gate)
+- 🟨 **Closed testing** — **1.2.1** (`102012`) live; **≥12 opted-in** ✅;
+  **14-day** production-access clock **started 2026-08-20** (eligible ~2026-09-03 if
+  enrollment holds)
 - ⬜ **Promote → Production 1.2.0+** after Closed eligibility + Console `08` §E
   (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
   recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
@@ -160,9 +161,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
-- 2026-08-20: Play — **1.2.1** `versionCode` **102012** on **Internal** + **Closed**
-  release submitted (Console validation). Mapping OK; native symbols not required.
-  Next: Closed opt-ins → 12×14 clock → §E → production.
+- 2026-08-20: Play — **1.2.1** `versionCode` **102012** on **Internal** + **Closed**.
+  ≥12 closed testers opted in; **14-day** clock started (target ~2026-09-03 if stable).
+  Mapping OK; native symbols not required. Next: hold enrollment → §E → production.
 - 2026-08-19: **1.2.1** — adaptive board metrics (floor + ceiling); race-to / 14-1 **swipe**
   pickers with neighbor strip; Settings **page**; race-to Tap-to-set row; 14/1 ACCEPT /
   RE-BREAK; 9/10 push-out tree (+ **Push outs** in summary/PDF/history); tall-phone

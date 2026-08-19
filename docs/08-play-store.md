@@ -129,9 +129,10 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 **Closed track (start the clock now)**
 
 - [x] Create **Closed testing** release with monetized **1.2.1** AAB (`102012`) —
-  Console validation in progress (2026-08-20)
-- [ ] Add ≥12 testers (email list); each must open the opt-in link and stay enrolled
+  live 2026-08-20
+- [x] ≥12 testers opted in (2026-08-20)
 - [ ] Wait ≥14 consecutive days with ≥12 still enrolled → request production access
+  (**clock started 2026-08-20** → earliest ~**2026-09-03** if count holds)
 
 **Console — update before / with production release**
 
