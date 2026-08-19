@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.presentation.theme.ButtonRunOut
 import com.racktrack.presentation.theme.ButtonRunOutDark
@@ -37,10 +38,20 @@ import com.racktrack.presentation.theme.ButtonRunOutLight
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 
-/** Shared stepper modal (race length, etc.) — same visual family as 14/1 visit-end. */
+/** Shared integer picker modal (race length, etc.) — swipe or tap arrows. */
 private const val MODAL_MAX_HEIGHT_FRACTION = 0.72f
 private const val MODAL_WIDTH_FRACTION = 0.88f
+private const val MODAL_WIDTH_CEIL_FRAC = 0.92f
 private const val MODAL_SCRIM_ALPHA = 0.55f
+private const val VALUE_SP_FRAC = 0.11f
+private const val VALUE_SP_FLOOR = 40f
+private const val VALUE_SP_CEIL = 72f
+private const val ACTION_H_FRAC = 0.055f
+private const val ACTION_H_FLOOR = 40f
+private const val ACTION_H_CEIL = 52f
+private const val CORNER_FRAC = 0.028f
+private const val PAD_H_FRAC = 0.05f
+private const val PAD_V_FRAC = 0.028f
 
 @Composable
 fun IntStepperModal(
@@ -66,24 +77,36 @@ fun IntStepperModal(
             ),
         contentAlignment = Alignment.Center,
     ) {
+        val shortSide = minOf(maxWidth, maxHeight)
+        val panelMaxWidth = maxWidth * MODAL_WIDTH_CEIL_FRAC
+        val corner = (shortSide.value * CORNER_FRAC).coerceIn(14f, 28f).dp
+        val padH = (maxWidth.value * PAD_H_FRAC).coerceIn(16f, 28f).dp
+        val padV = (maxHeight.value * PAD_V_FRAC).coerceIn(14f, 24f).dp
+        val valueSp = (shortSide.value * VALUE_SP_FRAC)
+            .coerceIn(VALUE_SP_FLOOR, VALUE_SP_CEIL)
+            .sp
+        val actionH = (shortSide.value * ACTION_H_FRAC)
+            .coerceIn(ACTION_H_FLOOR, ACTION_H_CEIL)
+            .dp
+
         Column(
             modifier = Modifier
-                .widthIn(max = 420.dp)
+                .widthIn(max = panelMaxWidth)
                 .fillMaxWidth(MODAL_WIDTH_FRACTION)
                 .heightIn(max = maxHeight * MODAL_MAX_HEIGHT_FRACTION)
-                .clip(RoundedCornerShape(22.dp))
+                .clip(RoundedCornerShape(corner))
                 .background(
                     Brush.verticalGradient(
                         listOf(felt.dark.copy(alpha = 0.98f), felt.vignette),
                     ),
                 )
-                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(22.dp))
+                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(corner))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {},
                 )
-                .padding(horizontal = 22.dp, vertical = 18.dp),
+                .padding(horizontal = padH, vertical = padV),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -92,40 +115,16 @@ fun IntStepperModal(
                 color = ScoreWhite,
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(18.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                TexturedActionButton(
-                    label = "−",
-                    base = felt.mid,
-                    light = felt.light,
-                    dark = felt.dark,
-                    enabled = value > min,
-                    onClick = { value = (value - 1).coerceAtLeast(min) },
-                    modifier = Modifier.widthIn(min = 64.dp),
-                    height = 48.dp,
-                )
-                Text(
-                    text = valueLabel(value),
-                    style = MaterialTheme.typography.displayLarge,
-                    color = ScoreWhite,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.widthIn(min = 96.dp),
-                )
-                TexturedActionButton(
-                    label = "+",
-                    base = felt.mid,
-                    light = felt.light,
-                    dark = felt.dark,
-                    enabled = value < max,
-                    onClick = { value = (value + 1).coerceAtMost(max) },
-                    modifier = Modifier.widthIn(min = 64.dp),
-                    height = 48.dp,
-                )
-            }
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(padV))
+            SwipeIntPicker(
+                value = value,
+                onValueChange = { value = it },
+                min = min,
+                max = max,
+                valueLabel = valueLabel,
+                valueSp = valueSp,
+            )
+            Spacer(modifier = Modifier.height(padV))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -135,6 +134,7 @@ fun IntStepperModal(
                     enabled = true,
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f),
+                    height = actionH,
                 )
                 TexturedActionButton(
                     label = "CONFIRM",
@@ -144,7 +144,7 @@ fun IntStepperModal(
                     enabled = true,
                     onClick = { onConfirm(value) },
                     modifier = Modifier.weight(1f),
-                    height = 44.dp,
+                    height = actionH,
                 )
             }
         }

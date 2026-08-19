@@ -2,6 +2,7 @@ package com.racktrack.presentation.screen
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -45,6 +44,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.BuildConfig
+import com.racktrack.appearance.FeltTone
+import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
@@ -52,8 +53,7 @@ import com.racktrack.presentation.component.IntStepperModal
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
-import com.racktrack.appearance.FeltTone
-import com.racktrack.appearance.LocalFeltPalette
+import com.racktrack.presentation.component.TexturedSettingButton
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 import java.text.SimpleDateFormat
@@ -62,7 +62,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 @Composable
-fun SettingsSheet(
+fun SettingsScreen(
     settings: UserSettings,
     adsRemoved: Boolean = false,
     onRemoveAds: () -> Unit = {},
@@ -74,50 +74,32 @@ fun SettingsSheet(
     onDefaultPointsChange: (Int) -> Unit,
     onDefaultInningsChange: (Int?) -> Unit,
     onDefaultBreakRuleChange: (BreakRule) -> Unit = {},
-    onDismiss: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val felt = LocalFeltPalette.current
     val scrollState = rememberScrollState()
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = SCRIM_ALPHA))
-            .clickable(onClick = onDismiss)
-            .safeDrawingPadding(),
-        contentAlignment = Alignment.Center,
-    ) {
+    BackHandler(onBack = onBack)
+
+    FeltBackground(modifier = modifier) {
         Box(
             modifier = Modifier
-                .widthIn(max = 560.dp)
-                .fillMaxWidth(PANEL_WIDTH)
-                .fillMaxHeight(PANEL_MAX_HEIGHT)
-                .clip(RoundedCornerShape(22.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(felt.dark.copy(alpha = PANEL_TOP_ALPHA), felt.vignette),
-                    ),
-                )
-                .border(2.dp, OutlineWarm.copy(alpha = PANEL_BORDER_ALPHA), RoundedCornerShape(22.dp))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {},
-                ),
+                .fillMaxSize()
+                .safeDrawingPadding(),
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(horizontal = 22.dp, vertical = 18.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
             Text(
                 text = "SETTINGS",
-                style = MaterialTheme.typography.titleLarge,
-                color = ScoreWhite.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.headlineLarge,
+                color = ScoreWhite,
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -200,16 +182,13 @@ fun SettingsSheet(
             SectionLabel("Default race to")
             Spacer(modifier = Modifier.height(8.dp))
             var raceEditorOpen by remember { mutableStateOf(false) }
-            TexturedChip(
-                label = settings.defaultRacksToWin.toString(),
-                selected = true,
+            TexturedSettingButton(
+                label = "Tap to set",
+                value = settings.defaultRacksToWin.toString(),
                 onClick = { raceEditorOpen = true },
-                modifier = Modifier.widthIn(min = 72.dp),
-                selectedLight = felt.accentLight,
-                selectedDark = felt.accentDark,
-                idleLight = felt.mid,
-                idleDark = felt.dark,
-                height = 40.dp,
+                height = 44.dp,
+                light = felt.accentLight,
+                dark = felt.accentDark,
             )
             if (raceEditorOpen) {
                 IntStepperModal(
@@ -328,14 +307,14 @@ fun SettingsSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
             TexturedActionButton(
-                label = "CLOSE",
+                label = "BACK",
                 base = felt.accent,
                 light = felt.accentLight,
                 dark = felt.accentDark,
                 enabled = true,
-                onClick = onDismiss,
-                modifier = Modifier.widthIn(min = 180.dp),
-                height = 48.dp,
+                onClick = onBack,
+                modifier = Modifier.widthIn(min = 200.dp),
+                height = 52.dp,
             )
             }
             ScrollMoreHint(
@@ -515,11 +494,6 @@ private fun FeltSwatch(
 
 const val FFB_RULES_URL = "https://m.ffbillard.com/ext/telechargement.php?id=32249"
 
-private const val SCRIM_ALPHA = 0.55f
-private const val PANEL_WIDTH = 0.88f
-private const val PANEL_MAX_HEIGHT = 0.92f
-private const val PANEL_TOP_ALPHA = 0.97f
-private const val PANEL_BORDER_ALPHA = 0.55f
 private const val SWATCHES_PER_ROW = 3
 private val SWATCH_CIRCLE = 40.dp
 private val SWATCH_GAP = 8.dp

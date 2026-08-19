@@ -43,6 +43,7 @@ import com.racktrack.presentation.component.IntStepperModal
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
+import com.racktrack.presentation.component.TexturedSettingButton
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.theme.ScoreWhite
@@ -399,19 +400,22 @@ private fun FormatControls(
         }
     } else {
         var raceEditorOpen by remember { mutableStateOf(false) }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Race to", style = MaterialTheme.typography.titleLarge)
-            if (!compact) Box(modifier = Modifier.height(8.dp))
-            TexturedChip(
-                label = state.racksToWin.toString(),
-                selected = true,
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (!compact) {
+                Text("Race to", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            TexturedSettingButton(
+                label = if (compact) "Race to" else "Tap to set",
+                value = state.racksToWin.toString(),
                 onClick = { raceEditorOpen = true },
-                modifier = Modifier.widthIn(min = 72.dp),
-                selectedLight = felt.accentLight,
-                selectedDark = felt.accentDark,
-                idleLight = felt.mid,
-                idleDark = felt.dark,
-                height = if (compact) 44.dp else 48.dp,
+                modifier = Modifier.widthIn(max = 360.dp),
+                height = if (compact) 44.dp else 52.dp,
+                light = felt.accentLight,
+                dark = felt.accentDark,
             )
         }
         if (raceEditorOpen) {

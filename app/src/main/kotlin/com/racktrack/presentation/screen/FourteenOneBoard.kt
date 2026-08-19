@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -57,9 +56,9 @@ import com.racktrack.domain.model.PlayerId
 import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.ScrollMoreHint
+import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TwoChoiceModal
-import com.racktrack.presentation.component.rememberClickHaptic
 import com.racktrack.presentation.theme.ButtonFoul
 import com.racktrack.presentation.theme.ButtonFoulDark
 import com.racktrack.presentation.theme.ButtonFoulLight
@@ -88,6 +87,11 @@ fun FourteenOneBoardContent(
     onFoulWithRemaining: (PlayerId, Int, Int) -> Unit,
     onBreakFoul: (PlayerId) -> Unit,
     onAcceptIllegalOpen: () -> Unit = {},
+    screenWidth: Dp,
+    screenHeight: Dp,
+    medianThickness: Dp,
+    medianInset: Dp,
+    topChromePad: Dp,
     modifier: Modifier = Modifier,
 ) {
     var visitEnd by remember { mutableStateOf<VisitEndDraft?>(null) }
@@ -117,6 +121,8 @@ fun FourteenOneBoardContent(
                     visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
                 },
                 onBreakFoul = onBreakFoul,
+                screenWidth = screenWidth,
+                screenHeight = screenHeight,
                 modifier = Modifier.fillMaxSize(),
             )
         } else if (landscape) {
@@ -138,11 +144,17 @@ fun FourteenOneBoardContent(
                         visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
                     },
                     onBreakFoul = onBreakFoul,
+                    screenWidth = screenWidth,
+                    screenHeight = screenHeight,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
                 )
-                FourteenMedianDivider(landscape = true)
+                FourteenMedianDivider(
+                    landscape = true,
+                    thickness = medianThickness,
+                    inset = medianInset,
+                )
                 FourteenOnePlayerPanel(
                     match = match,
                     player = match.player2,
@@ -160,6 +172,8 @@ fun FourteenOneBoardContent(
                         visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.FOUL)
                     },
                     onBreakFoul = onBreakFoul,
+                    screenWidth = screenWidth,
+                    screenHeight = screenHeight,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
@@ -184,12 +198,18 @@ fun FourteenOneBoardContent(
                         visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
                     },
                     onBreakFoul = onBreakFoul,
+                    screenWidth = screenWidth,
+                    screenHeight = screenHeight,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(top = PortraitNameTopInset, bottom = PortraitMedianInset),
+                        .padding(top = topChromePad, bottom = medianInset),
                 )
-                FourteenMedianDivider(landscape = false)
+                FourteenMedianDivider(
+                    landscape = false,
+                    thickness = medianThickness,
+                    inset = medianInset,
+                )
                 FourteenOnePlayerPanel(
                     match = match,
                     player = match.player2,
@@ -207,10 +227,12 @@ fun FourteenOneBoardContent(
                         visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.FOUL)
                     },
                     onBreakFoul = onBreakFoul,
+                    screenWidth = screenWidth,
+                    screenHeight = screenHeight,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(top = PortraitMedianInset),
+                        .padding(top = medianInset),
                 )
             }
         }
@@ -288,6 +310,8 @@ private fun FourteenOnePlayerPanel(
     onRequestPass: () -> Unit,
     onRequestFoul: () -> Unit,
     onBreakFoul: (PlayerId) -> Unit,
+    screenWidth: Dp,
+    screenHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
     val enabled = match.status == MatchStatus.IN_PROGRESS && hasHand
@@ -296,7 +320,13 @@ private fun FourteenOnePlayerPanel(
 
     BoxWithConstraints(modifier = modifier) {
         val actionRows = if (showBreakFoul) 3 else 2
-        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight, actionRowCount = actionRows)
+        val metrics = BoardMetrics.fromPane(
+            paneWidth = maxWidth,
+            paneHeight = maxHeight,
+            actionRowCount = actionRows,
+            screenWidth = screenWidth,
+            screenHeight = screenHeight,
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -336,6 +366,7 @@ private fun FourteenOnePlayerPanel(
                 clearRackPoints = clearRackPoints,
                 actionHeight = metrics.actionHeight,
                 actionGap = metrics.actionGap,
+                actionCorner = metrics.actionCorner,
                 onAddPoints = { onAddPoints(player.id, clearRackPoints) },
                 onRequestPass = onRequestPass,
                 onRequestFoul = onRequestFoul,
@@ -489,6 +520,7 @@ private fun FourteenOneActionButtons(
     clearRackPoints: Int,
     actionHeight: Dp,
     actionGap: Dp,
+    actionCorner: Dp,
     onAddPoints: () -> Unit,
     onRequestPass: () -> Unit,
     onRequestFoul: () -> Unit,
@@ -511,6 +543,7 @@ private fun FourteenOneActionButtons(
                 onClick = onAddPoints,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
             TexturedActionButton(
                 label = "PASS",
@@ -521,6 +554,7 @@ private fun FourteenOneActionButtons(
                 onClick = onRequestPass,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
             TexturedActionButton(
                 label = "FOUL",
@@ -531,6 +565,7 @@ private fun FourteenOneActionButtons(
                 onClick = onRequestFoul,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
         }
         if (showBreakFoul) {
@@ -543,6 +578,7 @@ private fun FourteenOneActionButtons(
                 onClick = onBreakFoul,
                 modifier = Modifier.fillMaxWidth(),
                 height = actionHeight,
+                corner = actionCorner,
             )
             Text(
                 text = "Opening break",
@@ -625,27 +661,33 @@ BoxWithConstraints(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        // Cap height so landscape (and short portrait) keep CANCEL/CONFIRM on-screen when
-        // the auto re-rack warning (remaining > On Table) adds extra lines.
         val panelMaxHeight = maxHeight * MODAL_MAX_HEIGHT_FRACTION
+        val panelMaxWidth = maxWidth * MODAL_WIDTH_CEIL_FRAC
+        val shortSide = minOf(maxWidth, maxHeight)
+        val corner = (shortSide.value * MODAL_CORNER_FRAC).coerceIn(MODAL_CORNER_MIN_DP, MODAL_CORNER_MAX_DP).dp
+        val padH = (maxWidth.value * MODAL_PAD_H_FRAC).coerceIn(MODAL_PAD_MIN_DP, MODAL_PAD_H_MAX_DP).dp
+        val padV = (maxHeight.value * MODAL_PAD_V_FRAC).coerceIn(MODAL_PAD_MIN_DP, MODAL_PAD_V_MAX_DP).dp
+        val ballsValueSp = (shortSide.value * BALLS_VALUE_SP_FRAC)
+            .coerceIn(BALLS_VALUE_SP_FLOOR, BALLS_VALUE_SP_CEIL)
+            .sp
         Column(
             modifier = Modifier
-                .widthIn(max = 420.dp)
+                .widthIn(max = panelMaxWidth)
                 .fillMaxWidth(MODAL_CONTENT_WIDTH_FRACTION)
                 .heightIn(max = panelMaxHeight)
-                .clip(RoundedCornerShape(22.dp))
+                .clip(RoundedCornerShape(corner))
                 .background(
                     Brush.verticalGradient(
                         listOf(felt.dark.copy(alpha = 0.98f), felt.vignette),
                     ),
                 )
-                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(22.dp))
+                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(corner))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {},
                 )
-                .padding(horizontal = 22.dp, vertical = 18.dp),
+                .padding(horizontal = padH, vertical = padV),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val bodyScroll = rememberScrollState()
@@ -675,25 +717,16 @@ BoxWithConstraints(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    StepperButton(
-                        label = "−",
-                        enabled = remaining > minBalls,
-                        onClick = { remaining -= 1 },
-                    )
-                    Text(
-                        text = remaining.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
-                        color = ScoreWhite,
-                        modifier = Modifier.widthIn(min = 96.dp),
-                        textAlign = TextAlign.Center,
-                    )
-                    StepperButton(
-                        label = "+",
-                        enabled = remaining < maxBalls,
-                        onClick = { remaining += 1 },
+                    SwipeIntPicker(
+                        value = remaining,
+                        onValueChange = { remaining = it },
+                        min = minBalls,
+                        max = maxBalls,
+                        valueSp = ballsValueSp,
+                        modifier = Modifier.fillMaxWidth(SWIPE_PICKER_WIDTH_FRAC),
                     )
                 }
 
@@ -778,54 +811,11 @@ BoxWithConstraints(
 }
 
 @Composable
-private fun StepperButton(
-    label: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
+private fun FourteenMedianDivider(
+    landscape: Boolean,
+    thickness: Dp,
+    inset: Dp,
 ) {
-    val felt = LocalFeltPalette.current
-    val performHaptic = rememberClickHaptic()
-    val interaction = remember { MutableInteractionSource() }
-    val alpha = if (enabled) 1f else 0.38f
-    val shape = RoundedCornerShape(16.dp)
-    Box(
-        modifier = Modifier
-            .size(72.dp, 64.dp)
-            .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        felt.accentLight.copy(alpha = alpha),
-                        felt.accentDark.copy(alpha = alpha),
-                    ),
-                ),
-            )
-            .border(
-                width = 2.dp,
-                color = OutlineWarm.copy(alpha = if (enabled) 0.85f else 0.28f),
-                shape = shape,
-            )
-            .clickable(
-                enabled = enabled,
-                interactionSource = interaction,
-                indication = null,
-                onClick = {
-                    performHaptic()
-                    onClick()
-                },
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.headlineLarge,
-            color = ScoreWhite.copy(alpha = alpha),
-        )
-    }
-}
-
-@Composable
-private fun FourteenMedianDivider(landscape: Boolean) {
     val brush = if (landscape) {
         Brush.verticalGradient(
             listOf(Color.Transparent, ScoreWhite.copy(alpha = 0.35f), Color.Transparent),
@@ -838,25 +828,36 @@ private fun FourteenMedianDivider(landscape: Boolean) {
     Box(
         modifier = if (landscape) {
             Modifier
-                .width(3.dp)
+                .width(thickness)
                 .fillMaxHeight()
-                .padding(vertical = 12.dp)
+                .padding(vertical = inset)
                 .background(brush)
         } else {
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-                .height(3.dp)
+                .padding(horizontal = inset)
+                .height(thickness)
                 .background(brush)
         },
     )
 }
 
-private val PortraitMedianInset = 16.dp
-private val PortraitNameTopInset = 8.dp
 private const val MODAL_CONTENT_WIDTH_FRACTION = 0.92f
 private const val MODAL_MAX_HEIGHT_FRACTION = 0.92f
+private const val MODAL_WIDTH_CEIL_FRAC = 0.92f
 private const val MODAL_PLUS_FOURTEEN_WIDTH_FRACTION = 0.55f
+private const val MODAL_CORNER_FRAC = 0.028f
+private const val MODAL_CORNER_MIN_DP = 14f
+private const val MODAL_CORNER_MAX_DP = 28f
+private const val MODAL_PAD_H_FRAC = 0.05f
+private const val MODAL_PAD_V_FRAC = 0.022f
+private const val MODAL_PAD_MIN_DP = 12f
+private const val MODAL_PAD_H_MAX_DP = 28f
+private const val MODAL_PAD_V_MAX_DP = 22f
+private const val BALLS_VALUE_SP_FRAC = 0.10f
+private const val BALLS_VALUE_SP_FLOOR = 40f
+private const val BALLS_VALUE_SP_CEIL = 72f
+private const val SWIPE_PICKER_WIDTH_FRAC = 0.92f
 private const val POINTS_FOURTEEN = 14
 
 /** Full continuous racks (+14) already scored in the current unfinished visit. */

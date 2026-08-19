@@ -49,6 +49,7 @@ sealed interface AppScreen {
     data class MatchBoard(val match: Match) : AppScreen
     data object History : AppScreen
     data class HistoryDetail(val matchId: String) : AppScreen
+    data object Settings : AppScreen
 }
 
 /** Thin Android shell: preferences, history store, [MatchCoordinator]. */
@@ -69,7 +70,6 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     val settings: StateFlow<UserSettings> = coordinator.settings
     val setup: StateFlow<SetupUiState> = coordinator.setup
     val screen: StateFlow<AppScreen> = coordinator.screen
-    val settingsOpen: StateFlow<Boolean> = coordinator.settingsOpen
     val matchPaused: StateFlow<Boolean> = coordinator.matchPaused
 
     val history: StateFlow<HistoryUiState> = combine(

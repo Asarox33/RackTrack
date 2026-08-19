@@ -11,13 +11,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 ### Features
 
 - **Adaptive live boards** — race and 14/1 scale from available pane size on phones, folds,
-  and tablets (readable scores / actions without S25- or tablet-only hacks).
-- **Race to stepper** — setup and Settings open a 1–15 modal instead of fixed chips
-  (default remains 6).
+  and tablets (readable scores / actions without S25- or tablet-only hacks). Sizes use a
+  touch **floor** and a tablet **ceiling** so chrome does not explode on large screens.
+- **Race to picker** — setup and Settings open a 1–15 modal (default remains 6). Swipe
+  left/right (or tap neighbors / arrows); ±2 smaller values show so the control reads as
+  a strip. Same swipe strip for 14/1 balls-left on the visit-end modal.
+- **Race to control** — full-width **Tap to set · N ›** row instead of a lone selected chip.
+- **Settings page** — Settings is a full screen (like History), not a modal sheet; Back
+  returns to Setup or the live match.
 - **14/1 illegal opening break** — after **BREAK −2**, opponent chooses **ACCEPT** (take the
   table) or **RE-BREAK** (same breaker; further illegal opens stack another −2).
 - **9/10 push-out** — FFB decision tree on the scoreboard: **PUSH OUT** → CLEAN / FOUL →
   **TAKE** / **GIVE BACK**. A dry break does not remove the push-out window.
+
+### Bug fixes
+
+- **Tall phones** — run-out and consecutive-foul chips stay visible under the score (reserved
+  height + muted-icon contrast).
 
 ### Notes
 

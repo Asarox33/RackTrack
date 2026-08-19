@@ -172,6 +172,7 @@ fun PlayerStatIcons(
     iconSize: Dp = StatIconSize,
     iconGap: Dp = 22.dp,
     clearHintSp: TextUnit = 11.sp,
+    countSp: TextUnit = 16.sp,
 ) {
     val performHaptic = rememberClickHaptic()
     val foulClearable = consecutiveFouls > 0 && onClearFouls != null
@@ -185,6 +186,7 @@ fun PlayerStatIcons(
             countLabel = runOuts.toString(),
             emphasized = runOuts > 0,
             accent = ButtonRunOutLight,
+            countSp = countSp,
         ) {
             RunOutIcon(
                 gameMode = gameMode,
@@ -201,6 +203,7 @@ fun PlayerStatIcons(
                 },
                 emphasized = consecutiveFouls > 0,
                 accent = ButtonFoulLight,
+                countSp = countSp,
                 clearable = foulClearable,
                 onClick = if (foulClearable) {
                     {
@@ -236,6 +239,7 @@ private fun StatIconChip(
     countLabel: String,
     emphasized: Boolean,
     accent: Color,
+    countSp: TextUnit,
     clearable: Boolean = false,
     onClick: (() -> Unit)? = null,
     icon: @Composable () -> Unit,
@@ -273,7 +277,7 @@ private fun StatIconChip(
         Box(contentAlignment = Alignment.Center) { icon() }
         Text(
             text = countLabel,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = countSp),
             color = if (emphasized) accent else ScoreWhite.copy(alpha = MUTED_LABEL_ALPHA),
         )
     }

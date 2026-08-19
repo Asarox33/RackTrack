@@ -7,9 +7,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Live-board sizing derived from the available pane (half-screen or full).
- * Reserves room for name, stat chips (run-out / fouls), and action rows so tall
- * phones (e.g. Pixel) do not let a huge score hide the counters.
+ * Live-board metrics: every size is a **fraction of the available pane / screen**,
+ * clamped with a touch **floor** and a tablet **ceiling**.
+ *
+ * No device-specific breakpoints (S25 / tablet / Pixel).
  */
 @Immutable
 data class BoardMetrics(
@@ -18,8 +19,10 @@ data class BoardMetrics(
     val visitStatSp: TextUnit,
     val warnSp: TextUnit,
     val clearHintSp: TextUnit,
+    val statCountSp: TextUnit,
     val actionHeight: Dp,
     val actionGap: Dp,
+    val actionCorner: Dp,
     val panelPaddingH: Dp,
     val panelPaddingV: Dp,
     val scoreToActionsGap: Dp,
@@ -29,107 +32,157 @@ data class BoardMetrics(
     val cueBallSize: Dp,
     val cueInset: Dp,
     val footerActionHeight: Dp,
+    val screenPadH: Dp,
+    val screenPadV: Dp,
+    val headerToBoardGap: Dp,
+    val boardToFooterGap: Dp,
+    val footerGap: Dp,
+    val medianThickness: Dp,
+    val medianInset: Dp,
+    val headerSideReserve: Dp,
+    val topChromePad: Dp,
+    val topChromeGap: Dp,
 ) {
     companion object {
-        private const val SHORT_WEIGHT = 0.42f
-        private const val TALL_WEIGHT = 0.10f
+        // --- Pane vertical fractions (portrait half-board) ---
+        private const val PAD_V_FRAC = 0.018f
+        private const val PAD_H_FRAC = 0.045f
+        private const val NAME_FRAC = 0.072f
+        private const val NAME_SCORE_GAP_FRAC = 0.012f
+        private const val SCORE_ACTIONS_GAP_FRAC = 0.016f
+        private const val ACTION_GAP_FRAC = 0.012f
+        /** Share of pane height for all action rows together. */
+        private const val ACTIONS_BLOCK_FRAC = 0.38f
+        private const val STAT_ICON_FRAC_OF_CLUSTER = 0.30f
+        private const val SCORE_FRAC_OF_CLUSTER = 0.58f
+        private const val CUE_FRAC_OF_CLUSTER = 0.36f
+        private const val CUE_INSET_FRAC = 0.04f
+        private const val VISIT_STAT_FRAC = 0.045f
+        private const val WARN_FRAC = 0.038f
+        private const val HINT_FRAC = 0.030f
+        private const val STAT_COUNT_FRAC = 0.042f
+        private const val STAT_GAP_FRAC = 0.035f
+        private const val ACTION_CORNER_FRAC = 0.28f
 
-        private const val NAME_FACTOR = 0.22f
-        private const val ACTION_FACTOR = 0.28f
-        private const val ICON_FACTOR = 0.26f
-        private const val CUE_FACTOR = 0.30f
-        private const val VISIT_STAT_FACTOR = 0.14f
-        private const val WARN_FACTOR = 0.12f
-        private const val CLEAR_HINT_FACTOR = 0.10f
-        private const val ACTION_GAP_FACTOR = 0.05f
-        private const val PAD_H_FACTOR = 0.08f
-        private const val PAD_V_FACTOR = 0.04f
-        private const val SCORE_ACTIONS_GAP_FACTOR = 0.05f
-        private const val NAME_SCORE_GAP_FACTOR = 0.04f
-        private const val STAT_GAP_FACTOR = 0.12f
-        private const val CUE_INSET_FACTOR = 0.16f
-        private const val FOOTER_FACTOR = 0.28f
+        // --- Full-screen chrome (of min(screenW, screenH)) ---
+        private const val SCREEN_PAD_H_FRAC = 0.028f
+        private const val SCREEN_PAD_V_FRAC = 0.012f
+        private const val HEADER_GAP_FRAC = 0.012f
+        private const val FOOTER_GAP_FRAC = 0.014f
+        private const val FOOTER_BTN_GAP_FRAC = 0.035f
+        private const val FOOTER_BTN_H_FRAC = 0.055f
+        private const val MEDIAN_THICK_FRAC = 0.006f
+        private const val MEDIAN_INSET_FRAC = 0.018f
+        private const val HEADER_SIDE_FRAC = 0.20f
+        private const val TOP_CHROME_PAD_FRAC = 0.012f
+        private const val TOP_CHROME_GAP_FRAC = 0.008f
 
-        /** Fraction of the score-cluster budget used by the big score digits. */
-        private const val SCORE_IN_CLUSTER_FRACTION = 0.62f
+        /** Soft touch floor — only kicks in on very small panes. */
+        private const val TOUCH_FLOOR_FRAC = 0.055f
+        private const val TOUCH_FLOOR_MIN_DP = 28f
+        private const val TOUCH_FLOOR_MAX_DP = 48f
 
-        private const val SCORE_MIN_SP = 36f
-        private const val SCORE_MAX_SP = 72f
-        private const val NAME_MIN_SP = 16f
-        private const val NAME_MAX_SP = 32f
-        private const val VISIT_MIN_SP = 12f
-        private const val VISIT_MAX_SP = 22f
-        private const val WARN_MIN_SP = 11f
-        private const val WARN_MAX_SP = 18f
-        private const val HINT_MIN_SP = 10f
-        private const val HINT_MAX_SP = 13f
-
-        private val ACTION_MIN = 34.dp
-        private val ACTION_MAX = 52.dp
-        private val ICON_MIN = 28.dp
-        private val ICON_MAX = 44.dp
-        private val CUE_MIN = 26.dp
-        private val CUE_MAX = 48.dp
+        /** Ceilings so tablets / tall panes do not grow chrome to absurd sizes. */
+        private const val ACTION_HEIGHT_CEIL_DP = 56f
+        private const val FOOTER_HEIGHT_CEIL_DP = 48f
+        private const val SCORE_SP_CEIL = 92f
+        private const val NAME_SP_CEIL = 34f
+        private const val STAT_ICON_CEIL_DP = 52f
+        private const val CUE_CEIL_DP = 56f
+        private const val VISIT_STAT_SP_CEIL = 22f
+        private const val WARN_SP_CEIL = 18f
+        private const val HINT_SP_CEIL = 14f
+        private const val STAT_COUNT_SP_CEIL = 20f
+        private const val SCREEN_PAD_H_CEIL_DP = 24f
+        private const val SCREEN_PAD_V_CEIL_DP = 14f
+        private const val HEADER_SIDE_CEIL_DP = 120f
 
         /**
-         * @param paneWidth available width of one player pane (or board column)
-         * @param paneHeight available height of one player pane
-         * @param actionRowCount 1 = +1/RUN/FOUL only; 2 = extras row (GOLDEN/DRY/PUSH…)
+         * @param paneWidth / [paneHeight] one player column (or full 14/1 solo column)
+         * @param screenWidth / [screenHeight] full board window (for chrome)
+         * @param actionRowCount 1..3 action rows under the score
          */
         fun fromPane(
             paneWidth: Dp,
             paneHeight: Dp,
             actionRowCount: Int = 2,
+            screenWidth: Dp = paneWidth * 2,
+            screenHeight: Dp = paneHeight * 2,
         ): BoardMetrics {
-            val short = minOf(paneWidth, paneHeight)
-            val tall = maxOf(paneWidth, paneHeight)
-            val unit = (short.value * SHORT_WEIGHT + tall.value * TALL_WEIGHT).dp
-
-            fun Dp.clamp(min: Dp, max: Dp): Dp = coerceIn(min, max)
-            fun Float.spClamp(min: Float, max: Float): TextUnit =
-                coerceIn(min, max).sp
-
-            val name = (unit.value * NAME_FACTOR).spClamp(NAME_MIN_SP, NAME_MAX_SP)
-            val actionH = (unit.value * ACTION_FACTOR).dp.clamp(ACTION_MIN, ACTION_MAX)
-            val icon = (unit.value * ICON_FACTOR).dp.clamp(ICON_MIN, ICON_MAX)
-            val cue = (unit.value * CUE_FACTOR).dp.clamp(CUE_MIN, CUE_MAX)
-            val actionGap = (unit.value * ACTION_GAP_FACTOR).dp.clamp(3.dp, 8.dp)
-            val padV = (unit.value * PAD_V_FACTOR).dp.clamp(2.dp, 8.dp)
-            val nameToScore = (unit.value * NAME_SCORE_GAP_FACTOR).dp.clamp(2.dp, 8.dp)
-            val scoreToActions = (unit.value * SCORE_ACTIONS_GAP_FACTOR).dp.clamp(2.dp, 10.dp)
+            val h = paneHeight.value.coerceAtLeast(1f)
+            val w = paneWidth.value.coerceAtLeast(1f)
+            val screenShort = minOf(screenWidth.value, screenHeight.value).coerceAtLeast(1f)
             val rows = actionRowCount.coerceIn(1, 3)
 
-            // Keep name + stat row + action rows on-screen; score fills what remains.
+            val touchFloor = (h * TOUCH_FLOOR_FRAC)
+                .coerceIn(TOUCH_FLOOR_MIN_DP, TOUCH_FLOOR_MAX_DP)
+
+            val padV = (h * PAD_V_FRAC).dp
+            val padH = (w * PAD_H_FRAC).dp
+            val nameSp = (h * NAME_FRAC).coerceAtMost(NAME_SP_CEIL).sp
+            val nameToScore = (h * NAME_SCORE_GAP_FRAC).dp
+            val scoreToActions = (h * SCORE_ACTIONS_GAP_FRAC).dp
+            val actionGap = (h * ACTION_GAP_FRAC).dp
+
+            val actionsBlock = h * ACTIONS_BLOCK_FRAC
+            val actionH = (
+                (actionsBlock - actionGap.value * (rows - 1)) / rows
+                ).coerceIn(touchFloor, ACTION_HEIGHT_CEIL_DP).dp
+
             val reserved =
-                padV * 2 +
-                    name.value.dp +
-                    nameToScore +
-                    icon +
-                    nameToScore +
-                    scoreToActions +
-                    actionH * rows +
-                    actionGap * (rows - 1).coerceAtLeast(0)
-            val clusterBudget = (paneHeight - reserved).coerceAtLeast(SCORE_MIN_SP.dp)
-            val score = (clusterBudget.value * SCORE_IN_CLUSTER_FRACTION)
-                .spClamp(SCORE_MIN_SP, SCORE_MAX_SP)
+                padV.value * 2 +
+                    nameSp.value +
+                    nameToScore.value +
+                    scoreToActions.value +
+                    actionH.value * rows +
+                    actionGap.value * (rows - 1)
+            val cluster = (h - reserved).coerceAtLeast(h * 0.22f)
+
+            val scoreSp = (cluster * SCORE_FRAC_OF_CLUSTER).coerceAtMost(SCORE_SP_CEIL).sp
+            val icon = (cluster * STAT_ICON_FRAC_OF_CLUSTER)
+                .coerceIn(touchFloor * 0.85f, STAT_ICON_CEIL_DP)
+                .dp
+            val cue = (cluster * CUE_FRAC_OF_CLUSTER)
+                .coerceIn(touchFloor * 0.8f, CUE_CEIL_DP)
+                .dp
 
             return BoardMetrics(
-                scoreSp = score,
-                nameSp = name,
-                visitStatSp = (unit.value * VISIT_STAT_FACTOR).spClamp(VISIT_MIN_SP, VISIT_MAX_SP),
-                warnSp = (unit.value * WARN_FACTOR).spClamp(WARN_MIN_SP, WARN_MAX_SP),
-                clearHintSp = (unit.value * CLEAR_HINT_FACTOR).spClamp(HINT_MIN_SP, HINT_MAX_SP),
+                scoreSp = scoreSp,
+                nameSp = nameSp,
+                visitStatSp = (h * VISIT_STAT_FRAC).coerceAtMost(VISIT_STAT_SP_CEIL).sp,
+                warnSp = (h * WARN_FRAC).coerceAtMost(WARN_SP_CEIL).sp,
+                clearHintSp = (h * HINT_FRAC).coerceAtMost(HINT_SP_CEIL).sp,
+                statCountSp = (h * STAT_COUNT_FRAC).coerceAtMost(STAT_COUNT_SP_CEIL).sp,
                 actionHeight = actionH,
                 actionGap = actionGap,
-                panelPaddingH = (unit.value * PAD_H_FACTOR).dp.clamp(6.dp, 16.dp),
+                actionCorner = (actionH.value * ACTION_CORNER_FRAC).dp,
+                panelPaddingH = padH,
                 panelPaddingV = padV,
                 scoreToActionsGap = scoreToActions,
                 nameToScoreGap = nameToScore,
                 statIconSize = icon,
-                statIconGap = (unit.value * STAT_GAP_FACTOR).dp.clamp(10.dp, 20.dp),
+                statIconGap = (w * STAT_GAP_FRAC).dp,
                 cueBallSize = cue,
-                cueInset = (unit.value * CUE_INSET_FACTOR).dp.clamp(8.dp, 28.dp),
-                footerActionHeight = (unit.value * FOOTER_FACTOR).dp.clamp(34.dp, 48.dp),
+                cueInset = (w * CUE_INSET_FRAC).dp,
+                footerActionHeight = (screenShort * FOOTER_BTN_H_FRAC)
+                    .coerceIn(touchFloor, FOOTER_HEIGHT_CEIL_DP)
+                    .dp,
+                screenPadH = (screenShort * SCREEN_PAD_H_FRAC)
+                    .coerceAtMost(SCREEN_PAD_H_CEIL_DP)
+                    .dp,
+                screenPadV = (screenShort * SCREEN_PAD_V_FRAC)
+                    .coerceAtMost(SCREEN_PAD_V_CEIL_DP)
+                    .dp,
+                headerToBoardGap = (screenShort * HEADER_GAP_FRAC).dp,
+                boardToFooterGap = (screenShort * FOOTER_GAP_FRAC).dp,
+                footerGap = (screenShort * FOOTER_BTN_GAP_FRAC).dp,
+                medianThickness = (screenShort * MEDIAN_THICK_FRAC).coerceAtLeast(2f).dp,
+                medianInset = (screenShort * MEDIAN_INSET_FRAC).dp,
+                headerSideReserve = (screenWidth.value * HEADER_SIDE_FRAC)
+                    .coerceAtMost(HEADER_SIDE_CEIL_DP)
+                    .dp,
+                topChromePad = (screenShort * TOP_CHROME_PAD_FRAC).dp,
+                topChromeGap = (screenShort * TOP_CHROME_GAP_FRAC).dp,
             )
         }
     }

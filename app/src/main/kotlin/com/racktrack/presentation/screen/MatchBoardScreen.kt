@@ -114,14 +114,23 @@ fun MatchBoardScreen(
     val playEnabled = match.status == MatchStatus.IN_PROGRESS && !matchPaused
 
     FeltBackground(modifier = modifier) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val screenW = maxWidth
+            val screenH = maxHeight
+            val chrome = BoardMetrics.fromPane(
+                paneWidth = if (landscape) screenW / 2 else screenW,
+                paneHeight = if (landscape) screenH else screenH / 2,
+                screenWidth = screenW,
+                screenHeight = screenH,
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()
                     .padding(
-                        horizontal = if (landscape) 16.dp else 12.dp,
-                        vertical = if (landscape) 8.dp else 6.dp,
+                        horizontal = chrome.screenPadH,
+                        vertical = chrome.screenPadV,
                     ),
             ) {
                 Text(
@@ -134,11 +143,11 @@ fun MatchBoardScreen(
                     color = felt.accentLight,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 88.dp),
+                        .padding(horizontal = chrome.headerSideReserve),
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(if (landscape) 8.dp else 10.dp))
+                Spacer(modifier = Modifier.height(chrome.headerToBoardGap))
 
                 if (match.gameMode.isPointScoring) {
                     FourteenOneBoardContent(
@@ -149,6 +158,11 @@ fun MatchBoardScreen(
                         onFoulWithRemaining = onFoulWithRemaining,
                         onBreakFoul = onBreakFoul,
                         onAcceptIllegalOpen = onAcceptIllegalOpen,
+                        screenWidth = screenW,
+                        screenHeight = screenH,
+                        medianThickness = chrome.medianThickness,
+                        medianInset = chrome.medianInset,
+                        topChromePad = chrome.topChromePad,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -164,6 +178,10 @@ fun MatchBoardScreen(
                         onAnnouncePushOut = onAnnouncePushOut,
                         onFoul = onFoul,
                         onClearFouls = onClearFouls,
+                        screenWidth = screenW,
+                        screenHeight = screenH,
+                        medianThickness = chrome.medianThickness,
+                        medianInset = chrome.medianInset,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -179,18 +197,21 @@ fun MatchBoardScreen(
                         onAnnouncePushOut = onAnnouncePushOut,
                         onFoul = onFoul,
                         onClearFouls = onClearFouls,
+                        screenWidth = screenW,
+                        screenHeight = screenH,
+                        medianThickness = chrome.medianThickness,
+                        medianInset = chrome.medianInset,
+                        topChromePad = chrome.topChromePad,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
                     )
                 }
 
-                Spacer(modifier = Modifier.height(if (landscape) 6.dp else 12.dp))
+                Spacer(modifier = Modifier.height(chrome.boardToFooterGap))
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -198,12 +219,14 @@ fun MatchBoardScreen(
                         label = "UNDO",
                         onClick = onUndo,
                         enabled = match.history.isNotEmpty() && playEnabled,
+                        height = chrome.footerActionHeight,
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(chrome.footerGap))
                     TexturedOutlineAction(
                         label = if (match.solo) "NEW TRAINING" else "NEW MATCH",
                         onClick = onNewMatch,
                         enabled = true,
+                        height = chrome.footerActionHeight,
                     )
                 }
             }
@@ -223,18 +246,22 @@ fun MatchBoardScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "PAUSED",
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 42.sp),
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = (minOf(screenW.value, screenH.value) * 0.09f).sp,
+                            ),
                             color = OutlineWarm,
                             textAlign = TextAlign.Center,
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(chrome.headerToBoardGap))
                         Text(
                             text = if (match.solo) {
                                 "Training timing stopped  ·  Tap to resume"
                             } else {
                                 "Match timing stopped  ·  Tap to resume"
                             },
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = (minOf(screenW.value, screenH.value) * 0.035f).sp,
+                            ),
                             color = ScoreWhite.copy(alpha = 0.85f),
                             textAlign = TextAlign.Center,
                         )
@@ -246,8 +273,8 @@ fun MatchBoardScreen(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .safeDrawingPadding()
-                    .padding(top = 6.dp, end = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    .padding(top = chrome.topChromePad, end = chrome.screenPadH),
+                horizontalArrangement = Arrangement.spacedBy(chrome.topChromeGap),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (match.status == MatchStatus.IN_PROGRESS) {
@@ -316,6 +343,10 @@ private fun LandscapeBoard(
     onAnnouncePushOut: (PlayerId) -> Unit,
     onFoul: (PlayerId) -> Unit,
     onClearFouls: (PlayerId) -> Unit,
+    screenWidth: Dp,
+    screenHeight: Dp,
+    medianThickness: Dp,
+    medianInset: Dp,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
@@ -336,11 +367,17 @@ private fun LandscapeBoard(
             onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
             onClearFouls = { onClearFouls(match.player1.id) },
+            screenWidth = screenWidth,
+            screenHeight = screenHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
         )
-        MedianDivider(landscape = true)
+        MedianDivider(
+            landscape = true,
+            thickness = medianThickness,
+            inset = medianInset,
+        )
         PlayerPanel(
             match = match,
             player = match.player2,
@@ -358,6 +395,8 @@ private fun LandscapeBoard(
             onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
             onClearFouls = { onClearFouls(match.player2.id) },
+            screenWidth = screenWidth,
+            screenHeight = screenHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -376,6 +415,11 @@ private fun PortraitBoard(
     onAnnouncePushOut: (PlayerId) -> Unit,
     onFoul: (PlayerId) -> Unit,
     onClearFouls: (PlayerId) -> Unit,
+    screenWidth: Dp,
+    screenHeight: Dp,
+    medianThickness: Dp,
+    medianInset: Dp,
+    topChromePad: Dp,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -396,12 +440,18 @@ private fun PortraitBoard(
             onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
             onClearFouls = { onClearFouls(match.player1.id) },
+            screenWidth = screenWidth,
+            screenHeight = screenHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(top = PortraitNameTopInset, bottom = PortraitMedianInset),
+                .padding(top = topChromePad, bottom = medianInset),
         )
-        MedianDivider(landscape = false)
+        MedianDivider(
+            landscape = false,
+            thickness = medianThickness,
+            inset = medianInset,
+        )
         PlayerPanel(
             match = match,
             player = match.player2,
@@ -419,16 +469,22 @@ private fun PortraitBoard(
             onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
             onClearFouls = { onClearFouls(match.player2.id) },
+            screenWidth = screenWidth,
+            screenHeight = screenHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(top = PortraitMedianInset),
+                .padding(top = medianInset),
         )
     }
 }
 
 @Composable
-private fun MedianDivider(landscape: Boolean) {
+private fun MedianDivider(
+    landscape: Boolean,
+    thickness: Dp,
+    inset: Dp,
+) {
     val brush = if (landscape) {
         Brush.verticalGradient(
             listOf(Color.Transparent, ScoreWhite.copy(alpha = 0.35f), Color.Transparent),
@@ -441,15 +497,15 @@ private fun MedianDivider(landscape: Boolean) {
     Box(
         modifier = if (landscape) {
             Modifier
-                .width(3.dp)
+                .width(thickness)
                 .fillMaxHeight()
-                .padding(vertical = 12.dp)
+                .padding(vertical = inset)
                 .background(brush)
         } else {
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-                .height(3.dp)
+                .padding(horizontal = inset)
+                .height(thickness)
                 .background(brush)
         },
     )
@@ -473,6 +529,8 @@ private fun PlayerPanel(
     onAnnouncePushOut: () -> Unit,
     onFoul: () -> Unit,
     onClearFouls: () -> Unit,
+    screenWidth: Dp,
+    screenHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
     val canRunOut = MatchEngine.canBreakAndClear(match, player.id)
@@ -489,7 +547,13 @@ private fun PlayerPanel(
 
     BoxWithConstraints(modifier = modifier) {
         val actionRows = if (showModeExtras) 2 else 1
-        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight, actionRowCount = actionRows)
+        val metrics = BoardMetrics.fromPane(
+            paneWidth = maxWidth,
+            paneHeight = maxHeight,
+            actionRowCount = actionRows,
+            screenWidth = screenWidth,
+            screenHeight = screenHeight,
+        )
         val nameStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp)
 
         Column(
@@ -538,6 +602,7 @@ private fun PlayerPanel(
                 showModeExtras = showModeExtras,
                 actionHeight = metrics.actionHeight,
                 actionGap = metrics.actionGap,
+                actionCorner = metrics.actionCorner,
                 onPlusOne = onPlusOne,
                 onRunOut = onRunOut,
                 onGoldenBreak = onGoldenBreak,
@@ -619,6 +684,7 @@ private fun RaceScoreCluster(
                 iconSize = metrics.statIconSize,
                 iconGap = metrics.statIconGap,
                 clearHintSp = metrics.clearHintSp,
+                countSp = metrics.statCountSp,
                 modifier = Modifier
                     .padding(top = metrics.nameToScoreGap)
                     .heightIn(min = metrics.statIconSize),
@@ -631,7 +697,7 @@ private fun RaceScoreCluster(
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     modifier = Modifier
-                        .padding(top = 4.dp)
+                        .padding(top = metrics.nameToScoreGap)
                         .alpha(warnAlpha),
                 )
             }
@@ -651,6 +717,7 @@ private fun RaceActionButtons(
     showModeExtras: Boolean,
     actionHeight: Dp,
     actionGap: Dp,
+    actionCorner: Dp,
     onPlusOne: () -> Unit,
     onRunOut: () -> Unit,
     onGoldenBreak: () -> Unit,
@@ -676,6 +743,7 @@ private fun RaceActionButtons(
                 onClick = onPlusOne,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
             TexturedActionButton(
                 label = "RUN OUT",
@@ -686,6 +754,7 @@ private fun RaceActionButtons(
                 onClick = onRunOut,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
             TexturedActionButton(
                 label = "FOUL",
@@ -696,6 +765,7 @@ private fun RaceActionButtons(
                 onClick = onFoul,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
         }
         if (showModeExtras) {
@@ -708,6 +778,7 @@ private fun RaceActionButtons(
                 canPushOut = canPushOut,
                 actionHeight = actionHeight,
                 actionGap = actionGap,
+                actionCorner = actionCorner,
                 onGoldenBreak = onGoldenBreak,
                 onDryBreak = onDryBreak,
                 onEightBallLoss = onEightBallLoss,
@@ -727,6 +798,7 @@ private fun RaceModeExtraButtons(
     canPushOut: Boolean,
     actionHeight: Dp,
     actionGap: Dp,
+    actionCorner: Dp,
     onGoldenBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
@@ -746,6 +818,7 @@ private fun RaceModeExtraButtons(
                 onClick = onGoldenBreak,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
         }
         if (gameMode.supportsEightBallLoss) {
@@ -758,6 +831,7 @@ private fun RaceModeExtraButtons(
                 onClick = onEightBallLoss,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
         }
         if (gameMode.supportsDryBreak) {
@@ -770,6 +844,7 @@ private fun RaceModeExtraButtons(
                 onClick = onDryBreak,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
         }
         if (gameMode.supportsPushOut) {
@@ -782,6 +857,7 @@ private fun RaceModeExtraButtons(
                 onClick = onAnnouncePushOut,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
+                corner = actionCorner,
             )
         }
     }
@@ -806,9 +882,6 @@ private fun GameMode.shortLabel(): String =
         GameMode.TEN_BALL -> "10-BALL"
         GameMode.FOURTEEN_ONE -> "14/1"
     }
-
-private val PortraitMedianInset: Dp = 16.dp
-private val PortraitNameTopInset: Dp = 8.dp
 
 @Preview(widthDp = 820, heightDp = 380, showBackground = true)
 @Composable
