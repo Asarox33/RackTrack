@@ -64,6 +64,8 @@ object MatchSummaryJson {
             .put("goldenBreaks2", summary.goldenBreaks2)
             .put("dryBreaks1", summary.dryBreaks1)
             .put("dryBreaks2", summary.dryBreaks2)
+            .put("pushOuts1", summary.pushOuts1)
+            .put("pushOuts2", summary.pushOuts2)
             .put("eightBallLosses1", summary.eightBallLosses1)
             .put("eightBallLosses2", summary.eightBallLosses2)
             .put("highRun1", summary.highRun1)
@@ -105,6 +107,8 @@ object MatchSummaryJson {
             goldenBreaks2 = obj.getInt("goldenBreaks2"),
             dryBreaks1 = obj.getInt("dryBreaks1"),
             dryBreaks2 = obj.getInt("dryBreaks2"),
+            pushOuts1 = obj.optInt("pushOuts1", 0),
+            pushOuts2 = obj.optInt("pushOuts2", 0),
             eightBallLosses1 = obj.getInt("eightBallLosses1"),
             eightBallLosses2 = obj.getInt("eightBallLosses2"),
             highRun1 = obj.getInt("highRun1"),

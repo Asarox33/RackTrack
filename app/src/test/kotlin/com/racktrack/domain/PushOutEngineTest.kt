@@ -273,4 +273,18 @@ class PushOutEngineTest {
         )
         assertSame(broken, PushOutEngine.take(broken, now()))
     }
+
+    @Test
+    fun `summarize counts announced push-outs per player`() {
+        val match = fresh()
+        val afterAnnounce = PushOutEngine.announce(match, match.player1.id, now())
+        val afterClean = PushOutEngine.resolveClean(afterAnnounce, afterAnnounce.player1.id, now())
+        val afterTake = PushOutEngine.take(afterClean, now())
+        val summary = MatchStats.summarize(afterTake)
+        assertEquals(1, summary.pushOuts1)
+        assertEquals(0, summary.pushOuts2)
+        assertTrue(
+            MatchSummaryReport.playerStatLines(summary, 1).any { it == "Push outs 1" },
+        )
+    }
 }

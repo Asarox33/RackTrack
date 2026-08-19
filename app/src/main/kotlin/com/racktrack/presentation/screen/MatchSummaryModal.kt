@@ -237,6 +237,7 @@ private fun MatchSummaryContent(
                 runOuts = summary.runOuts1,
                 goldenBreaks = summary.goldenBreaks1,
                 dryBreaks = summary.dryBreaks1,
+                pushOuts = summary.pushOuts1,
                 eightBallLosses = summary.eightBallLosses1,
                 highRun = summary.highRun1,
                 average = summary.average1,
@@ -251,6 +252,7 @@ private fun MatchSummaryContent(
                     runOuts = summary.runOuts2,
                     goldenBreaks = summary.goldenBreaks2,
                     dryBreaks = summary.dryBreaks2,
+                    pushOuts = summary.pushOuts2,
                     eightBallLosses = summary.eightBallLosses2,
                     highRun = summary.highRun2,
                     average = summary.average2,
@@ -381,6 +383,7 @@ private fun PlayerSummaryColumn(
     runOuts: Int,
     goldenBreaks: Int,
     dryBreaks: Int,
+    pushOuts: Int,
     eightBallLosses: Int,
     highRun: Int,
     average: Double,
@@ -442,11 +445,12 @@ private fun PlayerSummaryColumn(
                     Text("$fouls", style = MaterialTheme.typography.labelLarge)
                 }
             }
-            if (
+            val showExtraRaceStats =
                 gameMode.supportsGoldenBreak ||
-                gameMode.supportsDryBreak ||
-                gameMode.supportsEightBallLoss
-            ) {
+                    gameMode.supportsDryBreak ||
+                    gameMode.supportsEightBallLoss ||
+                    gameMode.supportsPushOut
+            if (showExtraRaceStats) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -469,6 +473,13 @@ private fun PlayerSummaryColumn(
                     if (gameMode.supportsDryBreak) {
                         Text(
                             text = "D $dryBreaks",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = ButtonDryLight,
+                        )
+                    }
+                    if (gameMode.supportsPushOut) {
+                        Text(
+                            text = "PO $pushOuts",
                             style = MaterialTheme.typography.labelLarge,
                             color = ButtonDryLight,
                         )

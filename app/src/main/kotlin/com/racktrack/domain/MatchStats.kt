@@ -60,6 +60,9 @@ data class MatchSummary(
     val endedAtMillis: Long,
     /** 14/1 solo training snapshot; false for races and duel 14/1. */
     val solo: Boolean = false,
+    /** Announced push-outs (9/10); counted from history. */
+    val pushOuts1: Int = 0,
+    val pushOuts2: Int = 0,
 )
 
 object MatchStats {
@@ -113,6 +116,8 @@ object MatchStats {
             startedAtMillis = startedAt,
             endedAtMillis = endMillis.coerceAtLeast(startedAt),
             solo = match.solo,
+            pushOuts1 = totalPushOuts(match.history, match.player1.id),
+            pushOuts2 = if (match.solo) 0 else totalPushOuts(match.history, match.player2.id),
         )
     }
 
@@ -193,6 +198,9 @@ object MatchStats {
                 else -> false
             }
         }
+
+    private fun totalPushOuts(history: List<MatchEvent>, playerId: PlayerId): Int =
+        history.count { it.type == MatchEventType.PUSH_OUT && it.playerId == playerId }
 
     private fun rackStats(match: Match): List<RackStat> {
         val ending = match.history.filter { it.type.isRackEnding() }

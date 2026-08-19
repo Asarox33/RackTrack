@@ -22,7 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 - **14/1 illegal opening break** — after **BREAK −2**, opponent chooses **ACCEPT** (take the
   table) or **RE-BREAK** (same breaker; further illegal opens stack another −2).
 - **9/10 push-out** — FFB decision tree on the scoreboard: **PUSH OUT** → CLEAN / FOUL →
-  **TAKE** / **GIVE BACK**. A dry break does not remove the push-out window.
+  **TAKE** / **GIVE BACK**. A dry break does not remove the push-out window. End-of-match
+  summary / PDF / history show **Push outs** (announcements) next to Dry / Golden.
 
 ### Bug fixes
 
