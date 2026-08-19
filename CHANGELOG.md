@@ -33,6 +33,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 ### Notes
 
 - Closed / Internal rebuilds of this name use `versionCode` `102010`+ (see `docs/07`).
+  Play already used `102010`; next smoke AAB is `102011`.
 
 ## 1.2.0 — 2026-08-17
 
