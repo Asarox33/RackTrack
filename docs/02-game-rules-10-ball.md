@@ -20,8 +20,9 @@ table partner) judge legality; the app records outcomes.
 | Warning after 2 consecutive fouls | **Yes** — on-screen “1 MORE FOUL = RACK LOSS” |
 | Legal shot resets consecutive fouls | **Partial** — tap foul chip (`FOULS_CLEARED`); no auto “legal shot” |
 | Golden break / Dry break buttons | **No** — flags off for 10-ball |
-| Call ball + pocket, push-out, 10 respot, ball-in-hand, ball order | **No** — operator judgment |
-| Undo last event; match summary | **Yes** |
+| Push-out after legal break | **Yes** — same decision tree as 9-ball (`PUSH OUT`); summary / PDF / history count announcements |
+| Call ball + pocket, 10 respot, ball-in-hand geometry, ball order | **No** — operator judgment |
+| Undo last event; match summary (incl. foul / push-out counts) | **Yes** |
 
 ---
 
@@ -106,4 +107,4 @@ Main fouls to model (see article 1.2.09 of the sporting code, full list in the P
 - Disciplinary cards and sanctions (article 1.2.17)
 - Masters category specific rules (break box)
 - Federal context (leagues, rankings, official competitions — Title III of the sporting code)
-- Per-shot call/pocket entry, push-out UI, respot geometry, ball-in-hand state
+- Per-shot call/pocket entry, respot geometry, ball-in-hand state

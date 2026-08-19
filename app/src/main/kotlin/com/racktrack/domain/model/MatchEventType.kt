@@ -41,8 +41,29 @@ enum class MatchEventType {
     BREAK_FOUL,
 
     /**
+     * 14/1 — opponent accepts the table after an illegal opening break.
+     * Ends the breaker’s visit; [MatchEvent.playerId] is the fouler.
+     */
+    ACCEPT_ILLEGAL_OPEN,
+
+    /**
      * 14/1 — extra −15 after the 3rd consecutive foul (FFB 1.6.07).
      * The −1 for that foul is a separate [FOUL] event immediately before.
      */
     THREE_FOUL_PENALTY,
+
+    /** 9/10 — player announces a push-out after a legal break. */
+    PUSH_OUT,
+
+    /** 9/10 — push-out shot without foul; opponent must TAKE or RETURN. */
+    PUSH_OUT_CLEAN,
+
+    /** 9/10 — foul on the push-out shot (opponent gets the table / BIH). */
+    PUSH_OUT_FOUL,
+
+    /** 9/10 — opponent takes the table after a clean push-out. */
+    PUSH_OUT_TAKE,
+
+    /** 9/10 — opponent returns the shot to the push-out player. */
+    PUSH_OUT_RETURN,
 }

@@ -82,6 +82,7 @@ object MatchSummaryReport {
             MatchEventType.PASS -> "pass"
             MatchEventType.FOUL -> "foul"
             MatchEventType.BREAK_FOUL -> "brk"
+            MatchEventType.ACCEPT_ILLEGAL_OPEN -> "acc"
             null -> "win"
             else -> ""
         }
@@ -115,6 +116,7 @@ object MatchSummaryReport {
         val runOuts = if (side == 1) summary.runOuts1 else summary.runOuts2
         val golden = if (side == 1) summary.goldenBreaks1 else summary.goldenBreaks2
         val dry = if (side == 1) summary.dryBreaks1 else summary.dryBreaks2
+        val pushOuts = if (side == 1) summary.pushOuts1 else summary.pushOuts2
         val early8 = if (side == 1) summary.eightBallLosses1 else summary.eightBallLosses2
         val highRun = if (side == 1) summary.highRun1 else summary.highRun2
         val average = if (side == 1) summary.average1 else summary.average2
@@ -133,6 +135,7 @@ object MatchSummaryReport {
                 if (summary.gameMode.supportsGoldenBreak) add("Golden $golden")
                 if (summary.gameMode.supportsEightBallLoss) add("Early 8 $early8")
                 if (summary.gameMode.supportsDryBreak) add("Dry $dry")
+                if (summary.gameMode.supportsPushOut) add("Push outs $pushOuts")
             }
         }
     }

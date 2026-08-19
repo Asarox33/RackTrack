@@ -5,7 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,14 +41,16 @@ fun TexturedActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     height: Dp = 44.dp,
+    corner: Dp = (height.value * CORNER_FRAC_OF_HEIGHT).dp,
 ) {
     val performHaptic = rememberClickHaptic()
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(corner)
     val alpha = if (enabled) 1f else 0.38f
     val top = if (pressed && enabled) dark else light
     val bottom = if (pressed && enabled) base.copy(alpha = 0.85f) else dark
+    val borderW = (height.value * BORDER_FRAC_OF_HEIGHT).coerceIn(1f, 2f).dp
 
     Box(
         modifier = modifier
@@ -59,7 +63,6 @@ fun TexturedActionButton(
             .drawWithContent {
                 drawContent()
                 drawFeltGrain(alpha = GRAIN_OVERLAY_ALPHA * alpha)
-                // Soft top highlight edge
                 drawRect(
                     brush = Brush.verticalGradient(
                         0f to Color.White.copy(alpha = HIGHLIGHT_ALPHA * alpha),
@@ -68,7 +71,7 @@ fun TexturedActionButton(
                 )
             }
             .border(
-                width = 1.5.dp,
+                width = borderW,
                 color = OutlineWarm.copy(alpha = if (enabled) 0.55f else 0.22f),
                 shape = shape,
             )
@@ -85,12 +88,14 @@ fun TexturedActionButton(
     ) {
         Text(
             text = label,
-            style = if (height <= 42.dp) {
+            style = if (height.value < 40f) {
                 MaterialTheme.typography.labelMedium
             } else {
                 MaterialTheme.typography.labelLarge
             },
             color = ScoreWhite.copy(alpha = if (enabled) 1f else 0.45f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -108,7 +113,7 @@ fun TexturedChip(
     height: Dp = 52.dp,
 ) {
     val performHaptic = rememberClickHaptic()
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape((height.value * CORNER_FRAC_OF_HEIGHT).dp)
     val top = if (selected) selectedLight else idleLight
     val bottom = if (selected) selectedDark else idleDark
 
@@ -122,7 +127,7 @@ fun TexturedChip(
                 drawFeltGrain(alpha = CHIP_GRAIN_ALPHA)
             }
             .border(
-                width = 1.5.dp,
+                width = (height.value * BORDER_FRAC_OF_HEIGHT).coerceIn(1f, 2f).dp,
                 color = OutlineWarm.copy(alpha = if (selected) 0.85f else 0.40f),
                 shape = shape,
             )
@@ -130,7 +135,7 @@ fun TexturedChip(
                 performHaptic()
                 onClick()
             }
-            .padding(horizontal = CHIP_PADDING_HORIZONTAL),
+            .padding(horizontal = (height.value * CHIP_PAD_H_FRAC).dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -143,18 +148,80 @@ fun TexturedChip(
     }
 }
 
+/**
+ * Full-width setting affordance: label + value + chevron (e.g. race distance).
+ * Reads as a tappable control, not a lone selected chip.
+ */
+@Composable
+fun TexturedSettingButton(
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    height: Dp = 52.dp,
+    light: Color,
+    dark: Color,
+) {
+    val performHaptic = rememberClickHaptic()
+    val shape = RoundedCornerShape((height.value * CORNER_FRAC_OF_HEIGHT).dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(light, dark)))
+            .drawWithContent {
+                drawContent()
+                drawFeltGrain(alpha = CHIP_GRAIN_ALPHA)
+            }
+            .border(
+                width = (height.value * BORDER_FRAC_OF_HEIGHT).coerceIn(1f, 2f).dp,
+                color = OutlineWarm.copy(alpha = 0.75f),
+                shape = shape,
+            )
+            .clickable {
+                performHaptic()
+                onClick()
+            }
+            .padding(horizontal = (height.value * CHIP_PAD_H_FRAC).dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            color = ScoreWhite.copy(alpha = 0.85f),
+            maxLines = 1,
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                color = ScoreWhite,
+                maxLines = 1,
+            )
+            Text(
+                text = "  ›",
+                style = MaterialTheme.typography.titleLarge,
+                color = ScoreWhite.copy(alpha = 0.7f),
+            )
+        }
+    }
+}
+
 @Composable
 fun TexturedOutlineAction(
     label: String,
     onClick: () -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier,
+    height: Dp = 40.dp,
 ) {
     val performHaptic = rememberClickHaptic()
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape((height.value * OUTLINE_CORNER_FRAC).dp)
     Box(
         modifier = modifier
-            .height(40.dp)
+            .height(height)
             .clip(shape)
             .background(
                 Brush.verticalGradient(
@@ -165,7 +232,7 @@ fun TexturedOutlineAction(
                 ),
             )
             .border(
-                1.5.dp,
+                (height.value * OUTLINE_BORDER_FRAC).coerceIn(1f, 2f).dp,
                 OutlineWarm.copy(alpha = if (enabled) 0.55f else 0.22f),
                 shape,
             )
@@ -173,13 +240,14 @@ fun TexturedOutlineAction(
                 performHaptic()
                 onClick()
             }
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = (height.value * OUTLINE_PAD_H_FRAC).dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             color = ScoreWhite.copy(alpha = if (enabled) 1f else 0.4f),
+            maxLines = 1,
         )
     }
 }
@@ -206,7 +274,6 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawFeltGrain(alpha
 
 private const val GRAIN_OVERLAY_ALPHA = 0.07f
 private const val CHIP_GRAIN_ALPHA = 0.06f
-private val CHIP_PADDING_HORIZONTAL = 12.dp
 private const val HIGHLIGHT_ALPHA = 0.10f
 private const val HIGHLIGHT_FADE_STOP = 0.35f
 private const val GRAIN_STEP_PX = 3.5f
@@ -218,3 +285,9 @@ private const val GRAIN_MIN_SHADE = 0.35f
 private const val GRAIN_SHADE_RANGE = 40
 private const val GRAIN_SHADE_DIVISOR = 100f
 private const val GRAIN_RADIUS_PX = 0.7f
+private const val CORNER_FRAC_OF_HEIGHT = 0.28f
+private const val BORDER_FRAC_OF_HEIGHT = 0.03f
+private const val CHIP_PAD_H_FRAC = 0.28f
+private const val OUTLINE_CORNER_FRAC = 0.32f
+private const val OUTLINE_BORDER_FRAC = 0.035f
+private const val OUTLINE_PAD_H_FRAC = 0.45f

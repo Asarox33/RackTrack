@@ -178,7 +178,11 @@ class MatchSummaryJsonTest {
         )
         val obj = MatchSummaryJson.encodeSummary(summary)
         obj.remove("solo")
+        obj.remove("pushOuts1")
+        obj.remove("pushOuts2")
         val decoded = MatchSummaryJson.decodeSummary(obj)
         assertEquals(false, decoded.solo)
+        assertEquals(0, decoded.pushOuts1)
+        assertEquals(0, decoded.pushOuts2)
     }
 }

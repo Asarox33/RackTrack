@@ -133,6 +133,30 @@ class MatchCoordinatorTest {
     }
 
     @Test
+    fun `given active match, when open and close settings, then returns to same board`() {
+        val c = coordinator()
+        c.startMatch()
+        val before = c.board().match
+        c.openSettings()
+        assertEquals(AppScreen.Settings, c.screen.value)
+        c.closeSettings()
+        val after = c.board().match
+        assertEquals(before.player1.name, after.player1.name)
+        assertEquals(before.player2.name, after.player2.name)
+        assertEquals(before.score1, after.score1)
+        assertEquals(before.racksToWin, after.racksToWin)
+    }
+
+    @Test
+    fun `given setup, when open and close settings, then returns to setup`() {
+        val c = coordinator()
+        c.openSettings()
+        assertEquals(AppScreen.Settings, c.screen.value)
+        c.closeSettings()
+        assertEquals(AppScreen.Setup, c.screen.value)
+    }
+
+    @Test
     fun `given race fouls, when clearFouls, then consecutive counter resets`() {
         val c = coordinator()
         c.updateGameMode(GameMode.TEN_BALL)

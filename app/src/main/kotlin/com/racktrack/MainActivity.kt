@@ -18,7 +18,7 @@ import com.racktrack.monetization.MonetizationFacade
 import com.racktrack.presentation.screen.HistoryDetailScreen
 import com.racktrack.presentation.screen.HistoryScreen
 import com.racktrack.presentation.screen.MatchBoardScreen
-import com.racktrack.presentation.screen.SettingsSheet
+import com.racktrack.presentation.screen.SettingsScreen
 import com.racktrack.presentation.screen.SetupScreen
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.viewmodel.AppScreen
@@ -37,7 +37,6 @@ class MainActivity : ComponentActivity() {
         hideSystemBars()
         setContent {
             val settings by viewModel.settings.collectAsStateWithLifecycle()
-            val settingsOpen by viewModel.settingsOpen.collectAsStateWithLifecycle()
             val adsRemoved by monetization.adsRemoved.collectAsStateWithLifecycle()
             val billingStatus by monetization.billingStatusMessage.collectAsStateWithLifecycle()
 
@@ -101,6 +100,12 @@ class MainActivity : ComponentActivity() {
                             onAddPoints = viewModel::addPoints,
                             onPassWithRemaining = viewModel::passWithRemaining,
                             onBreakFoul = viewModel::breakFoul,
+                            onAcceptIllegalOpen = viewModel::acceptIllegalOpen,
+                            onAnnouncePushOut = viewModel::announcePushOut,
+                            onResolvePushOutClean = viewModel::resolvePushOutClean,
+                            onResolvePushOutFoul = viewModel::resolvePushOutFoul,
+                            onTakePushOut = viewModel::takePushOut,
+                            onReturnPushOut = viewModel::returnPushOut,
                             onFoul = viewModel::foul,
                             onFoulWithRemaining = viewModel::foulWithRemaining,
                             onClearFouls = viewModel::clearFouls,
@@ -123,10 +128,7 @@ class MainActivity : ComponentActivity() {
                         match = selectedHistory,
                         onBack = viewModel::closeHistoryDetail,
                     )
-                }
-
-                if (settingsOpen) {
-                    SettingsSheet(
+                    AppScreen.Settings -> SettingsScreen(
                         settings = settings,
                         adsRemoved = adsRemoved,
                         onRemoveAds = { monetization.launchRemoveAdsPurchase(this@MainActivity) },
@@ -138,7 +140,7 @@ class MainActivity : ComponentActivity() {
                         onDefaultPointsChange = viewModel::setDefaultPointsToWin,
                         onDefaultInningsChange = viewModel::setDefaultInningsLimit,
                         onDefaultBreakRuleChange = viewModel::setDefaultBreakRule,
-                        onDismiss = viewModel::closeSettings,
+                        onBack = viewModel::closeSettings,
                     )
                 }
             }

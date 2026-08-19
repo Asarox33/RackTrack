@@ -33,8 +33,8 @@ class MatchCoordinator(
     private val _screen = MutableStateFlow<AppScreen>(AppScreen.Setup)
     val screen: StateFlow<AppScreen> = _screen.asStateFlow()
 
-    private val _settingsOpen = MutableStateFlow(false)
-    val settingsOpen: StateFlow<Boolean> = _settingsOpen.asStateFlow()
+    /** Screen to restore when leaving [AppScreen.Settings] (Setup or in-progress board). */
+    private var settingsReturnScreen: AppScreen = AppScreen.Setup
 
     /** Club break pause — freezes duration accounting; not an FFB player timeout. */
     private val _matchPaused = MutableStateFlow(false)
@@ -44,11 +44,15 @@ class MatchCoordinator(
     private var openPauseStartedAt: Long? = null
 
     fun openSettings() {
-        _settingsOpen.value = true
+        val current = _screen.value
+        if (current is AppScreen.Settings) return
+        settingsReturnScreen = current
+        _screen.value = AppScreen.Settings
     }
 
     fun closeSettings() {
-        _settingsOpen.value = false
+        _screen.value = settingsReturnScreen
+        settingsReturnScreen = AppScreen.Setup
     }
 
     fun toggleMatchPause() {
@@ -246,6 +250,30 @@ class MatchCoordinator(
 
     fun breakFoul(playerId: PlayerId) = mutateMatch {
         FourteenOneEngine.breakFoul(it, playerId, clock())
+    }
+
+    fun acceptIllegalOpen() = mutateMatch {
+        FourteenOneEngine.acceptIllegalOpen(it, clock())
+    }
+
+    fun announcePushOut(playerId: PlayerId) = mutateMatch {
+        MatchEngine.announcePushOut(it, playerId, clock())
+    }
+
+    fun resolvePushOutClean(playerId: PlayerId) = mutateMatch {
+        MatchEngine.resolvePushOutClean(it, playerId, clock())
+    }
+
+    fun resolvePushOutFoul(playerId: PlayerId) = mutateMatch {
+        MatchEngine.resolvePushOutFoul(it, playerId, clock())
+    }
+
+    fun takePushOut() = mutateMatch {
+        MatchEngine.takePushOut(it, clock())
+    }
+
+    fun returnPushOut() = mutateMatch {
+        MatchEngine.returnPushOut(it, clock())
     }
 
     fun undo() = mutateMatch {

@@ -50,6 +50,8 @@ data class Match(
     val currentShooterId: PlayerId,
     /** True at match start and after a 14/1 three-foul penalty (must open-break). */
     val awaitingOpeningBreak: Boolean = false,
+    /** 9/10 push-out window / decision tree (ignored for 8-ball / 14/1). */
+    val pushOutPhase: PushOutPhase = PushOutPhase.NONE,
     val status: MatchStatus = MatchStatus.IN_PROGRESS,
     val startedAtMillis: Long = 0L,
     /**
@@ -164,6 +166,11 @@ data class Match(
                 currentBreakerId = starter,
                 currentShooterId = starter,
                 awaitingOpeningBreak = gameMode.isPointScoring,
+                pushOutPhase = if (gameMode.supportsPushOut) {
+                    PushOutPhase.AVAILABLE
+                } else {
+                    PushOutPhase.NONE
+                },
                 startedAtMillis = startedAtMillis,
                 solo = solo,
             )

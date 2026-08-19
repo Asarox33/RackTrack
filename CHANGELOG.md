@@ -6,6 +6,34 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.2.1 — 2026-08-19
+
+### Features
+
+- **Adaptive live boards** — race and 14/1 scale from available pane size on phones, folds,
+  and tablets (readable scores / actions without S25- or tablet-only hacks). Sizes use a
+  touch **floor** and a tablet **ceiling** so chrome does not explode on large screens.
+- **Race to picker** — setup and Settings open a 1–15 modal (default remains 6). Swipe
+  left/right (or tap neighbors / arrows); ±2 smaller values show so the control reads as
+  a strip. Same swipe strip for 14/1 balls-left on the visit-end modal.
+- **Race to control** — full-width **Tap to set · N ›** row instead of a lone selected chip.
+- **Settings page** — Settings is a full screen (like History), not a modal sheet; Back
+  returns to Setup or the live match.
+- **14/1 illegal opening break** — after **BREAK −2**, opponent chooses **ACCEPT** (take the
+  table) or **RE-BREAK** (same breaker; further illegal opens stack another −2).
+- **9/10 push-out** — FFB decision tree on the scoreboard: **PUSH OUT** → CLEAN / FOUL →
+  **TAKE** / **GIVE BACK**. A dry break does not remove the push-out window. End-of-match
+  summary / PDF / history show **Push outs** (announcements) next to Dry / Golden.
+
+### Bug fixes
+
+- **Tall phones** — run-out and consecutive-foul chips stay visible under the score (reserved
+  height + muted-icon contrast).
+
+### Notes
+
+- Closed / Internal rebuilds of this name use `versionCode` `102010`+ (see `docs/07`).
+
 ## 1.2.0 — 2026-08-17
 
 ### Features

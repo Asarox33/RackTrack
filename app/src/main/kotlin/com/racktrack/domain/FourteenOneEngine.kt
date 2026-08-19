@@ -182,29 +182,49 @@ object FourteenOneEngine {
         }
     }
 
-    /** Illegal opening break (FFB 1.6.03): −2, hand to opponent (accept table). */
+    /** Illegal opening break (FFB 1.6.03): −2; stay on open until ACCEPT or legal play. */
     fun breakFoul(match: Match, playerId: PlayerId, nowMillis: Long): Match {
         if (!isActiveFourteenOne(match)) return match
         if (playerId != match.currentShooterId) return match
+        if (!match.awaitingOpeningBreak) return match
 
         val afterRun = commitCurrentRun(match, playerId)
         val scored = applyScoreDelta(afterRun, playerId, BREAK_FOUL_PENALTY)
-        val withEvent = scored.copy(
-            foul1 = if (playerId == match.player1.id) 0 else afterRun.foul1,
-            foul2 = if (playerId == match.player2.id) 0 else afterRun.foul2,
-            history = scored.history + MatchEvent(
-                MatchEventType.BREAK_FOUL,
-                playerId,
-                nowMillis,
-                value = BREAK_FOUL_PENALTY,
+        return finishIfDistanceReached(
+            scored.copy(
+                foul1 = if (playerId == match.player1.id) 0 else afterRun.foul1,
+                foul2 = if (playerId == match.player2.id) 0 else afterRun.foul2,
+                awaitingOpeningBreak = true,
+                currentShooterId = playerId,
+                currentBreakerId = playerId,
+                history = scored.history + MatchEvent(
+                    MatchEventType.BREAK_FOUL,
+                    playerId,
+                    nowMillis,
+                    value = BREAK_FOUL_PENALTY,
+                ),
             ),
         )
+    }
+
+    /**
+     * Opponent accepts the table after an illegal opening break.
+     * Ends the breaker’s visit; [MatchEvent.playerId] is the fouler.
+     */
+    fun acceptIllegalOpen(match: Match, nowMillis: Long): Match {
+        if (!isActiveFourteenOne(match)) return match
+        if (!match.awaitingOpeningBreak) return match
+        val last = match.history.lastOrNull() ?: return match
+        if (last.type != MatchEventType.BREAK_FOUL) return match
+        val fouler = last.playerId
+        if (match.currentShooterId != fouler) return match
+
         val ended = endInning(
-            match = withEvent,
-            playerId = playerId,
-            nextShooterId = nextShooterAfterVisit(match, playerId),
+            match = match,
+            playerId = fouler,
+            nextShooterId = nextShooterAfterVisit(match, fouler),
             awaitingOpeningBreak = false,
-            historyEvent = null,
+            historyEvent = MatchEvent(MatchEventType.ACCEPT_ILLEGAL_OPEN, fouler, nowMillis),
         )
         return resolveInningsLimit(ended)
     }
@@ -237,13 +257,25 @@ object FourteenOneEngine {
                 )
             }
             MatchEventType.PASS,
-            MatchEventType.BREAK_FOUL,
+            MatchEventType.ACCEPT_ILLEGAL_OPEN,
             -> {
-                val scoreRestored = when (last.type) {
-                    MatchEventType.PASS -> match
-                    else -> applyScoreDelta(match, last.playerId, -last.value)
-                }
-                undoEndedInning(scoreRestored, withoutLast, last.playerId)
+                undoEndedInning(match, withoutLast, last.playerId)
+            }
+            MatchEventType.BREAK_FOUL -> {
+                val scoreRestored = applyScoreDelta(match, last.playerId, -last.value)
+                scoreRestored.copy(
+                    foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
+                    foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
+                    highRun1 = highRunFromHistory(withoutLast, match.player1.id),
+                    highRun2 = highRunFromHistory(withoutLast, match.player2.id),
+                    currentRun = currentRunFromHistory(withoutLast, last.playerId),
+                    objectBallsOnTable = objectBallsFromHistory(withoutLast),
+                    awaitingOpeningBreak = awaitingOpeningBreakFromHistory(withoutLast),
+                    currentShooterId = last.playerId,
+                    currentBreakerId = last.playerId,
+                    status = MatchStatus.IN_PROGRESS,
+                    history = withoutLast,
+                )
             }
             MatchEventType.FOUL -> {
                 val scoreRestored = applyScoreDelta(match, last.playerId, -last.value)
@@ -442,6 +474,7 @@ object FourteenOneEngine {
                 MatchEventType.POINTS,
                 MatchEventType.PASS,
                 MatchEventType.BREAK_FOUL,
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
                 MatchEventType.THREE_FOUL_PENALTY,
                 -> return count
                 MatchEventType.FOUL ->
@@ -454,18 +487,22 @@ object FourteenOneEngine {
 
     private fun awaitingOpeningBreakFromHistory(history: List<MatchEvent>): Boolean {
         if (history.isEmpty()) return true
+        var awaiting: Boolean? = null
         for (event in history.asReversed()) {
-            when (event.type) {
-                MatchEventType.THREE_FOUL_PENALTY -> return true
-                MatchEventType.POINTS -> return false
+            awaiting = when (event.type) {
+                MatchEventType.THREE_FOUL_PENALTY,
+                MatchEventType.BREAK_FOUL,
+                -> true
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
+                MatchEventType.POINTS,
                 MatchEventType.PASS,
                 MatchEventType.FOUL,
-                MatchEventType.BREAK_FOUL,
-                -> return false
-                else -> Unit
+                -> false
+                else -> awaiting
             }
+            if (awaiting != null) break
         }
-        return true
+        return awaiting ?: true
     }
 
     private fun currentRunFromHistory(history: List<MatchEvent>, playerId: PlayerId): Int {
@@ -476,9 +513,10 @@ object FourteenOneEngine {
                     if (event.playerId == playerId) run += event.value else return run
                 MatchEventType.PASS,
                 MatchEventType.FOUL,
-                MatchEventType.BREAK_FOUL,
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
                 MatchEventType.THREE_FOUL_PENALTY,
                 -> return run
+                MatchEventType.BREAK_FOUL -> return run
                 else -> Unit
             }
         }
@@ -493,11 +531,14 @@ object FourteenOneEngine {
                 MatchEventType.POINTS -> if (event.playerId == playerId) run += event.value
                 MatchEventType.PASS,
                 MatchEventType.FOUL,
-                MatchEventType.BREAK_FOUL,
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
                 MatchEventType.THREE_FOUL_PENALTY,
                 -> if (event.playerId == playerId) {
                     best = maxOf(best, run)
                     run = 0
+                }
+                MatchEventType.BREAK_FOUL -> if (event.playerId == playerId) {
+                    // Penalty mid-open; visit not closed until accept / legal end.
                 }
                 else -> Unit
             }
@@ -526,15 +567,15 @@ object FourteenOneEngine {
                     } else {
                         score2 += event.value
                     }
-                MatchEventType.PASS -> {
+                MatchEventType.PASS,
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
+                -> {
                     if (event.playerId == match.player1.id) i1++ else i2++
                     if (i1 >= limit && i2 >= limit && score1 == score2) {
                         limit += OVERTIME_INNINGS
                     }
                 }
-                MatchEventType.FOUL,
-                MatchEventType.BREAK_FOUL,
-                -> {
+                MatchEventType.FOUL -> {
                     if (event.playerId == match.player1.id) {
                         score1 += event.value
                         i1++
@@ -544,6 +585,13 @@ object FourteenOneEngine {
                     }
                     if (i1 >= limit && i2 >= limit && score1 == score2) {
                         limit += OVERTIME_INNINGS
+                    }
+                }
+                MatchEventType.BREAK_FOUL -> {
+                    if (event.playerId == match.player1.id) {
+                        score1 += event.value
+                    } else {
+                        score2 += event.value
                     }
                 }
                 MatchEventType.THREE_FOUL_PENALTY ->

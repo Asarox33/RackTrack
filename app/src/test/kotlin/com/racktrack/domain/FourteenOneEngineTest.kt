@@ -87,16 +87,32 @@ class FourteenOneEngineTest {
     }
 
     @Test
-    fun `given opening break foul, then -2 and hand switches`() {
+    fun `given opening break foul, then -2 and still awaiting until accept`() {
         val match = fresh()
         assertTrue(match.awaitingOpeningBreak)
 
-        val next = FourteenOneEngine.breakFoul(match, match.player1.id, now())
+        val fouled = FourteenOneEngine.breakFoul(match, match.player1.id, now())
 
-        assertEquals(-2, next.score1)
-        assertEquals(match.player2.id, next.currentShooterId)
-        assertEquals(false, next.awaitingOpeningBreak)
-        assertEquals(MatchEventType.BREAK_FOUL, next.history.last().type)
+        assertEquals(-2, fouled.score1)
+        assertEquals(match.player1.id, fouled.currentShooterId)
+        assertEquals(true, fouled.awaitingOpeningBreak)
+        assertEquals(MatchEventType.BREAK_FOUL, fouled.history.last().type)
+
+        val accepted = FourteenOneEngine.acceptIllegalOpen(fouled, now())
+        assertEquals(match.player2.id, accepted.currentShooterId)
+        assertEquals(false, accepted.awaitingOpeningBreak)
+        assertEquals(MatchEventType.ACCEPT_ILLEGAL_OPEN, accepted.history.last().type)
+    }
+
+    @Test
+    fun `given illegal open refused then illegal again, then penalties accumulate`() {
+        var match = fresh()
+        match = FourteenOneEngine.breakFoul(match, match.player1.id, now())
+        match = FourteenOneEngine.breakFoul(match, match.player1.id, now())
+
+        assertEquals(-4, match.score1)
+        assertTrue(match.awaitingOpeningBreak)
+        assertEquals(match.player1.id, match.currentShooterId)
     }
 
     @Test

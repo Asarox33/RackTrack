@@ -17,13 +17,13 @@ Race scoreboard. Richest race mode in the app (golden + dry + three-foul loss).
 | Golden break — legal break pockets 9 (1.4.03) | **Yes** — **GOLDEN** → awards rack |
 | Dry break (no object ball pocketed) as stat | **Yes** — **DRY**; blocks Run out / Golden this rack |
 | Illegal break / “three-ball” soft-break rule | **No** — operator; may use FOUL or DRY by judgment |
-| Push-out after legal break | **No** |
+| Push-out after legal break | **Yes** — **PUSH OUT** → CLEAN/FOUL → TAKE / GIVE BACK; DRY keeps window open |
 | 9 respotted when pocketed/ejected irregularly (1.4.06) | **No** — operator |
 | 3 consecutive fouls → lose rack (1.4.07) | **Yes** — `THREE_FOULS_LOSS` |
 | Warning after 2 fouls | **Yes** — on-screen banner |
 | Legal shot resets consecutive fouls | **Partial** — tap foul chip (`FOULS_CLEARED`) |
 | Ball order / combo legality / BIH | **No** |
-| Undo; summary (incl. golden / dry counts) | **Yes** |
+| Undo; summary (incl. golden / dry / push-out counts) | **Yes** |
 
 Unlike 10-ball, FFB 9-ball is generally **without call**, except special cases (art. 1.4.01).
 
@@ -87,6 +87,5 @@ Unlike 10-ball, FFB 9-ball is generally **without call**, except special cases (
 
 ## 10. Deliberately not modeled (deep mode / later)
 
-- Push-out UI and illegal-break choice tree
-- Three-ball soft-break automation
+- Illegal-break choice tree / three-ball soft-break automation
 - Respot geometry, BIH state, shot clock, disciplinary / federal machinery

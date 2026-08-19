@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.domain.model.GameMode
@@ -168,23 +169,29 @@ fun PlayerStatIcons(
     maxConsecutiveFouls: Int,
     modifier: Modifier = Modifier,
     onClearFouls: (() -> Unit)? = null,
+    iconSize: Dp = StatIconSize,
+    iconGap: Dp = 22.dp,
+    clearHintSp: TextUnit = 11.sp,
+    countSp: TextUnit = 16.sp,
 ) {
     val performHaptic = rememberClickHaptic()
     val foulClearable = consecutiveFouls > 0 && onClearFouls != null
+    val safeIconSize = iconSize.coerceAtLeast(24.dp)
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(22.dp),
+        horizontalArrangement = Arrangement.spacedBy(iconGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StatIconChip(
             countLabel = runOuts.toString(),
             emphasized = runOuts > 0,
             accent = ButtonRunOutLight,
+            countSp = countSp,
         ) {
             RunOutIcon(
                 gameMode = gameMode,
                 muted = runOuts == 0,
-                size = StatIconSize,
+                size = safeIconSize,
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -196,6 +203,7 @@ fun PlayerStatIcons(
                 },
                 emphasized = consecutiveFouls > 0,
                 accent = ButtonFoulLight,
+                countSp = countSp,
                 clearable = foulClearable,
                 onClick = if (foulClearable) {
                     {
@@ -212,13 +220,13 @@ fun PlayerStatIcons(
                         consecutiveFouls > 0 -> ButtonFoul
                         else -> ScoreWhite.copy(alpha = MUTED_ICON_ALPHA)
                     },
-                    size = StatIconSize,
+                    size = safeIconSize,
                 )
             }
             if (foulClearable) {
                 Text(
                     text = "TAP TO CLEAR",
-                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 11.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = clearHintSp),
                     color = ButtonFoulLight.copy(alpha = 0.95f),
                 )
             }
@@ -231,6 +239,7 @@ private fun StatIconChip(
     countLabel: String,
     emphasized: Boolean,
     accent: Color,
+    countSp: TextUnit,
     clearable: Boolean = false,
     onClick: (() -> Unit)? = null,
     icon: @Composable () -> Unit,
@@ -268,7 +277,7 @@ private fun StatIconChip(
         Box(contentAlignment = Alignment.Center) { icon() }
         Text(
             text = countLabel,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = countSp),
             color = if (emphasized) accent else ScoreWhite.copy(alpha = MUTED_LABEL_ALPHA),
         )
     }
@@ -512,8 +521,8 @@ private const val SPECULAR_OFFSET_Y = 0.3f
 private const val SPECULAR_RADIUS_FACTOR = 0.28f
 private const val TIP_OFFSET_Y = 0.34f
 private const val TIP_RADIUS_FACTOR = 0.24f
-private const val MUTED_ICON_ALPHA = 0.45f
-private const val MUTED_LABEL_ALPHA = 0.55f
+private const val MUTED_ICON_ALPHA = 0.72f
+private const val MUTED_LABEL_ALPHA = 0.78f
 private const val FOUL_WARN_THRESHOLD = 2
 private val FOUL_CHIP_CORNER = 12.dp
 private val BallEightBlack = Color(0xFF1C1C1C)
