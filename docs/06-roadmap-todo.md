@@ -68,6 +68,7 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 - ✅ Race-to swipe picker (1–15) + **Tap to set** affordance; 14/1 balls-left same strip
 - ✅ Settings as full `AppScreen` (return to Setup or live match)
 - ✅ 14/1 illegal open ACCEPT / RE-BREAK; 9/10 push-out FFB tree
+  (summary / PDF / history: **Push outs** count next to Dry / Golden)
 - ✅ Tall-phone score cluster keeps run-out / foul chips visible
 
 ### 1.1.1 — font OFL attribution
@@ -162,8 +163,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 - 2026-08-19: **1.2.1** — adaptive board metrics (floor + ceiling); race-to / 14-1 **swipe**
   pickers with neighbor strip; Settings **page**; race-to Tap-to-set row; 14/1 ACCEPT /
-  RE-BREAK; 9/10 push-out tree; tall-phone foul/run-out chips. `versionCode` **102010** +
-  `CHANGELOG.md`.
+  RE-BREAK; 9/10 push-out tree (+ **Push outs** in summary/PDF/history); tall-phone
+  foul/run-out chips. `versionCode` **102010** + `CHANGELOG.md`.
 - 2026-08-18: **R8** enabled for release (minify + shrinkResources + native SYMBOL_TABLE);
   versionCode **10203** for next Closed/Internal AAB with mapping/symbols.
 - 2026-08-18: **Closed testing required** — Play blocks Production until ≥12 closed testers

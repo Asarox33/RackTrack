@@ -23,7 +23,7 @@ Race scoreboard. Richest race mode in the app (golden + dry + three-foul loss).
 | Warning after 2 fouls | **Yes** — on-screen banner |
 | Legal shot resets consecutive fouls | **Partial** — tap foul chip (`FOULS_CLEARED`) |
 | Ball order / combo legality / BIH | **No** |
-| Undo; summary (incl. golden / dry counts) | **Yes** |
+| Undo; summary (incl. golden / dry / push-out counts) | **Yes** |
 
 Unlike 10-ball, FFB 9-ball is generally **without call**, except special cases (art. 1.4.01).
 
