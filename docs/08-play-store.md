@@ -158,10 +158,14 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 **Build / crash quality (with monetization AAB)**
 
 - [x] Enable **R8** minify + resource shrink; `ndk.debugSymbolLevel = SYMBOL_TABLE`
-  (native symbols packaged in the AAB for Play)
-- [ ] Upload AAB; confirm Play accepts mapping (from
-  `app/build/outputs/mapping/release/mapping.txt` if Console asks — often paired with the
-  release) + native symbols from the bundle
+- [x] **Every** `:app:bundleRelease` embeds Play crash artifacts in the AAB:
+  - R8 mapping → `BUNDLE-METADATA/.../proguard.map` (Console often auto-detects)
+  - Native symbols → `BUNDLE-METADATA/.../debugsymbols/native-debug-symbols.zip`
+    (task `embedReleaseNativeDebugSymbolsInBundle`; also written to
+    `app/build/outputs/native-debug-symbols/release/native-debug-symbols.zip`)
+- [ ] Upload AAB; in App bundle explorer confirm **mapping** + **symboles de débogage
+  natifs** both show a size (not an empty upload arrow). If Console still asks, upload
+  the zip next to the AAB from `outputs/native-debug-symbols/release/`.
   (Internal 1.1.1 Console warnings were deferred on purpose — see `06-roadmap-todo.md`)
 
 **Code** — full UX: [`09-monetization.md`](09-monetization.md).
