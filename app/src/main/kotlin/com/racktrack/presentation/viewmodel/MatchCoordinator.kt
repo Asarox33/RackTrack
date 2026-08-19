@@ -248,6 +248,30 @@ class MatchCoordinator(
         FourteenOneEngine.breakFoul(it, playerId, clock())
     }
 
+    fun acceptIllegalOpen() = mutateMatch {
+        FourteenOneEngine.acceptIllegalOpen(it, clock())
+    }
+
+    fun announcePushOut(playerId: PlayerId) = mutateMatch {
+        MatchEngine.announcePushOut(it, playerId, clock())
+    }
+
+    fun resolvePushOutClean(playerId: PlayerId) = mutateMatch {
+        MatchEngine.resolvePushOutClean(it, playerId, clock())
+    }
+
+    fun resolvePushOutFoul(playerId: PlayerId) = mutateMatch {
+        MatchEngine.resolvePushOutFoul(it, playerId, clock())
+    }
+
+    fun takePushOut() = mutateMatch {
+        MatchEngine.takePushOut(it, clock())
+    }
+
+    fun returnPushOut() = mutateMatch {
+        MatchEngine.returnPushOut(it, clock())
+    }
+
     fun undo() = mutateMatch {
         if (it.gameMode.isPointScoring) {
             FourteenOneEngine.undoLast(it)

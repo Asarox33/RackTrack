@@ -58,6 +58,7 @@ import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
+import com.racktrack.presentation.component.TwoChoiceModal
 import com.racktrack.presentation.component.rememberClickHaptic
 import com.racktrack.presentation.theme.ButtonFoul
 import com.racktrack.presentation.theme.ButtonFoulDark
@@ -86,9 +87,16 @@ fun FourteenOneBoardContent(
     onPassWithRemaining: (PlayerId, Int, Int) -> Unit,
     onFoulWithRemaining: (PlayerId, Int, Int) -> Unit,
     onBreakFoul: (PlayerId) -> Unit,
+    onAcceptIllegalOpen: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var visitEnd by remember { mutableStateOf<VisitEndDraft?>(null) }
+    var dismissedIllegalOpenAt by remember { mutableStateOf<Long?>(null) }
+    val lastEvent = match.history.lastOrNull()
+    val showIllegalOpenChoice =
+        match.awaitingOpeningBreak &&
+            lastEvent?.type == MatchEventType.BREAK_FOUL &&
+            dismissedIllegalOpenAt != lastEvent.atMillis
 
     Box(modifier = modifier) {
         if (match.solo) {
@@ -222,6 +230,28 @@ fun FourteenOneBoardContent(
                             onFoulWithRemaining(draft.playerId, remaining, priorPoints)
                     }
                     visitEnd = null
+                },
+            )
+        }
+
+        if (showIllegalOpenChoice) {
+            TwoChoiceModal(
+                title = "ILLEGAL OPEN",
+                subtitle = "Opponent accepts the table?",
+                primaryLabel = "ACCEPT",
+                primaryBase = ButtonRunOut,
+                primaryLight = ButtonRunOutLight,
+                primaryDark = ButtonRunOutDark,
+                secondaryLabel = "RE-BREAK",
+                secondaryBase = ButtonFoul,
+                secondaryLight = ButtonFoulLight,
+                secondaryDark = ButtonFoulDark,
+                onPrimary = {
+                    onAcceptIllegalOpen()
+                    dismissedIllegalOpenAt = lastEvent.atMillis
+                },
+                onSecondary = {
+                    dismissedIllegalOpenAt = lastEvent.atMillis
                 },
             )
         }
@@ -844,6 +874,7 @@ private fun fullRacksInCurrentVisit(match: Match): Int {
             MatchEventType.PASS,
             MatchEventType.FOUL,
             MatchEventType.BREAK_FOUL,
+            MatchEventType.ACCEPT_ILLEGAL_OPEN,
             MatchEventType.THREE_FOUL_PENALTY,
             -> return racks
             else -> Unit

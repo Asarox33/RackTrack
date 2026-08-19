@@ -82,6 +82,7 @@ object MatchSummaryReport {
             MatchEventType.PASS -> "pass"
             MatchEventType.FOUL -> "foul"
             MatchEventType.BREAK_FOUL -> "brk"
+            MatchEventType.ACCEPT_ILLEGAL_OPEN -> "acc"
             null -> "win"
             else -> ""
         }

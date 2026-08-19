@@ -6,6 +6,23 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.2.1 — 2026-08-19
+
+### Features
+
+- **Adaptive live boards** — race and 14/1 scale from available pane size on phones, folds,
+  and tablets (readable scores / actions without S25- or tablet-only hacks).
+- **Race to stepper** — setup and Settings open a 1–15 modal instead of fixed chips
+  (default remains 6).
+- **14/1 illegal opening break** — after **BREAK −2**, opponent chooses **ACCEPT** (take the
+  table) or **RE-BREAK** (same breaker; further illegal opens stack another −2).
+- **9/10 push-out** — FFB decision tree on the scoreboard: **PUSH OUT** → CLEAN / FOUL →
+  **TAKE** / **GIVE BACK**. A dry break does not remove the push-out window.
+
+### Notes
+
+- Closed / Internal rebuilds of this name use `versionCode` `102010`+ (see `docs/07`).
+
 ## 1.2.0 — 2026-08-17
 
 ### Features

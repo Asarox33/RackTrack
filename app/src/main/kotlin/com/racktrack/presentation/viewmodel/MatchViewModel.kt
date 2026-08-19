@@ -164,6 +164,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun breakFoul(playerId: PlayerId) = coordinator.breakFoul(playerId)
 
+    fun acceptIllegalOpen() = coordinator.acceptIllegalOpen()
+
+    fun announcePushOut(playerId: PlayerId) = coordinator.announcePushOut(playerId)
+
+    fun resolvePushOutClean(playerId: PlayerId) = coordinator.resolvePushOutClean(playerId)
+
+    fun resolvePushOutFoul(playerId: PlayerId) = coordinator.resolvePushOutFoul(playerId)
+
+    fun takePushOut() = coordinator.takePushOut()
+
+    fun returnPushOut() = coordinator.returnPushOut()
+
     fun undo() = coordinator.undo()
 
     fun newMatch() = coordinator.newMatch()

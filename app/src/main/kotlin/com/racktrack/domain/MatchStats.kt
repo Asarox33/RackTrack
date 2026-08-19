@@ -121,7 +121,8 @@ object MatchStats {
 
     /**
      * Net points per visit for [playerId], in order (pocketed + FOUL/BREAK/−15).
-     * A visit ends on PASS / FOUL / BREAK_FOUL; an open visit at match end is kept.
+     * A visit ends on PASS / FOUL / ACCEPT_ILLEGAL_OPEN; an open visit at match end is kept.
+     * BREAK_FOUL (−2) stays in the open visit until accept or another visit end.
      */
     fun inningScores(history: List<MatchEvent>, playerId: PlayerId): List<InningStat> {
         val result = mutableListOf<InningStat>()
@@ -143,10 +144,16 @@ object MatchStats {
                     points = 0
                     open = false
                 }
-                MatchEventType.FOUL,
-                MatchEventType.BREAK_FOUL,
-                -> {
+                MatchEventType.BREAK_FOUL -> {
                     points += event.value
+                    open = true
+                }
+                MatchEventType.FOUL,
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
+                -> {
+                    if (event.type == MatchEventType.FOUL) {
+                        points += event.value
+                    }
                     result += InningStat(
                         index = result.size + 1,
                         points = points,
@@ -180,6 +187,7 @@ object MatchStats {
             when (event.type) {
                 MatchEventType.FOUL,
                 MatchEventType.BREAK_FOUL,
+                MatchEventType.PUSH_OUT_FOUL,
                 -> event.playerId == playerId
                 MatchEventType.THREE_FOULS_LOSS -> event.playerId == playerId
                 else -> false
@@ -224,7 +232,13 @@ object MatchStats {
             MatchEventType.POINTS,
             MatchEventType.PASS,
             MatchEventType.BREAK_FOUL,
+            MatchEventType.ACCEPT_ILLEGAL_OPEN,
             MatchEventType.THREE_FOUL_PENALTY,
+            MatchEventType.PUSH_OUT,
+            MatchEventType.PUSH_OUT_CLEAN,
+            MatchEventType.PUSH_OUT_FOUL,
+            MatchEventType.PUSH_OUT_TAKE,
+            MatchEventType.PUSH_OUT_RETURN,
             -> error("${event.type} is not a rack-ending event")
         }
 

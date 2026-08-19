@@ -726,7 +726,13 @@ private fun rackEndLabel(type: MatchEventType): String =
         MatchEventType.POINTS,
         MatchEventType.PASS,
         MatchEventType.BREAK_FOUL,
+        MatchEventType.ACCEPT_ILLEGAL_OPEN,
         MatchEventType.THREE_FOUL_PENALTY,
+        MatchEventType.PUSH_OUT,
+        MatchEventType.PUSH_OUT_CLEAN,
+        MatchEventType.PUSH_OUT_FOUL,
+        MatchEventType.PUSH_OUT_TAKE,
+        MatchEventType.PUSH_OUT_RETURN,
         -> ""
     }
 

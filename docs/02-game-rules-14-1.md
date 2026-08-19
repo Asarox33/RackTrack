@@ -23,7 +23,7 @@ geometry and call-shot are **not** enforced — players enter points in chunks.
 | Legal shot / pass clears consecutive fouls | **Yes** — via `addPoints` / `PASS` (no separate clear chip) |
 | 3 consecutive fouls → −1 then extra **−15**, re-break (1.6.07) | **Yes** — `THREE_FOUL_PENALTY`; same player opens again |
 | Illegal opening break −2 (1.6.03) | **Yes** — **BREAK −2** while `awaitingOpeningBreak` |
-| Opponent may force re-break after illegal open (cumulate −2) | **Partial** — operator can tap BREAK −2 again; no accept/refuse UI |
+| Opponent may force re-break after illegal open (cumulate −2) | **Yes** — ACCEPT / RE-BREAK modal; −2 stacks on re-break |
 | Classic foul on legal open = −1 (not −2) | **Yes** — use FOUL, not BREAK −2 |
 | Combined illegal open + classic foul (−3) | **No** — single action only |
 | Call ball + pocket; continuous re-rack with 1 left; object respot | **Partial** — table count only; no call/geometry |
@@ -84,5 +84,5 @@ Only the **current shooter**’s actions are enabled (unlike the race board).
 - Per-ball call entry and which numbered balls are down
 - Continuous re-rack geometry and special cases (1.6.06)
 - BIH-behind-line after scratch (table state)
-- Forced re-break accept/refuse UI; −3 combined open+foul as one coded path
+- −3 combined open+foul as one coded path
 - Shot clock, disciplinary cards, federal competition machinery

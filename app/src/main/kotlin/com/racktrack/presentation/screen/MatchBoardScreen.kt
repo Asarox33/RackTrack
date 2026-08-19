@@ -47,6 +47,7 @@ import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.domain.model.PushOutPhase
 import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.MatchPauseButton
@@ -54,6 +55,7 @@ import com.racktrack.presentation.component.PlayerStatIcons
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedOutlineAction
+import com.racktrack.presentation.component.TwoChoiceModal
 import com.racktrack.presentation.theme.ButtonDry
 import com.racktrack.presentation.theme.ButtonDryDark
 import com.racktrack.presentation.theme.ButtonDryLight
@@ -89,6 +91,12 @@ fun MatchBoardScreen(
     onAddPoints: (PlayerId, Int) -> Unit = { _, _ -> },
     onPassWithRemaining: (PlayerId, Int, Int) -> Unit = { _, _, _ -> },
     onBreakFoul: (PlayerId) -> Unit = {},
+    onAcceptIllegalOpen: () -> Unit = {},
+    onAnnouncePushOut: (PlayerId) -> Unit = {},
+    onResolvePushOutClean: (PlayerId) -> Unit = {},
+    onResolvePushOutFoul: (PlayerId) -> Unit = {},
+    onTakePushOut: () -> Unit = {},
+    onReturnPushOut: () -> Unit = {},
     onFoul: (PlayerId) -> Unit,
     onFoulWithRemaining: (PlayerId, Int, Int) -> Unit = { _, _, _ -> },
     onClearFouls: (PlayerId) -> Unit = {},
@@ -139,6 +147,7 @@ fun MatchBoardScreen(
                         onPassWithRemaining = onPassWithRemaining,
                         onFoulWithRemaining = onFoulWithRemaining,
                         onBreakFoul = onBreakFoul,
+                        onAcceptIllegalOpen = onAcceptIllegalOpen,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -151,6 +160,7 @@ fun MatchBoardScreen(
                         onGoldenBreak = onGoldenBreak,
                         onDryBreak = onDryBreak,
                         onEightBallLoss = onEightBallLoss,
+                        onAnnouncePushOut = onAnnouncePushOut,
                         onFoul = onFoul,
                         onClearFouls = onClearFouls,
                         modifier = Modifier
@@ -165,6 +175,7 @@ fun MatchBoardScreen(
                         onGoldenBreak = onGoldenBreak,
                         onDryBreak = onDryBreak,
                         onEightBallLoss = onEightBallLoss,
+                        onAnnouncePushOut = onAnnouncePushOut,
                         onFoul = onFoul,
                         onClearFouls = onClearFouls,
                         modifier = Modifier
@@ -254,6 +265,41 @@ fun MatchBoardScreen(
                     onNewMatch = onNewMatch,
                 )
             }
+
+            if (playEnabled && match.pushOutPhase == PushOutPhase.ANNOUNCED) {
+                val announcer = match.currentShooterId
+                TwoChoiceModal(
+                    title = "PUSH-OUT",
+                    subtitle = "Shot result?",
+                    primaryLabel = "CLEAN",
+                    primaryBase = ButtonRunOut,
+                    primaryLight = ButtonRunOutLight,
+                    primaryDark = ButtonRunOutDark,
+                    secondaryLabel = "FOUL",
+                    secondaryBase = ButtonFoul,
+                    secondaryLight = ButtonFoulLight,
+                    secondaryDark = ButtonFoulDark,
+                    onPrimary = { onResolvePushOutClean(announcer) },
+                    onSecondary = { onResolvePushOutFoul(announcer) },
+                )
+            }
+
+            if (playEnabled && match.pushOutPhase == PushOutPhase.AWAITING_CHOICE) {
+                TwoChoiceModal(
+                    title = "PUSH-OUT",
+                    subtitle = "Opponent chooses",
+                    primaryLabel = "TAKE",
+                    primaryBase = ButtonRunOut,
+                    primaryLight = ButtonRunOutLight,
+                    primaryDark = ButtonRunOutDark,
+                    secondaryLabel = "GIVE BACK",
+                    secondaryBase = ButtonDry,
+                    secondaryLight = ButtonDryLight,
+                    secondaryDark = ButtonDryDark,
+                    onPrimary = onTakePushOut,
+                    onSecondary = onReturnPushOut,
+                )
+            }
         }
     }
 }
@@ -266,6 +312,7 @@ private fun LandscapeBoard(
     onGoldenBreak: (PlayerId) -> Unit,
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
+    onAnnouncePushOut: (PlayerId) -> Unit,
     onFoul: (PlayerId) -> Unit,
     onClearFouls: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
@@ -277,7 +324,7 @@ private fun LandscapeBoard(
             score = match.score1,
             fouls = match.foul1,
             runOuts = match.runOut1,
-            hasBreak = match.currentBreakerId == match.player1.id,
+            hasBreak = match.currentShooterId == match.player1.id,
             breakAnchor = BreakAnchor.TowardEnd,
             enabled = match.status == MatchStatus.IN_PROGRESS,
             onPlusOne = { onPlusOne(match.player1.id) },
@@ -285,6 +332,7 @@ private fun LandscapeBoard(
             onGoldenBreak = { onGoldenBreak(match.player1.id) },
             onDryBreak = { onDryBreak(match.player1.id) },
             onEightBallLoss = { onEightBallLoss(match.player1.id) },
+            onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
             onClearFouls = { onClearFouls(match.player1.id) },
             modifier = Modifier
@@ -298,7 +346,7 @@ private fun LandscapeBoard(
             score = match.score2,
             fouls = match.foul2,
             runOuts = match.runOut2,
-            hasBreak = match.currentBreakerId == match.player2.id,
+            hasBreak = match.currentShooterId == match.player2.id,
             breakAnchor = BreakAnchor.TowardStart,
             enabled = match.status == MatchStatus.IN_PROGRESS,
             onPlusOne = { onPlusOne(match.player2.id) },
@@ -306,6 +354,7 @@ private fun LandscapeBoard(
             onGoldenBreak = { onGoldenBreak(match.player2.id) },
             onDryBreak = { onDryBreak(match.player2.id) },
             onEightBallLoss = { onEightBallLoss(match.player2.id) },
+            onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
             onClearFouls = { onClearFouls(match.player2.id) },
             modifier = Modifier
@@ -323,6 +372,7 @@ private fun PortraitBoard(
     onGoldenBreak: (PlayerId) -> Unit,
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
+    onAnnouncePushOut: (PlayerId) -> Unit,
     onFoul: (PlayerId) -> Unit,
     onClearFouls: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
@@ -334,7 +384,7 @@ private fun PortraitBoard(
             score = match.score1,
             fouls = match.foul1,
             runOuts = match.runOut1,
-            hasBreak = match.currentBreakerId == match.player1.id,
+            hasBreak = match.currentShooterId == match.player1.id,
             breakAnchor = BreakAnchor.TowardEnd,
             enabled = match.status == MatchStatus.IN_PROGRESS,
             onPlusOne = { onPlusOne(match.player1.id) },
@@ -342,6 +392,7 @@ private fun PortraitBoard(
             onGoldenBreak = { onGoldenBreak(match.player1.id) },
             onDryBreak = { onDryBreak(match.player1.id) },
             onEightBallLoss = { onEightBallLoss(match.player1.id) },
+            onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
             onClearFouls = { onClearFouls(match.player1.id) },
             compact = true,
@@ -357,7 +408,7 @@ private fun PortraitBoard(
             score = match.score2,
             fouls = match.foul2,
             runOuts = match.runOut2,
-            hasBreak = match.currentBreakerId == match.player2.id,
+            hasBreak = match.currentShooterId == match.player2.id,
             breakAnchor = BreakAnchor.TowardEnd,
             enabled = match.status == MatchStatus.IN_PROGRESS,
             onPlusOne = { onPlusOne(match.player2.id) },
@@ -365,6 +416,7 @@ private fun PortraitBoard(
             onGoldenBreak = { onGoldenBreak(match.player2.id) },
             onDryBreak = { onDryBreak(match.player2.id) },
             onEightBallLoss = { onEightBallLoss(match.player2.id) },
+            onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
             onClearFouls = { onClearFouls(match.player2.id) },
             compact = true,
@@ -419,6 +471,7 @@ private fun PlayerPanel(
     onGoldenBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
+    onAnnouncePushOut: () -> Unit,
     onFoul: () -> Unit,
     onClearFouls: () -> Unit,
     modifier: Modifier = Modifier,
@@ -428,11 +481,13 @@ private fun PlayerPanel(
     val canGolden = MatchEngine.canRecordGoldenBreak(match, player.id)
     val canDry = MatchEngine.canRecordDryBreak(match, player.id)
     val canEarlyEight = MatchEngine.canRecordEightBallLoss(match, player.id)
+    val canPushOut = MatchEngine.canAnnouncePushOut(match, player.id)
     val showFoulWarning = match.gameMode.supportsThreeFoulRackLoss
     val showModeExtras =
         match.gameMode.supportsGoldenBreak ||
             match.gameMode.supportsDryBreak ||
-            match.gameMode.supportsEightBallLoss
+            match.gameMode.supportsEightBallLoss ||
+            match.gameMode.supportsPushOut
 
     BoxWithConstraints(modifier = modifier) {
         val metrics = BoardMetrics.fromPane(maxWidth, maxHeight)
@@ -480,6 +535,7 @@ private fun PlayerPanel(
                 canGolden = canGolden,
                 canDry = canDry,
                 canEarlyEight = canEarlyEight,
+                canPushOut = canPushOut,
                 showModeExtras = showModeExtras,
                 actionHeight = metrics.actionHeight,
                 actionGap = metrics.actionGap,
@@ -488,6 +544,7 @@ private fun PlayerPanel(
                 onGoldenBreak = onGoldenBreak,
                 onDryBreak = onDryBreak,
                 onEightBallLoss = onEightBallLoss,
+                onAnnouncePushOut = onAnnouncePushOut,
                 onFoul = onFoul,
             )
         }
@@ -585,6 +642,7 @@ private fun RaceActionButtons(
     canGolden: Boolean,
     canDry: Boolean,
     canEarlyEight: Boolean,
+    canPushOut: Boolean,
     showModeExtras: Boolean,
     actionHeight: Dp,
     actionGap: Dp,
@@ -593,6 +651,7 @@ private fun RaceActionButtons(
     onGoldenBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
+    onAnnouncePushOut: () -> Unit,
     onFoul: () -> Unit,
 ) {
     Column(
@@ -641,11 +700,13 @@ private fun RaceActionButtons(
                 canGolden = canGolden,
                 canDry = canDry,
                 canEarlyEight = canEarlyEight,
+                canPushOut = canPushOut,
                 actionHeight = actionHeight,
                 actionGap = actionGap,
                 onGoldenBreak = onGoldenBreak,
                 onDryBreak = onDryBreak,
                 onEightBallLoss = onEightBallLoss,
+                onAnnouncePushOut = onAnnouncePushOut,
             )
         }
     }
@@ -658,11 +719,13 @@ private fun RaceModeExtraButtons(
     canGolden: Boolean,
     canDry: Boolean,
     canEarlyEight: Boolean,
+    canPushOut: Boolean,
     actionHeight: Dp,
     actionGap: Dp,
     onGoldenBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
+    onAnnouncePushOut: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -700,6 +763,18 @@ private fun RaceModeExtraButtons(
                 dark = ButtonDryDark,
                 enabled = enabled && canDry,
                 onClick = onDryBreak,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+            )
+        }
+        if (gameMode.supportsPushOut) {
+            TexturedActionButton(
+                label = "PUSH OUT",
+                base = ButtonDry,
+                light = ButtonDryLight,
+                dark = ButtonDryDark,
+                enabled = enabled && canPushOut,
+                onClick = onAnnouncePushOut,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
             )

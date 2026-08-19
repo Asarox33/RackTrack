@@ -142,7 +142,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ⬜ Other game families later (e.g. English 8-Ball) — only after American multi-ruleset base
 
 ## Explicitly dropped
-- ~~Deeper FFB shot-by-shot mode (call/pocket/push-out)~~ — useless without camera auto-detection
+- ~~Deeper FFB shot-by-shot mode (call/pocket)~~ — useless without camera auto-detection
+  (push-out scoreboard tree for 9/10 is **in product** — see progress notes)
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
 - ~~PNG share of match summary~~ — PDF only
 - ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
@@ -152,6 +153,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-19: Board adaptive % layout (all devices); race-to stepper modal (1–15, default 6);
+  14/1 illegal open ACCEPT / RE-BREAK (stacking −2); 9/10 push-out FFB decision tree.
+  User-facing **1.2.1** (`versionCode` **102010**) + `CHANGELOG.md`.
 - 2026-08-18: **R8** enabled for release (minify + shrinkResources + native SYMBOL_TABLE);
   versionCode **10203** for next Closed/Internal AAB with mapping/symbols.
 - 2026-08-18: **Closed testing required** — Play blocks Production until ≥12 closed testers

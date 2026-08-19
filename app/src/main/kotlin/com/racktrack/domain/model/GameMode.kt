@@ -33,4 +33,8 @@ enum class GameMode {
     /** FFB art. 1.3.06 — early 8 / 8 off table / foul on 8 / wrong pocket. */
     val supportsEightBallLoss: Boolean
         get() = this == EIGHT_BALL
+
+    /** FFB arts 1.4.04 / 1.5.04 — push-out after a legal break. */
+    val supportsPushOut: Boolean
+        get() = this == NINE_BALL || this == TEN_BALL
 }

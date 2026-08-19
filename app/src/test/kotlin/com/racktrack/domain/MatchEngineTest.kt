@@ -5,6 +5,7 @@ import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
+import com.racktrack.domain.model.PushOutPhase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -309,6 +310,49 @@ class MatchEngineTest {
 
         assertEquals(0, undone.dryBreak1)
         assertTrue(undone.history.isEmpty())
+        assertEquals(PushOutPhase.AVAILABLE, undone.pushOutPhase)
+    }
+
+    @Test
+    fun `given 9-ball after dry, when push-out clean then take, then opponent has the table`() {
+        var match = freshMatch(GameMode.NINE_BALL)
+        assertEquals(PushOutPhase.AVAILABLE, match.pushOutPhase)
+        match = MatchEngine.recordDryBreak(match, match.player1.id, now())
+        assertEquals(PushOutPhase.AVAILABLE, match.pushOutPhase)
+
+        match = MatchEngine.announcePushOut(match, match.player1.id, now())
+        assertEquals(PushOutPhase.ANNOUNCED, match.pushOutPhase)
+
+        match = MatchEngine.resolvePushOutClean(match, match.player1.id, now())
+        assertEquals(PushOutPhase.AWAITING_CHOICE, match.pushOutPhase)
+
+        match = MatchEngine.takePushOut(match, now())
+        assertEquals(PushOutPhase.NONE, match.pushOutPhase)
+        assertEquals(match.player2.id, match.currentShooterId)
+        assertEquals(match.player1.id, match.currentBreakerId)
+    }
+
+    @Test
+    fun `given push-out foul, then opponent has the table and foul counts`() {
+        var match = freshMatch(GameMode.NINE_BALL)
+        match = MatchEngine.announcePushOut(match, match.player1.id, now())
+        match = MatchEngine.resolvePushOutFoul(match, match.player1.id, now())
+
+        assertEquals(1, match.foul1)
+        assertEquals(match.player2.id, match.currentShooterId)
+        assertEquals(PushOutPhase.NONE, match.pushOutPhase)
+        assertEquals(MatchEventType.PUSH_OUT_FOUL, match.history.last().type)
+    }
+
+    @Test
+    fun `given clean push-out give back, then announcer keeps the table`() {
+        var match = freshMatch(GameMode.TEN_BALL)
+        match = MatchEngine.announcePushOut(match, match.player1.id, now())
+        match = MatchEngine.resolvePushOutClean(match, match.player1.id, now())
+        match = MatchEngine.returnPushOut(match, now())
+
+        assertEquals(match.player1.id, match.currentShooterId)
+        assertEquals(PushOutPhase.NONE, match.pushOutPhase)
     }
 
     @Test

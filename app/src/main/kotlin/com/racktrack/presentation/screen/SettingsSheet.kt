@@ -29,7 +29,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,7 @@ import com.racktrack.BuildConfig
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
+import com.racktrack.presentation.component.IntStepperModal
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
@@ -195,19 +199,31 @@ fun SettingsSheet(
             Spacer(modifier = Modifier.height(14.dp))
             SectionLabel("Default race to")
             Spacer(modifier = Modifier.height(8.dp))
-            ChipRow {
-                MatchFormatOptions.raceToWin.forEach { n ->
-                    TexturedChip(
-                        label = n.toString(),
-                        selected = settings.defaultRacksToWin == n,
-                        onClick = { onDefaultRacksChange(n) },
-                        selectedLight = felt.accentLight,
-                        selectedDark = felt.accentDark,
-                        idleLight = felt.mid,
-                        idleDark = felt.dark,
-                        height = 40.dp,
-                    )
-                }
+            var raceEditorOpen by remember { mutableStateOf(false) }
+            TexturedChip(
+                label = settings.defaultRacksToWin.toString(),
+                selected = true,
+                onClick = { raceEditorOpen = true },
+                modifier = Modifier.widthIn(min = 72.dp),
+                selectedLight = felt.accentLight,
+                selectedDark = felt.accentDark,
+                idleLight = felt.mid,
+                idleDark = felt.dark,
+                height = 40.dp,
+            )
+            if (raceEditorOpen) {
+                IntStepperModal(
+                    title = "DEFAULT RACE TO",
+                    valueLabel = { it.toString() },
+                    initial = settings.defaultRacksToWin,
+                    min = MatchFormatOptions.RACE_TO_MIN,
+                    max = MatchFormatOptions.RACE_TO_MAX,
+                    onDismiss = { raceEditorOpen = false },
+                    onConfirm = { n ->
+                        onDefaultRacksChange(n)
+                        raceEditorOpen = false
+                    },
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
