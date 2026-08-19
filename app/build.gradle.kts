@@ -212,15 +212,17 @@ detekt {
 /**
  * Play Console App bundle explorer expects native debug symbols. AGP only embeds them when
  * it can extract `.sym` / `.dbg` from unstripped libs (`mergeReleaseNativeDebugMetadata` is
- * often NO-SOURCE for pre-stripped AAR `.so`). After each release bundle, zip merged JNI libs
- * and inject them into the AAB metadata so the next upload ships mapping + native symbols.
+ * often NO-SOURCE for pre-stripped AAR `.so`). Zip merged JNI libs and inject them into the
+ * **unsigned** intermediary bundle so `signReleaseBundle` still produces a valid AAB.
  */
 tasks.register("embedReleaseNativeDebugSymbolsInBundle") {
     group = "build"
     description =
-        "Zip merged release .so libs and embed native-debug-symbols.zip inside the release AAB"
-    val aabFile =
-        layout.buildDirectory.file("outputs/bundle/release/app-release.aab")
+        "Zip merged release .so libs and embed native-debug-symbols.zip in the intermediary AAB"
+    val intermediaryAab =
+        layout.buildDirectory.file(
+            "intermediates/intermediary_bundle/release/packageReleaseBundle/intermediary-bundle.aab",
+        )
     val nativeLibsDir =
         layout.buildDirectory.dir(
             "intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib",
@@ -229,17 +231,19 @@ tasks.register("embedReleaseNativeDebugSymbolsInBundle") {
         layout.buildDirectory.file(
             "outputs/native-debug-symbols/release/native-debug-symbols.zip",
         )
-    // Mutates the AAB in place after signing — do not declare it as this task's output
-    // (would conflict with produceReleaseBundleIdeListingFile / signReleaseBundle).
+    // Mutate the unsigned intermediary only — never the signed outputs AAB (breaks Play verify).
+    dependsOn("packageReleaseBundle")
     inputs.dir(nativeLibsDir)
     outputs.file(symbolsZip)
-    mustRunAfter("signReleaseBundle")
+    // packageReleaseBundle rewrites the intermediary without symbols; never skip inject
+    // just because the symbols zip / .so tree look unchanged.
+    outputs.upToDateWhen { false }
 
     doLast {
-        val aab = aabFile.get().asFile
+        val aab = intermediaryAab.get().asFile
         val libsRoot = nativeLibsDir.get().asFile
         check(aab.isFile) {
-            "Missing $aab — run :app:bundleRelease first"
+            "Missing $aab — packageReleaseBundle must run first"
         }
         check(libsRoot.isDirectory) {
             "Missing merged native libs at $libsRoot"
@@ -258,8 +262,11 @@ tasks.register("embedReleaseNativeDebugSymbolsInBundle") {
 }
 
 tasks.configureEach {
-    if (name == "bundleRelease") {
-        finalizedBy("embedReleaseNativeDebugSymbolsInBundle")
+    when (name) {
+        "packageReleaseBundle" ->
+            finalizedBy("embedReleaseNativeDebugSymbolsInBundle")
+        "signReleaseBundle" ->
+            dependsOn("embedReleaseNativeDebugSymbolsInBundle")
     }
 }
 
