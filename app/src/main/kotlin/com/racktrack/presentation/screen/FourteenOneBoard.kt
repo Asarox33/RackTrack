@@ -295,7 +295,8 @@ private fun FourteenOnePlayerPanel(
     val clearRackPoints = (match.objectBallsOnTable - 1).coerceAtLeast(1)
 
     BoxWithConstraints(modifier = modifier) {
-        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight)
+        val actionRows = if (showBreakFoul) 3 else 2
+        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight, actionRowCount = actionRows)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -309,6 +310,7 @@ private fun FourteenOnePlayerPanel(
                 text = player.name.uppercase(),
                 style = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp),
                 textAlign = TextAlign.Center,
+                maxLines = 1,
             )
             Spacer(modifier = Modifier.height(metrics.nameToScoreGap))
 

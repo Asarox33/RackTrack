@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
@@ -487,7 +488,8 @@ private fun PlayerPanel(
             match.gameMode.supportsPushOut
 
     BoxWithConstraints(modifier = modifier) {
-        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight)
+        val actionRows = if (showModeExtras) 2 else 1
+        val metrics = BoardMetrics.fromPane(maxWidth, maxHeight, actionRowCount = actionRows)
         val nameStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp)
 
         Column(
@@ -503,6 +505,7 @@ private fun PlayerPanel(
                 text = player.name.uppercase(),
                 style = nameStyle,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
             )
             Spacer(modifier = Modifier.height(metrics.nameToScoreGap))
 
@@ -518,7 +521,7 @@ private fun PlayerPanel(
                 onClearFouls = onClearFouls,
                 metrics = metrics,
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1f, fill = true)
                     .fillMaxWidth(),
             )
 
@@ -576,7 +579,10 @@ private fun RaceScoreCluster(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
@@ -589,6 +595,7 @@ private fun RaceScoreCluster(
                     Text(
                         text = value.toString(),
                         style = MaterialTheme.typography.displayLarge.copy(fontSize = metrics.scoreSp),
+                        maxLines = 1,
                     )
                 }
                 CueBallBreakIndicator(
@@ -612,7 +619,9 @@ private fun RaceScoreCluster(
                 iconSize = metrics.statIconSize,
                 iconGap = metrics.statIconGap,
                 clearHintSp = metrics.clearHintSp,
-                modifier = Modifier.padding(top = metrics.nameToScoreGap),
+                modifier = Modifier
+                    .padding(top = metrics.nameToScoreGap)
+                    .heightIn(min = metrics.statIconSize),
             )
             if (nearRackLoss) {
                 Text(
@@ -620,6 +629,7 @@ private fun RaceScoreCluster(
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
                     color = ButtonFoulLight.copy(alpha = warnAlpha),
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
                     modifier = Modifier
                         .padding(top = 4.dp)
                         .alpha(warnAlpha),
