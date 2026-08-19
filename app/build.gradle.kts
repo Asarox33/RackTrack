@@ -65,7 +65,8 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            // Play: deobfuscation mapping + native symbols (AdMob / GMS .so) with the AAB.
+            // Play: R8 mapping is embedded in the AAB. Native debug symbols only appear when
+            // AGP can extract them from unstripped .so (deps here are usually pre-stripped).
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }

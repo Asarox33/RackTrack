@@ -128,9 +128,11 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 
 **Closed track (start the clock now)**
 
-- [ ] Create **Closed testing** release with current monetized **1.2.0** AAB
-- [ ] Add ≥12 testers (email list); each must open the opt-in link and stay enrolled
+- [x] Create **Closed testing** release with monetized **1.2.1** AAB (`102012`) —
+  live 2026-08-20
+- [x] ≥12 testers opted in (2026-08-20)
 - [ ] Wait ≥14 consecutive days with ≥12 still enrolled → request production access
+  (**clock started 2026-08-20** → earliest ~**2026-09-03** if count holds)
 
 **Console — update before / with production release**
 
@@ -158,10 +160,12 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 **Build / crash quality (with monetization AAB)**
 
 - [x] Enable **R8** minify + resource shrink; `ndk.debugSymbolLevel = SYMBOL_TABLE`
-  (native symbols packaged in the AAB for Play)
-- [ ] Upload AAB; confirm Play accepts mapping (from
-  `app/build/outputs/mapping/release/mapping.txt` if Console asks — often paired with the
-  release) + native symbols from the bundle
+  (mapping embeds in the AAB as `BUNDLE-METADATA/.../proguard.map` — Console auto-detects)
+- [x] Upload AAB; confirm **Fichier de mappage ReTrace** has a size in App bundle explorer
+- [ ] **Symboles de débogage natifs** — leave empty unless AGP produces a real symbols zip
+  (`mergeReleaseNativeDebugMetadata`). Third-party `.so` (AndroidX / GMS) are usually
+  pre-stripped; zipping them ourselves does not satisfy Play. Optional later if we ship
+  our own NDK code with unstripped libs.
   (Internal 1.1.1 Console warnings were deferred on purpose — see `06-roadmap-todo.md`)
 
 **Code** — full UX: [`09-monetization.md`](09-monetization.md).
