@@ -158,14 +158,12 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 **Build / crash quality (with monetization AAB)**
 
 - [x] Enable **R8** minify + resource shrink; `ndk.debugSymbolLevel = SYMBOL_TABLE`
-- [x] **Every** `:app:bundleRelease` embeds Play crash artifacts in the AAB:
-  - R8 mapping → `BUNDLE-METADATA/.../proguard.map` (Console often auto-detects)
-  - Native symbols → `BUNDLE-METADATA/.../debugsymbols/native-debug-symbols.zip`
-    (task `embedReleaseNativeDebugSymbolsInBundle`; also written to
-    `app/build/outputs/native-debug-symbols/release/native-debug-symbols.zip`)
-- [ ] Upload AAB; in App bundle explorer confirm **mapping** + **symboles de débogage
-  natifs** both show a size (not an empty upload arrow). If Console still asks, upload
-  the zip next to the AAB from `outputs/native-debug-symbols/release/`.
+  (mapping embeds in the AAB as `BUNDLE-METADATA/.../proguard.map` — Console auto-detects)
+- [x] Upload AAB; confirm **Fichier de mappage ReTrace** has a size in App bundle explorer
+- [ ] **Symboles de débogage natifs** — leave empty unless AGP produces a real symbols zip
+  (`mergeReleaseNativeDebugMetadata`). Third-party `.so` (AndroidX / GMS) are usually
+  pre-stripped; zipping them ourselves does not satisfy Play. Optional later if we ship
+  our own NDK code with unstripped libs.
   (Internal 1.1.1 Console warnings were deferred on purpose — see `06-roadmap-todo.md`)
 
 **Code** — full UX: [`09-monetization.md`](09-monetization.md).

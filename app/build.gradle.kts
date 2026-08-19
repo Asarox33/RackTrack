@@ -1,10 +1,4 @@
-import java.net.URI
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import java.util.Properties
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 plugins {
     alias(libs.plugins.android.application)
@@ -71,8 +65,8 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            // Play: R8 mapping is embedded in the AAB; native symbols are forced in via
-            // embedReleaseNativeDebugSymbolsInBundle (deps often ship already-stripped .so).
+            // Play: R8 mapping is embedded in the AAB. Native debug symbols only appear when
+            // AGP can extract them from unstripped .so (deps here are usually pre-stripped).
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
@@ -103,11 +97,6 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-        // Keep whatever native debug info deps still carry so AGP can extract / we can
-        // package a Play-compatible symbols zip into the AAB.
-        jniLibs {
-            keepDebugSymbols += "**/*.so"
         }
     }
 }
@@ -207,95 +196,4 @@ detekt {
     buildUponDefaultConfig = true
     allRules = false
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-}
-
-/**
- * Play Console App bundle explorer expects native debug symbols. AGP only embeds them when
- * it can extract `.sym` / `.dbg` from unstripped libs (`mergeReleaseNativeDebugMetadata` is
- * often NO-SOURCE for pre-stripped AAR `.so`). Zip merged JNI libs and inject them into the
- * **unsigned** intermediary bundle so `signReleaseBundle` still produces a valid AAB.
- */
-tasks.register("embedReleaseNativeDebugSymbolsInBundle") {
-    group = "build"
-    description =
-        "Zip merged release .so libs and embed native-debug-symbols.zip in the intermediary AAB"
-    val intermediaryAab =
-        layout.buildDirectory.file(
-            "intermediates/intermediary_bundle/release/packageReleaseBundle/intermediary-bundle.aab",
-        )
-    val nativeLibsDir =
-        layout.buildDirectory.dir(
-            "intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib",
-        )
-    val symbolsZip =
-        layout.buildDirectory.file(
-            "outputs/native-debug-symbols/release/native-debug-symbols.zip",
-        )
-    // Mutate the unsigned intermediary only — never the signed outputs AAB (breaks Play verify).
-    dependsOn("packageReleaseBundle")
-    inputs.dir(nativeLibsDir)
-    outputs.file(symbolsZip)
-    // packageReleaseBundle rewrites the intermediary without symbols; never skip inject
-    // just because the symbols zip / .so tree look unchanged.
-    outputs.upToDateWhen { false }
-
-    doLast {
-        val aab = intermediaryAab.get().asFile
-        val libsRoot = nativeLibsDir.get().asFile
-        check(aab.isFile) {
-            "Missing $aab — packageReleaseBundle must run first"
-        }
-        check(libsRoot.isDirectory) {
-            "Missing merged native libs at $libsRoot"
-        }
-
-        val zipOut = symbolsZip.get().asFile
-        zipOut.parentFile.mkdirs()
-        zipNativeAbiTree(libsRoot, zipOut)
-        embedNativeDebugSymbolsZip(aab, zipOut)
-        logger.lifecycle(
-            "Embedded Play native debug symbols ({} bytes) into {}",
-            zipOut.length(),
-            aab.name,
-        )
-    }
-}
-
-tasks.configureEach {
-    when (name) {
-        "packageReleaseBundle" ->
-            finalizedBy("embedReleaseNativeDebugSymbolsInBundle")
-        "signReleaseBundle" ->
-            dependsOn("embedReleaseNativeDebugSymbolsInBundle")
-    }
-}
-
-private fun zipNativeAbiTree(libsRoot: File, zipOut: File) {
-    ZipOutputStream(zipOut.outputStream().buffered()).use { zos ->
-        libsRoot.walkTopDown()
-            .filter { it.isFile }
-            .forEach { file ->
-                val entryName = file.relativeTo(libsRoot).invariantSeparatorsPath
-                zos.putNextEntry(ZipEntry(entryName))
-                file.inputStream().use { input -> input.copyTo(zos) }
-                zos.closeEntry()
-            }
-    }
-}
-
-private fun embedNativeDebugSymbolsZip(aab: File, symbolsZip: File) {
-    val uri = URI.create("jar:" + aab.toURI())
-    val env = mapOf("create" to "false")
-    FileSystems.newFileSystem(uri, env).use { fs ->
-        val dest =
-            fs.getPath(
-                "BUNDLE-METADATA/com.android.tools.build.debugsymbols/native-debug-symbols.zip",
-            )
-        Files.createDirectories(dest.parent)
-        Files.copy(
-            symbolsZip.toPath(),
-            dest,
-            StandardCopyOption.REPLACE_EXISTING,
-        )
-    }
 }
