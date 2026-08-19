@@ -395,7 +395,6 @@ private fun PortraitBoard(
             onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
             onFoul = { onFoul(match.player1.id) },
             onClearFouls = { onClearFouls(match.player1.id) },
-            compact = true,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -419,7 +418,6 @@ private fun PortraitBoard(
             onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
             onFoul = { onFoul(match.player2.id) },
             onClearFouls = { onClearFouls(match.player2.id) },
-            compact = true,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -475,7 +473,6 @@ private fun PlayerPanel(
     onFoul: () -> Unit,
     onClearFouls: () -> Unit,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
 ) {
     val canRunOut = MatchEngine.canBreakAndClear(match, player.id)
     val canGolden = MatchEngine.canRecordGoldenBreak(match, player.id)
@@ -520,7 +517,6 @@ private fun PlayerPanel(
                 showFoulWarning = showFoulWarning,
                 onClearFouls = onClearFouls,
                 metrics = metrics,
-                compact = compact,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -563,7 +559,6 @@ private fun RaceScoreCluster(
     showFoulWarning: Boolean,
     onClearFouls: () -> Unit,
     metrics: BoardMetrics,
-    compact: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val nearRackLoss =

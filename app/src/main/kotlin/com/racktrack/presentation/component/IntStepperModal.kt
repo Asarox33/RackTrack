@@ -38,6 +38,10 @@ import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 
 /** Shared stepper modal (race length, etc.) — same visual family as 14/1 visit-end. */
+private const val MODAL_MAX_HEIGHT_FRACTION = 0.72f
+private const val MODAL_WIDTH_FRACTION = 0.88f
+private const val MODAL_SCRIM_ALPHA = 0.55f
+
 @Composable
 fun IntStepperModal(
     title: String,
@@ -54,7 +58,7 @@ fun IntStepperModal(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.55f))
+            .background(Color.Black.copy(alpha = MODAL_SCRIM_ALPHA))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -65,8 +69,8 @@ fun IntStepperModal(
         Column(
             modifier = Modifier
                 .widthIn(max = 420.dp)
-                .fillMaxWidth(0.88f)
-                .heightIn(max = maxHeight * 0.72f)
+                .fillMaxWidth(MODAL_WIDTH_FRACTION)
+                .heightIn(max = maxHeight * MODAL_MAX_HEIGHT_FRACTION)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.verticalGradient(

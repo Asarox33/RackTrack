@@ -487,19 +487,22 @@ object FourteenOneEngine {
 
     private fun awaitingOpeningBreakFromHistory(history: List<MatchEvent>): Boolean {
         if (history.isEmpty()) return true
+        var awaiting: Boolean? = null
         for (event in history.asReversed()) {
-            when (event.type) {
-                MatchEventType.THREE_FOUL_PENALTY -> return true
-                MatchEventType.BREAK_FOUL -> return true
-                MatchEventType.ACCEPT_ILLEGAL_OPEN -> return false
-                MatchEventType.POINTS -> return false
+            awaiting = when (event.type) {
+                MatchEventType.THREE_FOUL_PENALTY,
+                MatchEventType.BREAK_FOUL,
+                -> true
+                MatchEventType.ACCEPT_ILLEGAL_OPEN,
+                MatchEventType.POINTS,
                 MatchEventType.PASS,
                 MatchEventType.FOUL,
-                -> return false
-                else -> Unit
+                -> false
+                else -> awaiting
             }
+            if (awaiting != null) break
         }
-        return true
+        return awaiting ?: true
     }
 
     private fun currentRunFromHistory(history: List<MatchEvent>, playerId: PlayerId): Int {

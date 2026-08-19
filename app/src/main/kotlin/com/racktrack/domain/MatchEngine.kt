@@ -12,7 +12,7 @@ import com.racktrack.domain.model.PushOutPhase
 object MatchEngine {
     const val CONSECUTIVE_FOULS_TO_LOSE_RACK = 3
 
-    private val RACK_ENDING_TYPES = setOf(
+    internal val RACK_ENDING_TYPES = setOf(
         MatchEventType.PLUS_ONE,
         MatchEventType.RUN_OUT,
         MatchEventType.GOLDEN_BREAK,
@@ -173,92 +173,27 @@ object MatchEngine {
     }
 
     fun canAnnouncePushOut(match: Match, playerId: PlayerId): Boolean =
-        match.status != MatchStatus.COMPLETED &&
-            match.gameMode.supportsPushOut &&
-            match.pushOutPhase == PushOutPhase.AVAILABLE &&
-            playerId == match.currentShooterId
+        PushOutEngine.canAnnounce(match, playerId)
 
-    fun announcePushOut(match: Match, playerId: PlayerId, nowMillis: Long): Match {
-        if (!canAnnouncePushOut(match, playerId)) return match
-        return match.copy(
-            pushOutPhase = PushOutPhase.ANNOUNCED,
-            history = match.history + MatchEvent(MatchEventType.PUSH_OUT, playerId, nowMillis),
-        )
-    }
+    fun announcePushOut(match: Match, playerId: PlayerId, nowMillis: Long): Match =
+        PushOutEngine.announce(match, playerId, nowMillis)
 
-    fun resolvePushOutClean(match: Match, playerId: PlayerId, nowMillis: Long): Match {
-        if (match.status == MatchStatus.COMPLETED) return match
-        if (match.pushOutPhase != PushOutPhase.ANNOUNCED) return match
-        if (playerId != match.currentShooterId) return match
-        return match.copy(
-            pushOutPhase = PushOutPhase.AWAITING_CHOICE,
-            history = match.history + MatchEvent(MatchEventType.PUSH_OUT_CLEAN, playerId, nowMillis),
-        )
-    }
+    fun resolvePushOutClean(match: Match, playerId: PlayerId, nowMillis: Long): Match =
+        PushOutEngine.resolveClean(match, playerId, nowMillis)
 
-    /**
-     * Foul on the push-out shot — opponent gets the table (BIH anywhere).
-     * Counts toward consecutive fouls / three-foul rack loss.
-     */
-    fun resolvePushOutFoul(match: Match, playerId: PlayerId, nowMillis: Long): Match {
-        if (match.status == MatchStatus.COMPLETED) return match
-        if (match.pushOutPhase != PushOutPhase.ANNOUNCED) return match
-        if (playerId != match.currentShooterId) return match
-        requireKnownPlayer(match, playerId)
+    fun resolvePushOutFoul(match: Match, playerId: PlayerId, nowMillis: Long): Match =
+        PushOutEngine.resolveFoul(match, playerId, nowMillis)
 
-        val nextFoul1 = if (playerId == match.player1.id) match.foul1 + 1 else match.foul1
-        val nextFoul2 = if (playerId == match.player2.id) match.foul2 + 1 else match.foul2
-        val consecutive = if (playerId == match.player1.id) nextFoul1 else nextFoul2
-        val threeFoulLossApplies =
-            match.gameMode.supportsThreeFoulRackLoss &&
-                consecutive >= CONSECUTIVE_FOULS_TO_LOSE_RACK
+    fun takePushOut(match: Match, nowMillis: Long): Match =
+        PushOutEngine.take(match, nowMillis)
 
-        if (threeFoulLossApplies) {
-            return awardRackToOpponent(
-                match = match.copy(pushOutPhase = PushOutPhase.NONE),
-                loserId = playerId,
-                winnerId = match.otherPlayerId(playerId),
-                type = MatchEventType.THREE_FOULS_LOSS,
-                nowMillis = nowMillis,
-            )
-        }
-
-        return match.copy(
-            foul1 = nextFoul1,
-            foul2 = nextFoul2,
-            pushOutPhase = PushOutPhase.NONE,
-            currentShooterId = match.otherPlayerId(playerId),
-            history = match.history + MatchEvent(MatchEventType.PUSH_OUT_FOUL, playerId, nowMillis),
-        )
-    }
-
-    fun takePushOut(match: Match, nowMillis: Long): Match {
-        if (match.status == MatchStatus.COMPLETED) return match
-        if (match.pushOutPhase != PushOutPhase.AWAITING_CHOICE) return match
-        val announcer = pushOutAnnouncerId(match) ?: return match
-        val opponent = match.otherPlayerId(announcer)
-        return match.copy(
-            pushOutPhase = PushOutPhase.NONE,
-            currentShooterId = opponent,
-            history = match.history + MatchEvent(MatchEventType.PUSH_OUT_TAKE, opponent, nowMillis),
-        )
-    }
-
-    fun returnPushOut(match: Match, nowMillis: Long): Match {
-        if (match.status == MatchStatus.COMPLETED) return match
-        if (match.pushOutPhase != PushOutPhase.AWAITING_CHOICE) return match
-        val announcer = pushOutAnnouncerId(match) ?: return match
-        val opponent = match.otherPlayerId(announcer)
-        return match.copy(
-            pushOutPhase = PushOutPhase.NONE,
-            currentShooterId = announcer,
-            history = match.history + MatchEvent(MatchEventType.PUSH_OUT_RETURN, opponent, nowMillis),
-        )
-    }
+    fun returnPushOut(match: Match, nowMillis: Long): Match =
+        PushOutEngine.giveBack(match, nowMillis)
 
     fun undoLast(match: Match): Match {
         val last = match.history.lastOrNull() ?: return match
         val withoutLast = match.history.dropLast(1)
+        PushOutEngine.undo(match, last, withoutLast)?.let { return it }
         return when (last.type) {
             MatchEventType.POINTS,
             MatchEventType.PASS,
@@ -274,88 +209,17 @@ object MatchEngine {
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,
             MatchEventType.GOLDEN_BREAK,
-            -> {
-                val revertedScores = when (last.playerId) {
-                    match.player1.id -> match.copy(
-                        score1 = (match.score1 - 1).coerceAtLeast(0),
-                        runOut1 = if (last.type == MatchEventType.RUN_OUT) {
-                            (match.runOut1 - 1).coerceAtLeast(0)
-                        } else {
-                            match.runOut1
-                        },
-                        goldenBreak1 = if (last.type == MatchEventType.GOLDEN_BREAK) {
-                            (match.goldenBreak1 - 1).coerceAtLeast(0)
-                        } else {
-                            match.goldenBreak1
-                        },
-                    )
-                    else -> match.copy(
-                        score2 = (match.score2 - 1).coerceAtLeast(0),
-                        runOut2 = if (last.type == MatchEventType.RUN_OUT) {
-                            (match.runOut2 - 1).coerceAtLeast(0)
-                        } else {
-                            match.runOut2
-                        },
-                        goldenBreak2 = if (last.type == MatchEventType.GOLDEN_BREAK) {
-                            (match.goldenBreak2 - 1).coerceAtLeast(0)
-                        } else {
-                            match.goldenBreak2
-                        },
-                    )
-                }
-                val breaker = breakerFromHistory(match, withoutLast)
-                revertedScores.copy(
-                    foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
-                    foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
-                    currentBreakerId = breaker,
-                    currentShooterId = shooterFromHistory(match, withoutLast, breaker),
-                    pushOutPhase = pushOutPhaseFromHistory(match, withoutLast),
-                    status = MatchStatus.IN_PROGRESS,
-                    history = withoutLast,
-                )
-            }
+            -> undoRackWin(match, last, withoutLast)
             MatchEventType.THREE_FOULS_LOSS,
             MatchEventType.EIGHT_BALL_LOSS,
-            -> {
-                val winnerId = match.otherPlayerId(last.playerId)
-                val revertedScores = when (winnerId) {
-                    match.player1.id -> match.copy(
-                        score1 = (match.score1 - 1).coerceAtLeast(0),
-                    )
-                    else -> match.copy(
-                        score2 = (match.score2 - 1).coerceAtLeast(0),
-                    )
-                }
-                val withLossCounter = if (last.type == MatchEventType.EIGHT_BALL_LOSS) {
-                    when (last.playerId) {
-                        match.player1.id -> revertedScores.copy(
-                            eightBallLoss1 = (match.eightBallLoss1 - 1).coerceAtLeast(0),
-                        )
-                        else -> revertedScores.copy(
-                            eightBallLoss2 = (match.eightBallLoss2 - 1).coerceAtLeast(0),
-                        )
-                    }
-                } else {
-                    revertedScores
-                }
-                val breaker = breakerFromHistory(match, withoutLast)
-                withLossCounter.copy(
-                    foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
-                    foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
-                    currentBreakerId = breaker,
-                    currentShooterId = shooterFromHistory(match, withoutLast, breaker),
-                    pushOutPhase = pushOutPhaseFromHistory(match, withoutLast),
-                    status = MatchStatus.IN_PROGRESS,
-                    history = withoutLast,
-                )
-            }
+            -> undoRackLoss(match, last, withoutLast)
             MatchEventType.FOUL -> {
                 val revertedFouls = when (last.playerId) {
                     match.player1.id -> match.copy(foul1 = (match.foul1 - 1).coerceAtLeast(0))
                     else -> match.copy(foul2 = (match.foul2 - 1).coerceAtLeast(0))
                 }
                 revertedFouls.copy(
-                    pushOutPhase = pushOutPhaseFromHistory(match, withoutLast),
+                    pushOutPhase = PushOutEngine.phaseFromHistory(match, withoutLast),
                     history = withoutLast,
                 )
             }
@@ -365,40 +229,90 @@ object MatchEngine {
                     else -> match.copy(dryBreak2 = (match.dryBreak2 - 1).coerceAtLeast(0))
                 }
                 reverted.copy(
-                    pushOutPhase = pushOutPhaseFromHistory(match, withoutLast),
+                    pushOutPhase = PushOutEngine.phaseFromHistory(match, withoutLast),
                     history = withoutLast,
                 )
             }
-            MatchEventType.PUSH_OUT -> match.copy(
-                pushOutPhase = PushOutPhase.AVAILABLE,
-                history = withoutLast,
-            )
-            MatchEventType.PUSH_OUT_CLEAN -> match.copy(
-                pushOutPhase = PushOutPhase.ANNOUNCED,
-                history = withoutLast,
-            )
-            MatchEventType.PUSH_OUT_FOUL -> {
-                val revertedFouls = when (last.playerId) {
-                    match.player1.id -> match.copy(foul1 = (match.foul1 - 1).coerceAtLeast(0))
-                    else -> match.copy(foul2 = (match.foul2 - 1).coerceAtLeast(0))
-                }
-                revertedFouls.copy(
-                    pushOutPhase = PushOutPhase.ANNOUNCED,
-                    currentShooterId = last.playerId,
-                    history = withoutLast,
-                )
-            }
-            MatchEventType.PUSH_OUT_TAKE,
-            MatchEventType.PUSH_OUT_RETURN,
-            -> {
-                val announcer = match.otherPlayerId(last.playerId)
-                match.copy(
-                    pushOutPhase = PushOutPhase.AWAITING_CHOICE,
-                    currentShooterId = announcer,
-                    history = withoutLast,
-                )
-            }
+            else -> match
         }
+    }
+
+    private fun undoRackWin(
+        match: Match,
+        last: MatchEvent,
+        withoutLast: List<MatchEvent>,
+    ): Match {
+        val revertedScores = when (last.playerId) {
+            match.player1.id -> match.copy(
+                score1 = (match.score1 - 1).coerceAtLeast(0),
+                runOut1 = if (last.type == MatchEventType.RUN_OUT) {
+                    (match.runOut1 - 1).coerceAtLeast(0)
+                } else {
+                    match.runOut1
+                },
+                goldenBreak1 = if (last.type == MatchEventType.GOLDEN_BREAK) {
+                    (match.goldenBreak1 - 1).coerceAtLeast(0)
+                } else {
+                    match.goldenBreak1
+                },
+            )
+            else -> match.copy(
+                score2 = (match.score2 - 1).coerceAtLeast(0),
+                runOut2 = if (last.type == MatchEventType.RUN_OUT) {
+                    (match.runOut2 - 1).coerceAtLeast(0)
+                } else {
+                    match.runOut2
+                },
+                goldenBreak2 = if (last.type == MatchEventType.GOLDEN_BREAK) {
+                    (match.goldenBreak2 - 1).coerceAtLeast(0)
+                } else {
+                    match.goldenBreak2
+                },
+            )
+        }
+        return restoreAfterRackUndo(match, revertedScores, withoutLast)
+    }
+
+    private fun undoRackLoss(
+        match: Match,
+        last: MatchEvent,
+        withoutLast: List<MatchEvent>,
+    ): Match {
+        val winnerId = match.otherPlayerId(last.playerId)
+        val revertedScores = when (winnerId) {
+            match.player1.id -> match.copy(score1 = (match.score1 - 1).coerceAtLeast(0))
+            else -> match.copy(score2 = (match.score2 - 1).coerceAtLeast(0))
+        }
+        val withLossCounter = if (last.type == MatchEventType.EIGHT_BALL_LOSS) {
+            when (last.playerId) {
+                match.player1.id -> revertedScores.copy(
+                    eightBallLoss1 = (match.eightBallLoss1 - 1).coerceAtLeast(0),
+                )
+                else -> revertedScores.copy(
+                    eightBallLoss2 = (match.eightBallLoss2 - 1).coerceAtLeast(0),
+                )
+            }
+        } else {
+            revertedScores
+        }
+        return restoreAfterRackUndo(match, withLossCounter, withoutLast)
+    }
+
+    private fun restoreAfterRackUndo(
+        match: Match,
+        reverted: Match,
+        withoutLast: List<MatchEvent>,
+    ): Match {
+        val breaker = breakerFromHistory(match, withoutLast)
+        return reverted.copy(
+            foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
+            foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
+            currentBreakerId = breaker,
+            currentShooterId = shooterFromHistory(match, withoutLast, breaker),
+            pushOutPhase = PushOutEngine.phaseFromHistory(match, withoutLast),
+            status = MatchStatus.IN_PROGRESS,
+            history = withoutLast,
+        )
     }
 
     fun canBreakAndClear(match: Match, playerId: PlayerId): Boolean =
@@ -422,7 +336,7 @@ object MatchEngine {
             match.gameMode.supportsEightBallLoss &&
             (playerId == match.player1.id || playerId == match.player2.id)
 
-    private fun awardRackToOpponent(
+    internal fun awardRackToOpponent(
         match: Match,
         loserId: PlayerId,
         winnerId: PlayerId,
@@ -441,11 +355,10 @@ object MatchEngine {
             foul2 = 0,
             currentBreakerId = nextBreaker,
             currentShooterId = nextBreaker,
-            pushOutPhase = if (!completed && match.gameMode.supportsPushOut) {
-                PushOutPhase.AVAILABLE
-            } else {
-                PushOutPhase.NONE
-            },
+            pushOutPhase = PushOutEngine.phaseAfterRack(
+                supportsPushOut = match.gameMode.supportsPushOut,
+                completed = completed,
+            ),
             status = if (completed) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
             history = match.history + MatchEvent(type, loserId, nowMillis),
         )
@@ -471,11 +384,10 @@ object MatchEngine {
             foul2 = 0,
             currentBreakerId = nextBreaker,
             currentShooterId = nextBreaker,
-            pushOutPhase = if (!completed && match.gameMode.supportsPushOut) {
-                PushOutPhase.AVAILABLE
-            } else {
-                PushOutPhase.NONE
-            },
+            pushOutPhase = PushOutEngine.phaseAfterRack(
+                supportsPushOut = match.gameMode.supportsPushOut,
+                completed = completed,
+            ),
             status = if (completed) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
             history = match.history + MatchEvent(type, playerId, nowMillis),
         )
@@ -613,47 +525,6 @@ object MatchEngine {
             }
         }
         return false
-    }
-
-    private fun pushOutAnnouncerId(match: Match): PlayerId? {
-        for (event in match.history.asReversed()) {
-            when (event.type) {
-                MatchEventType.PLUS_ONE,
-                MatchEventType.RUN_OUT,
-                MatchEventType.GOLDEN_BREAK,
-                MatchEventType.THREE_FOULS_LOSS,
-                MatchEventType.EIGHT_BALL_LOSS,
-                -> return null
-                MatchEventType.PUSH_OUT -> return event.playerId
-                else -> Unit
-            }
-        }
-        return null
-    }
-
-    private fun pushOutPhaseFromHistory(match: Match, history: List<MatchEvent>): PushOutPhase {
-        if (!match.gameMode.supportsPushOut) return PushOutPhase.NONE
-        var phase = PushOutPhase.AVAILABLE
-        for (event in history) {
-            if (event.type in RACK_ENDING_TYPES) {
-                phase = PushOutPhase.AVAILABLE
-                continue
-            }
-            when (event.type) {
-                MatchEventType.DRY_BREAK,
-                MatchEventType.FOULS_CLEARED,
-                -> Unit
-                MatchEventType.FOUL -> phase = PushOutPhase.NONE
-                MatchEventType.PUSH_OUT -> phase = PushOutPhase.ANNOUNCED
-                MatchEventType.PUSH_OUT_CLEAN -> phase = PushOutPhase.AWAITING_CHOICE
-                MatchEventType.PUSH_OUT_FOUL,
-                MatchEventType.PUSH_OUT_TAKE,
-                MatchEventType.PUSH_OUT_RETURN,
-                -> phase = PushOutPhase.NONE
-                else -> Unit
-            }
-        }
-        return phase
     }
 
     private fun shooterFromHistory(

@@ -32,6 +32,10 @@ import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 
 /** Two primary actions (no cancel) — 14/1 accept open, push-out choice, etc. */
+private const val CHOICE_MODAL_MAX_HEIGHT_FRACTION = 0.72f
+private const val CHOICE_MODAL_WIDTH_FRACTION = 0.88f
+private const val CHOICE_MODAL_SCRIM_ALPHA = 0.55f
+
 @Composable
 fun TwoChoiceModal(
     title: String,
@@ -52,7 +56,7 @@ fun TwoChoiceModal(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.55f))
+            .background(Color.Black.copy(alpha = CHOICE_MODAL_SCRIM_ALPHA))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -63,8 +67,8 @@ fun TwoChoiceModal(
         Column(
             modifier = Modifier
                 .widthIn(max = 420.dp)
-                .fillMaxWidth(0.88f)
-                .heightIn(max = maxHeight * 0.72f)
+                .fillMaxWidth(CHOICE_MODAL_WIDTH_FRACTION)
+                .heightIn(max = maxHeight * CHOICE_MODAL_MAX_HEIGHT_FRACTION)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.verticalGradient(

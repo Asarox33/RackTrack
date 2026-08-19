@@ -184,7 +184,6 @@ fun FourteenOneBoardContent(
                         visitEnd = VisitEndDraft(match.player1.id, VisitEndAction.FOUL)
                     },
                     onBreakFoul = onBreakFoul,
-                    compact = true,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -208,7 +207,6 @@ fun FourteenOneBoardContent(
                         visitEnd = VisitEndDraft(match.player2.id, VisitEndAction.FOUL)
                     },
                     onBreakFoul = onBreakFoul,
-                    compact = true,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -291,7 +289,6 @@ private fun FourteenOnePlayerPanel(
     onRequestFoul: () -> Unit,
     onBreakFoul: (PlayerId) -> Unit,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
 ) {
     val enabled = match.status == MatchStatus.IN_PROGRESS && hasHand
     val showBreakFoul = enabled && match.awaitingOpeningBreak
