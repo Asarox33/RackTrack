@@ -138,16 +138,16 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 - [ ] Wait ≥14 consecutive days with ≥12 still enrolled → request production access
   (**clock started 2026-08-20** → earliest ~**2026-09-03** if count holds)
 
-**Console — update before / with production release**
+**Console — declarations done 2026-08-20 (owner); promote still waits on 12×14**
 
-- [ ] **Annonces** → Oui (Contains ads)
-- [ ] **Data safety** → Oui + disclose AdMob + Play Billing (was Non / local-only on 1.1.1)
-- [ ] **Privacy policy** URL still live; expand text if needed for ads / Billing
-- [ ] **App access / login** — still Non unless something is truly gated (optional IAP ≠ gate)
-- [ ] **Content rating** — re-check “contenu en ligne” if AdMob changes answers
-- [ ] **Play Billing** products (`remove_ads`) + Console Billing protection as needed
-- [ ] **Protégé avec Play** — device integrity **recommandé** (was Aucun on Internal);
-      Play Integrity API in-app only if product asks
+- [x] **Annonces** → Oui (Contains ads)
+- [x] **Data safety** → Oui + disclose AdMob + Play Billing (was Non / local-only on 1.1.1)
+- [x] **Privacy policy** URL still live; text covers ads / Billing
+- [x] **App access / login** — Non (optional IAP ≠ gate)
+- [x] **Content rating** — re-checked for online / AdMob content
+- [x] **Play Billing** products (`remove_ads`) + Console Billing protection as needed
+- [x] **Protégé avec Play** — device integrity **recommandé**
+      (Play Integrity API in-app only if product asks later)
 - [ ] Promote → **Production** once access granted; countries / pricing free + IAP
   (**OK to ship first with Google SAMPLE interstitial** in `gradle.properties` — gate
   already skips when no fill; do **not** leave sample IDs once AdMob serves)
@@ -166,11 +166,8 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 - [x] Enable **R8** minify + resource shrink; `ndk.debugSymbolLevel = SYMBOL_TABLE`
   (mapping embeds in the AAB as `BUNDLE-METADATA/.../proguard.map` — Console auto-detects)
 - [x] Upload AAB; confirm **Fichier de mappage ReTrace** has a size in App bundle explorer
-- [ ] **Symboles de débogage natifs** — leave empty unless AGP produces a real symbols zip
-  (`mergeReleaseNativeDebugMetadata`). Third-party `.so` (AndroidX / GMS) are usually
-  pre-stripped; zipping them ourselves does not satisfy Play. Optional later if we ship
-  our own NDK code with unstripped libs.
-  (Internal 1.1.1 Console warnings were deferred on purpose — see `06-roadmap-todo.md`)
+- [x] **Symboles de débogage natifs** — intentionally empty (AGP does not produce a usable
+  symbols zip; third-party `.so` are pre-stripped). Revisit only if we ship our own NDK.
 
 **Code** — full UX: [`09-monetization.md`](09-monetization.md).
 
@@ -185,13 +182,14 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 | `app/build.gradle.kts` release signing if properties present | yes |
 | `:app:bundleRelease` local | yes |
 | CI signed AAB artifact (`signed-aab.yml`) | yes — `workflow_dispatch` only |
-| **CI → Play Internal** (`play-internal.yml`) | yes — after green CI on `main` when `versionCode` bumps; needs SA secret |
+| **CI → Play Internal** (`play-internal.yml`) | ✅ live — first auto upload **102015** (2026-08-20) |
 
 ### CI → Play Internal (auto)
 
 After **CI** succeeds on a push to **`main`**, workflow **Play Internal** builds a signed AAB and
 publishes it to the **Internal testing** track (`status: completed`) when
-`racktrack.versionCode` changed vs the parent commit.
+`racktrack.versionCode` changed vs the parent commit. Uses action input `tracks: internal`
+(`track` is deprecated on `r0adkll/upload-google-play`).
 
 **Also:** Actions → **Play Internal** → **Run workflow** (manual smoke; always uploads current
 `versionCode`).
@@ -201,12 +199,12 @@ publishes it to the **Internal testing** track (`status: completed`) when
 `whatsnew-*` files for the Publisher API. Keep copy **track-agnostic** (no “test interne” /
 “internal test”) — the same notes promote to Closed then Production.
 
-#### Owner checklist (one-time) — service account
+#### Owner checklist (one-time) — service account — ✅ done 2026-08-20
 
 Without secret `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON`, auto runs **skip** (CI stays green).
-Manual dispatch **fails** until the secret exists.
+Manual dispatch **fails** until the secret exists. (Secret + invite + smoke completed.)
 
-1. **Google Cloud — API + service account**
+1. **Google Cloud — API + service account** ✅
    1. Open [Google Cloud Console](https://console.cloud.google.com/) (same Google account as Play if possible).
    2. Create or pick a project (e.g. `racktrack-play-ci`).
    3. **APIs & Services → Library** → **Google Play Android Developer API** → **Enable**.
@@ -214,28 +212,25 @@ Manual dispatch **fails** until the secret exists.
       - Name: `racktrack-play-publisher` (or similar)
       - No GCP project roles required for Play upload (auth is via Play Console invite).
    5. Open the SA → **Keys** → **Add key** → **Create new key** → **JSON** → download.
-   6. **Never commit** that JSON.
+   6. **Never commit** that JSON (`racktrack-play-ci*.json` is gitignored).
 
-2. **Play Console — invite the SA**
+2. **Play Console — invite the SA** ✅
    1. [Play Console](https://play.google.com/console) → **Users and permissions**.
    2. **Invite new users** → SA email (`…@….iam.gserviceaccount.com` from the JSON / SA page).
    3. App **RackTrack** (`com.racktrack`): rights to release on **Internal** (and read app if asked).
       Prefer not granting full account Admin.
    4. Confirm invite; wait a few minutes for propagation.
 
-3. **GitHub — secret**
+3. **GitHub — secret** ✅
    1. Repo → **Settings → Secrets and variables → Actions**.
    2. **New repository secret** `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON` = full JSON file contents.
    3. Signing secrets already required (unchanged):
       `RACKTRACK_KEYSTORE_BASE64`, `RACKTRACK_KEYSTORE_PASSWORD`,
       `RACKTRACK_KEY_ALIAS`, `RACKTRACK_KEY_PASSWORD`.
 
-4. **Smoke test**
-   1. Actions → **Play Internal** → **Run workflow**, or merge a PR that bumps `versionCode` + notes.
-   2. Play Console → **Internal testing**: new `completed` release with that `versionCode`.
-   3. On 403: re-check SA invite + API enabled.
+4. **Smoke test** ✅ — merge bumped `versionCode` **102015** → Internal `completed` release.
 
-**Order:** Enable API → Create SA + JSON → Invite in Play → Add GitHub secret → smoke.
+**Order (reference):** Enable API → Create SA + JSON → Invite in Play → Add GitHub secret → smoke.
 
 **Out of scope:** auto Closed / Production (manual only).
 

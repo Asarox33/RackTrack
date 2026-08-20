@@ -80,7 +80,8 @@ no APK/AAB asset is attached (binaries go to app stores).
    - creates annotated tag + GitHub Release with changelog notes (**no APK**)
 4. Workflow **Play Internal** (`play-internal.yml`) also runs after **CI** on `main`:
    if `versionCode` changed and `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON` is set, it builds a
-   signed AAB and publishes to Play **Internal** (`completed`). See `docs/08-play-store.md`.
+   signed AAB and publishes to Play **Internal** (`tracks: internal`, `completed`).
+   First auto smoke: **102015** (2026-08-20). See `docs/08-play-store.md`.
 5. Workflow **Release** (`release.yml`) also runs on manual `vX.Y.Z` tag pushes
    (admins / ruleset bypass). It no-ops if the release already exists.
 

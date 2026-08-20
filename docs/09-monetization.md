@@ -171,7 +171,8 @@ APIs). Settings must expose:
 ## 7. Consent & store compliance (Android 1.2.0)
 
 - Google **UMP** (or equivalent) for EEA/UK consent before ad requests as required.
-- Play **Data safety** + privacy policy updated for AdMob + Billing **before** production.
+- Play **Data safety** + privacy policy updated for AdMob + Billing ✅ (2026-08-20);
+  Production promote still waits on Closed 12×14.
 - First **open / production** end-user build already includes this stack (no ad-free
   soft launch then ads later — trust risk). Closed testing may use pre-monetization builds.
 
@@ -274,7 +275,8 @@ Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
 - [x] `InterstitialAdManager` + preload + 5‑min cooldown
 - [x] `MonetizationGate` wired on START MATCH / START TRAINING only
 - [x] UMP consent before first ad request
-- [ ] Privacy / Data safety / listing updated (**promote checklist:** `08-play-store.md` §E)
+- [x] Privacy / Data safety / listing updated (**promote checklist:** `08-play-store.md` §E —
+  declarations done 2026-08-20; Production promote still waits on Closed 12×14)
 - [x] R8 minify + shrink + native `SYMBOL_TABLE` in release AAB (mapping at
   `app/build/outputs/mapping/release/`); verify on next Play upload
   (deferred from Internal 1.1.1 warnings; do before strangers see 1.2.0)

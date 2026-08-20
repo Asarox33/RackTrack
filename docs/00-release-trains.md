@@ -20,7 +20,7 @@ main (1.x patchable)
   │
   ├─ 1.1.0 ✅ shipped (GitHub)
   ├─ 1.1.1 ✅ OFL font attribution
-  ├─ 1.2.0 🔧 monetization (Internal smoke → Closed 12×14 → production)  ← current
+  ├─ 1.2.0 / 1.2.1 🔧 Play gate (Internal CI ✅ · Closed 12×14 ⏳ · §E ✅ · prod ⬜)  ← current
   └─ 1.2.x hotfixes if needed
        │
        └── branch rc/2.0.0  (open AFTER 1.2.0 is on Play production)
@@ -61,12 +61,13 @@ main (1.x patchable)
 
 | # | Who | Action |
 |---|-----|--------|
-| 1 | Human | Finish Google Play account validation |
-| 2 | Human | Create upload keystore locally; fill `keystore.properties` (never commit) |
-| 3 | Repo | Privacy URL live (see `privacy-policy.md` + `08-play-store.md`) |
-| 4 | Code | Implement **1.2.0** monetization per `09-monetization.md` |
-| 5 | Human | Internal smoke → **Closed** (≥12 testers, 14 days) → Console `08` §E → **production 1.2.0** |
+| 1 | Human | Finish Google Play account validation ✅ |
+| 2 | Human | Create upload keystore locally; fill `keystore.properties` (never commit) ✅ |
+| 3 | Repo | Privacy URL live (see `privacy-policy.md` + `08-play-store.md`) ✅ |
+| 4 | Code | Implement **1.2.0** monetization per `09-monetization.md` ✅ |
+| 5 | Human | Internal smoke ✅ → **Closed** (≥12 ✅, 14 days ⏳ from 2026-08-20) → Console `08` §E ✅ → **production 1.2.0+** ⬜ |
 | 6 | Repo | Open `rc/2.0.0` **after** 1.2.0 is live on Play |
+| — | Repo | CI → Play Internal (`play-internal.yml`) ✅ smoke 102015 |
 
 ---
 

@@ -1,7 +1,8 @@
 # Roadmap & TODO
 
-Overall status: ✅ **1.1.1** on GitHub · 🟨 **1.2.x** Play gate (Internal live · Closed
-live · **12×14 clock from 2026-08-20**) · ✅ **1.2.1** code · ⬜ **2.0** on `rc/2.0.0`
+Overall status: ✅ **1.1.1** on GitHub · 🟨 **1.2.x** Play gate (Internal CI live · Closed
+live · **12×14 clock from 2026-08-20** · Console §E declarations ✅ · prod blocked on
+clock) · ✅ **1.2.1** code · ⬜ **2.0** on `rc/2.0.0`
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
@@ -113,19 +114,22 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
 - ✅ Play product `remove_ads` Active + Internal IAP smoke (license testers)
 - 🟨 **Closed testing** — **1.2.1** (`102012`) live; **≥12 opted-in** ✅;
   **14-day** production-access clock **started 2026-08-20** (eligible ~2026-09-03 if
-  enrollment holds)
-- ⬜ **Promote → Production 1.2.0+** after Closed eligibility + Console `08` §E
-  (ads declaration, Data safety AdMob+Billing, privacy, Billing product, integrity
-  recommandé, content-rating re-check) — listing assets mostly reuse 1.1.1
+  enrollment holds). Internal auto-CI latest **102015**.
+- ✅ Console `08` §E declarations (Annonces, Data safety AdMob+Billing, privacy, app
+  access Non, content rating, Billing `remove_ads`, Play integrity recommandé) —
+  owner confirmed 2026-08-20
+- ⬜ **Promote → Production 1.2.0+** after Closed **12×14** eligibility — listing assets
+  mostly reuse 1.1.1; sample interstitial OK until post-prod AdMob patch
 - ⬜ **Post-prod AdMob patch** — link Play in AdMob → switch `gradle.properties` to real
   interstitial unit + version bump
 - ✅ Play crash diagnostics: **R8** + mapping confirmed on App bundle explorer (Internal
-  **1.2.1**); native symbols left empty (pre-stripped deps — see `08`)
-- ⬜ Closed smoke OK → **production** for strangers (after 12×14 + §E)
+  **1.2.1**); native symbols intentionally empty (pre-stripped deps — see `08`)
+- ⬜ Closed clock complete → **production** for strangers
 
 ### Later on 1.x (optional, after Play launch)
 - ✅ **CI → Play Internal upload** (`play-internal.yml` after green CI on `main` when
-  `versionCode` bumps; SA secret + notes in `play/internal-release-notes.txt`) — see `08`
+  `versionCode` bumps; SA secret live; smoke **102015** 2026-08-20; notes in
+  `play/internal-release-notes.txt`) — see `08`
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
   (may slip to 2.0 if paired with identity)
@@ -162,11 +166,14 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
-- 2026-08-20: **CI → Play Internal** — `play-internal.yml` after green CI on `main` when
-  `versionCode` changes; owner checklist for SA in `08`. Notes: `play/internal-release-notes.txt`.
-- 2026-08-20: Play — **1.2.1** `versionCode` **102012** on **Internal** + **Closed**.
-  ≥12 closed testers opted in; **14-day** clock started (target ~2026-09-03 if stable).
-  Mapping OK; native symbols not required. Next: hold enrollment → §E → production.
+- 2026-08-20: Play Console §E declarations all ✅ (owner). CI **Play Internal** smoke
+  published **102015** `completed`. Warning fixed: action input `tracks` (not deprecated
+  `track`). Remaining gate: hold Closed **12×14** → promote Production.
+- 2026-08-20: **CI → Play Internal** live — SA secret + invite done; notes in
+  `play/internal-release-notes.txt`.
+- 2026-08-20: Play — **1.2.1** `versionCode` **102012** on **Closed** (clock start);
+  Internal later advanced by CI. ≥12 closed testers opted in; **14-day** clock
+  (target ~2026-09-03 if stable). Mapping OK; native symbols intentionally empty.
 - 2026-08-19: **1.2.1** — adaptive board metrics (floor + ceiling); race-to / 14-1 **swipe**
   pickers with neighbor strip; Settings **page**; race-to Tap-to-set row; 14/1 ACCEPT /
   RE-BREAK; 9/10 push-out tree (+ **Push outs** in summary/PDF/history); tall-phone
