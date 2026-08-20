@@ -35,8 +35,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 ### Notes
 
 - Closed / Internal rebuilds of this name use `versionCode` `102010`+ (see `docs/07`).
-  Play used through **102013** (startup hotfix); **102014** = inline setup swipes + summary
-  avg layout + CI Play Internal workflow.
+  Play used through **102014**; **102015** = CI Play Internal smoke (same 1.2.1 notes).
 
 ## 1.2.0 — 2026-08-17
 
