@@ -151,8 +151,18 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
 - ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
+- ⬜ **Brand / visual identity (unified redesign)** — decide in **2.x.y** with CMP design
+  system (not a 1.2 Play-gate patch):
+  - Current launcher / Play icon (photo-real 8/9/10 balls + ✓ on felt) reads as a **pool
+    game**, feels dated (skeuomorphic), and does not carry a brand mark
+  - Prefer scoreboard / race signal (split board, numerals, stylized felt, monogram **RT**
+    or similar) — flat/modern; avoid photo balls as the hero
+  - Same pass should cover **icon + feature graphic + splash / setup** so listing and
+    in-app match; keep Play 1.2 listing as-is until then
 - ⬜ Optional accounts / shared post-match stats (still **never** remote live scoring)
 - ⬜ Other game families later (e.g. English 8-Ball) — only after American multi-ruleset base
+- ⬜ Optional later (not planned): Play In-App Updates flexible nudge; Firebase Crashlytics
+  if Play Console volume is not enough — **not** for 1.2 gate
 
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket)~~ — useless without camera auto-detection
@@ -166,6 +176,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-20: Owner — icon/brand feedback noted; **defer unified visual redesign to 2.x.y**
+  (with CMP). Keep current Play assets for 1.2 prod. No Firebase; Play crash/ANR enough.
+  No in-app update overlay for now (overkill).
 - 2026-08-20: Play Console §E declarations all ✅ (owner). CI **Play Internal** smoke
   published **102015** `completed`. Warning fixed: action input `tracks` (not deprecated
   `track`). Remaining gate: hold Closed **12×14** → promote Production.
