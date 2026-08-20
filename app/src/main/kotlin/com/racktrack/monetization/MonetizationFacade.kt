@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
  *
  * [start] must never crash the process — Setup UI must remain usable if ads/billing fail.
  */
+@Suppress("TooGenericExceptionCaught")
 class MonetizationFacade(
     context: Context,
     private val scope: CoroutineScope,

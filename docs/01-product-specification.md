@@ -43,7 +43,8 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
 - Create a match (2 names, mode, race length or 14/1 distance/innings, who starts;
   race: Alternate vs Winner break; **14/1 Solo** = one name / no opponent)
-- Race length via **Tap to set** + swipe picker modal (1–15, default 6)
+- Race length via **inline swipe** picker on setup (1–15, default 6); same strip for
+  14/1 distance & innings (∞ on the same strip). Settings defaults use the same controls.
 - Split-screen board on billiard cloth (felt tones: Forest, Blue, Burgundy, Charcoal, Pink, Golden)
 - Landscape and portrait (`fullSensor`); live boards scale from available pane size
   (touch floor + tablet ceiling)

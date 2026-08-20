@@ -1,9 +1,11 @@
 name: Signed release AAB
 
-# Builds a Play-uploadable release AAB when upload-key secrets are configured.
+# Builds a Play-uploadable release AAB (GitHub artifact only — no Play upload).
+# Prefer Play Internal workflow for auto-publish after CI on main.
 # Does NOT attach the AAB to GitHub Releases (notes-only policy).
 #
-# Triggers: manual dispatch, or push of tag v*
+# Trigger: manual dispatch only (tag v* does not start reliably when cut-release
+# creates tags with GITHUB_TOKEN).
 # Secrets (repo Settings → Secrets → Actions):
 #   RACKTRACK_KEYSTORE_BASE64   — base64 of racktrack-upload.p12
 #   RACKTRACK_KEYSTORE_PASSWORD
@@ -12,9 +14,6 @@ name: Signed release AAB
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
 
 jobs:
   bundle-release:

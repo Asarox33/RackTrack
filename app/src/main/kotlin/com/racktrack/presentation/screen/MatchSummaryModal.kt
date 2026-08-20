@@ -406,11 +406,28 @@ private fun PlayerSummaryColumn(
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (gameMode.isPointScoring) {
-            Text(
-                text = "HR $highRun  ·  avg ${"%.2f".format(average)}",
-                style = MaterialTheme.typography.labelLarge,
-                color = ButtonRunOutLight,
-            )
+            // Split HR / avg so wide averages (e.g. 10.00) never wrap the shared line and
+            // skew the two player cards on narrow panes.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "HR $highRun",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ButtonRunOutLight,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+                Text(
+                    text = "avg ${"%.2f".format(average)}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ButtonRunOutLight,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Inn $innings",

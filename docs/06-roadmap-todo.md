@@ -65,7 +65,8 @@ Legend: ⬜ to do · 🟨 in progress · ✅ done
 
 ### 1.2.1 — adaptive boards & table rules UX
 - ✅ Live boards scale from pane/screen % (touch floor + tablet ceiling)
-- ✅ Race-to swipe picker (1–15) + **Tap to set** affordance; 14/1 balls-left same strip
+- ✅ Race-to / 14-1 distance & innings as **inline swipe** on setup (no modal); Settings
+  defaults match
 - ✅ Settings as full `AppScreen` (return to Setup or live match)
 - ✅ 14/1 illegal open ACCEPT / RE-BREAK; 9/10 push-out FFB tree
   (summary / PDF / history: **Push outs** count next to Dry / Golden)
@@ -123,8 +124,8 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
 - ⬜ Closed smoke OK → **production** for strangers (after 12×14 + §E)
 
 ### Later on 1.x (optional, after Play launch)
-- ⬜ **CI → Play Internal upload** (SA + Publisher API + workflow step) — today CI only
-  produces a signed AAB artifact; see `08-play-store.md` “Later — CI upload…”
+- ✅ **CI → Play Internal upload** (`play-internal.yml` after green CI on `main` when
+  `versionCode` bumps; SA secret + notes in `play/internal-release-notes.txt`) — see `08`
 - ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
   (may slip to 2.0 if paired with identity)
@@ -161,6 +162,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-20: **CI → Play Internal** — `play-internal.yml` after green CI on `main` when
+  `versionCode` changes; owner checklist for SA in `08`. Notes: `play/internal-release-notes.txt`.
 - 2026-08-20: Play — **1.2.1** `versionCode` **102012** on **Internal** + **Closed**.
   ≥12 closed testers opted in; **14-day** clock started (target ~2026-09-03 if stable).
   Mapping OK; native symbols not required. Next: hold enrollment → §E → production.
