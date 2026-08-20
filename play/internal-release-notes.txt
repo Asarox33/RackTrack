@@ -1,10 +1,10 @@
 <fr-FR>
-RackTrack 1.2.1 — test interne
+RackTrack 1.2.1
 
 Correctif démarrage release ; Race to / Distance / reprises en swipe inline sur le setup ; résumé 14/1 sans décalage avg ≥ 10.
 </fr-FR>
 <en-US>
-RackTrack 1.2.1 — internal test
+RackTrack 1.2.1
 
 Release cold-start fix; inline swipe Race-to / Distance / innings on setup; 14/1 summary no longer misaligns when avg ≥ 10.
 </en-US>

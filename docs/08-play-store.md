@@ -107,7 +107,9 @@ Decode helper: [`.github/scripts/setup-upload-signing.sh`](../.github/scripts/se
 
 ### Release notes format (owner preference)
 
-When drafting Play “notes de version”, always use locale tags (≤500 chars each):
+When drafting Play “notes de version”, always use locale tags (≤500 chars each).
+Keep wording **track-agnostic** (no “test interne” / “internal test”) — notes reuse on
+Closed and Production.
 
 ```text
 <fr-FR>
@@ -196,7 +198,8 @@ publishes it to the **Internal testing** track (`status: completed`) when
 
 **Release notes:** edit [`play/internal-release-notes.txt`](../play/internal-release-notes.txt)
 (`<fr-FR>` / `<en-US>`, ≤500 chars each) in the same PR as the `versionCode` bump. CI extracts
-`whatsnew-*` files for the Publisher API.
+`whatsnew-*` files for the Publisher API. Keep copy **track-agnostic** (no “test interne” /
+“internal test”) — the same notes promote to Closed then Production.
 
 #### Owner checklist (one-time) — service account
 
