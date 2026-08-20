@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         monetization = MonetizationFacade(this, lifecycleScope)
-        monetization.start(this)
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
@@ -39,6 +38,11 @@ class MainActivity : ComponentActivity() {
             val settings by viewModel.settings.collectAsStateWithLifecycle()
             val adsRemoved by monetization.adsRemoved.collectAsStateWithLifecycle()
             val billingStatus by monetization.billingStatusMessage.collectAsStateWithLifecycle()
+
+            // First frame first — never block cold start on UMP / Ads / Billing.
+            LaunchedEffect(Unit) {
+                monetization.start(this@MainActivity)
+            }
 
             LaunchedEffect(billingStatus) {
                 val message = billingStatus ?: return@LaunchedEffect

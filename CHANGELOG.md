@@ -29,11 +29,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 
 - **Tall phones** — run-out and consecutive-foul chips stay visible under the score (reserved
   height + muted-icon contrast).
+- **Cold start (Play release)** — R8 + WorkManager auto-init could kill the process before UI
+  (`InitializationProvider` / `WorkDatabase`). Keep rules + disable WM/Ads providers at
+  process start; defer monetization until after the first Compose frame.
 
 ### Notes
 
 - Closed / Internal rebuilds of this name use `versionCode` `102010`+ (see `docs/07`).
-  Play already used `102010`–`102011`; next smoke AAB is `102012`.
+  Play already used `102010`–`102012`; **102013** = startup hotfix (WorkManager R8 /
+  deferred monetization).
 
 ## 1.2.0 — 2026-08-17
 
