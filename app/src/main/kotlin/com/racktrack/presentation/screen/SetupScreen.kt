@@ -1,7 +1,6 @@
 package com.racktrack.presentation.screen
 
 import android.content.res.Configuration
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,25 +24,21 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.MatchFormatOptions
-import com.racktrack.presentation.component.IntStepperModal
 import com.racktrack.presentation.component.SettingsGearButton
+import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
-import com.racktrack.presentation.component.TexturedSettingButton
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.theme.ScoreWhite
@@ -345,91 +340,57 @@ private fun FormatControls(
     onInningsChange: (Int?) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
-    if (state.gameMode.isPointScoring) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    val pickerSp = if (compact) 40.sp else 52.sp
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp),
+    ) {
+        if (state.gameMode.isPointScoring) {
             Text("Distance", style = MaterialTheme.typography.titleLarge)
-            if (!compact) Box(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                MatchFormatOptions.pointsToWin.forEach { n ->
-                    TexturedChip(
-                        label = n.toString(),
-                        selected = state.pointsToWin == n,
-                        onClick = { onPointsChange(n) },
-                        selectedLight = felt.accentLight,
-                        selectedDark = felt.accentDark,
-                        idleLight = felt.mid,
-                        idleDark = felt.dark,
-                        height = if (compact) 40.dp else 44.dp,
-                    )
-                }
-            }
-            Box(modifier = Modifier.height(if (compact) 6.dp else 10.dp))
-            Text("Innings", style = MaterialTheme.typography.titleLarge)
-            if (!compact) Box(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                MatchFormatOptions.inningsLimits.forEach { n ->
-                    TexturedChip(
-                        label = n.toString(),
-                        selected = state.inningsLimit == n,
-                        onClick = { onInningsChange(n) },
-                        selectedLight = felt.accentLight,
-                        selectedDark = felt.accentDark,
-                        idleLight = felt.mid,
-                        idleDark = felt.dark,
-                        height = if (compact) 40.dp else 44.dp,
-                    )
-                }
-                TexturedChip(
-                    label = "∞",
-                    selected = state.inningsLimit == null,
-                    onClick = { onInningsChange(null) },
-                    selectedLight = felt.accentLight,
-                    selectedDark = felt.accentDark,
-                    idleLight = felt.mid,
-                    idleDark = felt.dark,
-                    height = if (compact) 40.dp else 44.dp,
-                )
-            }
-        }
-    } else {
-        var raceEditorOpen by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (!compact) {
-                Text("Race to", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            TexturedSettingButton(
-                label = if (compact) "Race to" else "Tap to set",
-                value = state.racksToWin.toString(),
-                onClick = { raceEditorOpen = true },
-                modifier = Modifier.widthIn(max = 360.dp),
-                height = if (compact) 44.dp else 52.dp,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+            val pointsOptions = MatchFormatOptions.pointsToWin
+            val pointsIndex =
+                pointsOptions.indexOf(state.pointsToWin).let { if (it >= 0) it else 0 }
+            SwipeIntPicker(
+                value = pointsIndex,
+                onValueChange = { onPointsChange(pointsOptions[it]) },
+                min = 0,
+                max = pointsOptions.lastIndex,
+                valueLabel = { pointsOptions[it].toString() },
+                valueSp = pickerSp,
+                modifier = Modifier.widthIn(max = 420.dp),
             )
-        }
-        if (raceEditorOpen) {
-            IntStepperModal(
-                title = "RACE TO",
-                valueLabel = { it.toString() },
-                initial = state.racksToWin,
+            Text("Innings", style = MaterialTheme.typography.titleLarge)
+            val inningsOptions = MatchFormatOptions.inningsLimits
+            val unlimitedIndex = inningsOptions.size
+            val inningsIndex =
+                state.inningsLimit?.let { limit ->
+                    inningsOptions.indexOf(limit).let { if (it >= 0) it else 0 }
+                } ?: unlimitedIndex
+            SwipeIntPicker(
+                value = inningsIndex,
+                onValueChange = { index ->
+                    onInningsChange(
+                        if (index >= unlimitedIndex) null else inningsOptions[index],
+                    )
+                },
+                min = 0,
+                max = unlimitedIndex,
+                valueLabel = { index ->
+                    if (index >= unlimitedIndex) "∞" else inningsOptions[index].toString()
+                },
+                valueSp = pickerSp,
+                modifier = Modifier.widthIn(max = 420.dp),
+            )
+        } else {
+            Text("Race to", style = MaterialTheme.typography.titleLarge)
+            SwipeIntPicker(
+                value = state.racksToWin,
+                onValueChange = onRacksChange,
                 min = MatchFormatOptions.RACE_TO_MIN,
                 max = MatchFormatOptions.RACE_TO_MAX,
-                onDismiss = { raceEditorOpen = false },
-                onConfirm = { n ->
-                    onRacksChange(n)
-                    raceEditorOpen = false
-                },
+                valueSp = pickerSp,
+                modifier = Modifier.widthIn(max = 420.dp),
             )
         }
     }

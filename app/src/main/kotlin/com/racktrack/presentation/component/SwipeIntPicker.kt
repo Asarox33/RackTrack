@@ -5,11 +5,8 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -33,7 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 
 private const val SWIPE_STEP_DP = 48f
@@ -61,7 +57,6 @@ fun SwipeIntPicker(
     modifier: Modifier = Modifier,
     valueLabel: (Int) -> String = { it.toString() },
     valueSp: TextUnit = VALUE_SP_DEFAULT.sp,
-    hint: String = "Swipe  ·  or tap a number",
 ) {
     val performHaptic = rememberClickHaptic()
     val density = LocalDensity.current
@@ -87,67 +82,55 @@ fun SwipeIntPicker(
 
     fun stepBy(delta: Int) = commit(local.intValue + delta)
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 88.dp)
+            .semantics {
+                contentDescription =
+                    "Value ${valueLabel(local.intValue)}. Swipe left to increase, right to decrease."
+            }
+            .pointerInput(stepPx) {
+                detectHorizontalDragGestures(
+                    onDragEnd = { dragAccum = 0f },
+                    onDragCancel = { dragAccum = 0f },
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        dragAccum += dragAmount
+                        while (dragAccum <= -stepPx) {
+                            dragAccum += stepPx
+                            commit(local.intValue + 1)
+                        }
+                        while (dragAccum >= stepPx) {
+                            dragAccum -= stepPx
+                            commit(local.intValue - 1)
+                        }
+                    },
+                )
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(
+        ChevronTap(
+            label = "‹",
+            enabled = local.intValue > min,
+            onClick = { stepBy(-1) },
+        )
+        NeighborStrip(
+            center = local.intValue,
+            min = min,
+            max = max,
+            valueLabel = valueLabel,
+            valueSp = valueSp,
+            onSelect = ::commit,
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 88.dp)
-                .semantics {
-                    contentDescription =
-                        "Value ${valueLabel(local.intValue)}. Swipe left to increase, right to decrease."
-                }
-                .pointerInput(stepPx) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = { dragAccum = 0f },
-                        onDragCancel = { dragAccum = 0f },
-                        onHorizontalDrag = { change, dragAmount ->
-                            change.consume()
-                            dragAccum += dragAmount
-                            while (dragAccum <= -stepPx) {
-                                dragAccum += stepPx
-                                commit(local.intValue + 1)
-                            }
-                            while (dragAccum >= stepPx) {
-                                dragAccum -= stepPx
-                                commit(local.intValue - 1)
-                            }
-                        },
-                    )
-                },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            ChevronTap(
-                label = "‹",
-                enabled = local.intValue > min,
-                onClick = { stepBy(-1) },
-            )
-            NeighborStrip(
-                center = local.intValue,
-                min = min,
-                max = max,
-                valueLabel = valueLabel,
-                valueSp = valueSp,
-                onSelect = ::commit,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
-            )
-            ChevronTap(
-                label = "›",
-                enabled = local.intValue < max,
-                onClick = { stepBy(+1) },
-            )
-        }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = hint,
-            style = MaterialTheme.typography.labelLarge,
-            color = OutlineWarm.copy(alpha = 0.85f),
-            textAlign = TextAlign.Center,
+                .weight(1f)
+                .padding(horizontal = 4.dp),
+        )
+        ChevronTap(
+            label = "›",
+            enabled = local.intValue < max,
+            onClick = { stepBy(+1) },
         )
     }
 }

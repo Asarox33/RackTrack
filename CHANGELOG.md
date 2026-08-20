@@ -13,10 +13,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 - **Adaptive live boards** — race and 14/1 scale from available pane size on phones, folds,
   and tablets (readable scores / actions without S25- or tablet-only hacks). Sizes use a
   touch **floor** and a tablet **ceiling** so chrome does not explode on large screens.
-- **Race to picker** — setup and Settings open a 1–15 modal (default remains 6). Swipe
-  left/right (or tap neighbors / arrows); ±2 smaller values show so the control reads as
-  a strip. Same swipe strip for 14/1 balls-left on the visit-end modal.
-- **Race to control** — full-width **Tap to set · N ›** row instead of a lone selected chip.
+- **Race to / 14.1 format** — setup (and Settings defaults) use **inline swipe** pickers for
+  race length, distance, and innings (including **∞** on the innings strip) — no extra modal.
+  Same swipe strip for 14/1 balls-left on the visit-end modal.
 - **Settings page** — Settings is a full screen (like History), not a modal sheet; Back
   returns to Setup or the live match.
 - **14/1 illegal opening break** — after **BREAK −2**, opponent chooses **ACCEPT** (take the
@@ -29,11 +28,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 
 - **Tall phones** — run-out and consecutive-foul chips stay visible under the score (reserved
   height + muted-icon contrast).
+- **Cold start (Play release)** — R8 + WorkManager auto-init could kill the process before UI
+  (`InitializationProvider` / `WorkDatabase`). Keep rules + disable WM/Ads providers at
+  process start; defer monetization until after the first Compose frame.
 
 ### Notes
 
 - Closed / Internal rebuilds of this name use `versionCode` `102010`+ (see `docs/07`).
-  Play already used `102010`–`102011`; next smoke AAB is `102012`.
+  Play used through **102014**; **102015** = CI Play Internal smoke (same 1.2.1 notes).
 
 ## 1.2.0 — 2026-08-17
 

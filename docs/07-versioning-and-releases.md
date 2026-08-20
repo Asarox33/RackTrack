@@ -70,17 +70,21 @@ no APK/AAB asset is attached (binaries go to app stores).
 
 ## How a release is produced
 
-1. Open a PR that bumps `racktrack.versionName` + `racktrack.versionCode` **and** updates
-   `CHANGELOG.md` for that version.
+1. Open a PR that bumps `racktrack.versionCode` (and `versionName` when user-facing)
+   **and** updates `CHANGELOG.md` + [`play/internal-release-notes.txt`](../play/internal-release-notes.txt)
+   (`<fr-FR>` / `<en-US>`).
 2. Merge to **`main`** after CI is green.
 3. Workflow **Cut release from main** (`cut-release.yml`) runs after **CI** succeeds on `main`.
    If GitHub Release `v{versionName}` does not exist, it:
    - re-checks quality gates
    - creates annotated tag + GitHub Release with changelog notes (**no APK**)
-4. Workflow **Release** (`release.yml`) also runs on manual `vX.Y.Z` tag pushes
+4. Workflow **Play Internal** (`play-internal.yml`) also runs after **CI** on `main`:
+   if `versionCode` changed and `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON` is set, it builds a
+   signed AAB and publishes to Play **Internal** (`completed`). See `docs/08-play-store.md`.
+5. Workflow **Release** (`release.yml`) also runs on manual `vX.Y.Z` tag pushes
    (admins / ruleset bypass). It no-ops if the release already exists.
 
-Prefer version bump → merge → automatic cut. Do not invent tags that disagree with
+Prefer version bump → merge → automatic cut + Internal upload. Do not invent tags that disagree with
 `gradle.properties`.
 
 ## Protected tags
@@ -105,10 +109,10 @@ Optional hardening: add a `creation` rule and store an admin `RELEASE_PAT` secre
 
 ## Signing note
 
-CI does not publish binaries. Store builds use a dedicated upload keystore via local
-`keystore.properties` (see `keystore.properties.example` + `docs/08-play-store.md`).
-Without that file, `assembleRelease` / `bundleRelease` still falls back to the **debug**
-keystore for sideload testing only.
+Release AABs use the upload keystore via `keystore.properties` locally, or CI secrets +
+`.github/scripts/setup-upload-signing.sh` for **Play Internal** / Signed AAB workflows.
+Without signing, `assembleRelease` / `bundleRelease` falls back to the **debug** keystore
+for sideload testing only. GitHub Releases stay **notes-only** (no APK/AAB assets).
 
 ## Play end-user gate
 

@@ -28,10 +28,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,11 +46,10 @@ import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
-import com.racktrack.presentation.component.IntStepperModal
 import com.racktrack.presentation.component.ScrollMoreHint
+import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
-import com.racktrack.presentation.component.TexturedSettingButton
 import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.ScoreWhite
 import java.text.SimpleDateFormat
@@ -181,75 +177,52 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(14.dp))
             SectionLabel("Default race to")
             Spacer(modifier = Modifier.height(8.dp))
-            var raceEditorOpen by remember { mutableStateOf(false) }
-            TexturedSettingButton(
-                label = "Tap to set",
-                value = settings.defaultRacksToWin.toString(),
-                onClick = { raceEditorOpen = true },
-                height = 44.dp,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+            SwipeIntPicker(
+                value = settings.defaultRacksToWin,
+                onValueChange = onDefaultRacksChange,
+                min = MatchFormatOptions.RACE_TO_MIN,
+                max = MatchFormatOptions.RACE_TO_MAX,
+                valueSp = 44.sp,
             )
-            if (raceEditorOpen) {
-                IntStepperModal(
-                    title = "DEFAULT RACE TO",
-                    valueLabel = { it.toString() },
-                    initial = settings.defaultRacksToWin,
-                    min = MatchFormatOptions.RACE_TO_MIN,
-                    max = MatchFormatOptions.RACE_TO_MAX,
-                    onDismiss = { raceEditorOpen = false },
-                    onConfirm = { n ->
-                        onDefaultRacksChange(n)
-                        raceEditorOpen = false
-                    },
-                )
-            }
 
             Spacer(modifier = Modifier.height(12.dp))
             SectionLabel("Default distance (14/1)")
             Spacer(modifier = Modifier.height(8.dp))
-            ChipRow {
-                MatchFormatOptions.pointsToWin.forEach { n ->
-                    TexturedChip(
-                        label = n.toString(),
-                        selected = settings.defaultPointsToWin == n,
-                        onClick = { onDefaultPointsChange(n) },
-                        selectedLight = felt.accentLight,
-                        selectedDark = felt.accentDark,
-                        idleLight = felt.mid,
-                        idleDark = felt.dark,
-                        height = 40.dp,
-                    )
-                }
-            }
+            val pointsOptions = MatchFormatOptions.pointsToWin
+            val pointsIndex =
+                pointsOptions.indexOf(settings.defaultPointsToWin).let { if (it >= 0) it else 0 }
+            SwipeIntPicker(
+                value = pointsIndex,
+                onValueChange = { onDefaultPointsChange(pointsOptions[it]) },
+                min = 0,
+                max = pointsOptions.lastIndex,
+                valueLabel = { pointsOptions[it].toString() },
+                valueSp = 44.sp,
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
             SectionLabel("Default innings (14/1)")
             Spacer(modifier = Modifier.height(8.dp))
-            ChipRow {
-                MatchFormatOptions.inningsLimits.forEach { n ->
-                    TexturedChip(
-                        label = n.toString(),
-                        selected = settings.defaultInningsLimit == n,
-                        onClick = { onDefaultInningsChange(n) },
-                        selectedLight = felt.accentLight,
-                        selectedDark = felt.accentDark,
-                        idleLight = felt.mid,
-                        idleDark = felt.dark,
-                        height = 40.dp,
+            val inningsOptions = MatchFormatOptions.inningsLimits
+            val unlimitedIndex = inningsOptions.size
+            val inningsIndex =
+                settings.defaultInningsLimit?.let { limit ->
+                    inningsOptions.indexOf(limit).let { if (it >= 0) it else 0 }
+                } ?: unlimitedIndex
+            SwipeIntPicker(
+                value = inningsIndex,
+                onValueChange = { index ->
+                    onDefaultInningsChange(
+                        if (index >= unlimitedIndex) null else inningsOptions[index],
                     )
-                }
-                TexturedChip(
-                    label = "∞",
-                    selected = settings.defaultInningsLimit == null,
-                    onClick = { onDefaultInningsChange(null) },
-                    selectedLight = felt.accentLight,
-                    selectedDark = felt.accentDark,
-                    idleLight = felt.mid,
-                    idleDark = felt.dark,
-                    height = 40.dp,
-                )
-            }
+                },
+                min = 0,
+                max = unlimitedIndex,
+                valueLabel = { index ->
+                    if (index >= unlimitedIndex) "∞" else inningsOptions[index].toString()
+                },
+                valueSp = 44.sp,
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
             SectionLabel("Default break rule (8/9/10)")

@@ -45,7 +45,7 @@ Paste that privacy URL into Play Console → App content → Privacy policy.
 
 **Never commit** `*.p12` / `*.jks` / `keystore.properties` / `keystore.BACKUP.local.txt`.
 
-### B. GitHub secrets (CI signed AAB)
+### B. GitHub secrets (signing + Play Internal)
 
 Repo → **Settings → Secrets and variables → Actions** — add:
 
@@ -55,6 +55,7 @@ Repo → **Settings → Secrets and variables → Actions** — add:
 | `RACKTRACK_KEYSTORE_PASSWORD` | store password |
 | `RACKTRACK_KEY_ALIAS` | `racktrack` |
 | `RACKTRACK_KEY_PASSWORD` | key password |
+| `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON` | Full Play publisher SA JSON (see CI → Play Internal below) |
 
 **Encode keystore (PowerShell):**
 
@@ -68,13 +69,14 @@ Repo → **Settings → Secrets and variables → Actions** — add:
 base64 -w0 racktrack-upload.p12 | pbcopy   # or clip.exe / xclip
 ```
 
-Workflow: [`.github/workflows/signed-aab.yml`](../.github/workflows/signed-aab.yml)  
-Triggers: **`workflow_dispatch`** or tag **`v*`**.  
-Output: **Actions** artifact `app-release-aab` only (private to the repo, expires in **14 days**).
-That is intentional CI backup — **not** a public download.
-**Never** attach an AAB/APK to a GitHub **Release** (notes-only / `LICENSE`).
+Workflow **Signed release AAB** ([`signed-aab.yml`](../.github/workflows/signed-aab.yml)):
+**`workflow_dispatch` only** — GitHub artifact `app-release-aab` (backup; not a public download).
+
+Workflow **Play Internal** ([`play-internal.yml`](../.github/workflows/play-internal.yml)):
+auto after green CI on `main` when `versionCode` bumps (see below).
 
 Decode helper: [`.github/scripts/setup-upload-signing.sh`](../.github/scripts/setup-upload-signing.sh).
+**Never** attach an AAB/APK to a GitHub **Release** (notes-only / `LICENSE`).
 
 ### C. Play Console — create app + listing (owner)
 
@@ -105,7 +107,9 @@ Decode helper: [`.github/scripts/setup-upload-signing.sh`](../.github/scripts/se
 
 ### Release notes format (owner preference)
 
-When drafting Play “notes de version”, always use locale tags (≤500 chars each):
+When drafting Play “notes de version”, always use locale tags (≤500 chars each).
+Keep wording **track-agnostic** (no “test interne” / “internal test”) — notes reuse on
+Closed and Production.
 
 ```text
 <fr-FR>
@@ -180,24 +184,60 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 | `keystore.properties.example` | yes |
 | `app/build.gradle.kts` release signing if properties present | yes |
 | `:app:bundleRelease` local | yes |
-| CI signed AAB artifact (`signed-aab.yml`) | yes — needs secrets |
-| Fastlane / auto Play upload | **out of scope** for 1.1.1 — see backlog below |
+| CI signed AAB artifact (`signed-aab.yml`) | yes — `workflow_dispatch` only |
+| **CI → Play Internal** (`play-internal.yml`) | yes — after green CI on `main` when `versionCode` bumps; needs SA secret |
 
-### Later — CI upload to Play Internal (not built yet)
+### CI → Play Internal (auto)
 
-Today `signed-aab.yml` only uploads a **GitHub Actions artifact**. To publish the AAB
-straight to **Internal testing** from CI, still need:
+After **CI** succeeds on a push to **`main`**, workflow **Play Internal** builds a signed AAB and
+publishes it to the **Internal testing** track (`status: completed`) when
+`racktrack.versionCode` changed vs the parent commit.
 
-1. Google Cloud project linked to Play + **Android Publisher API** enabled
-2. Service account invited in Play Console (Users & permissions) with release rights
-   on the Internal track
-3. GitHub secret for SA JSON (or Workload Identity Federation)
-4. Workflow step after `bundleRelease` (e.g. `r0adkll/upload-google-play` or Fastlane
-   `supply`) — `packageName: com.racktrack`, `track: internal`, release notes
-   (`<fr-FR>` / `<en-US>`)
+**Also:** Actions → **Play Internal** → **Run workflow** (manual smoke; always uploads current
+`versionCode`).
 
-Prereq already met: upload keystore secrets + first manual Internal release.
-Defer until owner wants less manual Internal shipping (can wait for **1.2.0** cadence).
+**Release notes:** edit [`play/internal-release-notes.txt`](../play/internal-release-notes.txt)
+(`<fr-FR>` / `<en-US>`, ≤500 chars each) in the same PR as the `versionCode` bump. CI extracts
+`whatsnew-*` files for the Publisher API. Keep copy **track-agnostic** (no “test interne” /
+“internal test”) — the same notes promote to Closed then Production.
+
+#### Owner checklist (one-time) — service account
+
+Without secret `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON`, auto runs **skip** (CI stays green).
+Manual dispatch **fails** until the secret exists.
+
+1. **Google Cloud — API + service account**
+   1. Open [Google Cloud Console](https://console.cloud.google.com/) (same Google account as Play if possible).
+   2. Create or pick a project (e.g. `racktrack-play-ci`).
+   3. **APIs & Services → Library** → **Google Play Android Developer API** → **Enable**.
+   4. **IAM & Admin → Service accounts** → **Create service account**
+      - Name: `racktrack-play-publisher` (or similar)
+      - No GCP project roles required for Play upload (auth is via Play Console invite).
+   5. Open the SA → **Keys** → **Add key** → **Create new key** → **JSON** → download.
+   6. **Never commit** that JSON.
+
+2. **Play Console — invite the SA**
+   1. [Play Console](https://play.google.com/console) → **Users and permissions**.
+   2. **Invite new users** → SA email (`…@….iam.gserviceaccount.com` from the JSON / SA page).
+   3. App **RackTrack** (`com.racktrack`): rights to release on **Internal** (and read app if asked).
+      Prefer not granting full account Admin.
+   4. Confirm invite; wait a few minutes for propagation.
+
+3. **GitHub — secret**
+   1. Repo → **Settings → Secrets and variables → Actions**.
+   2. **New repository secret** `RACKTRACK_PLAY_SERVICE_ACCOUNT_JSON` = full JSON file contents.
+   3. Signing secrets already required (unchanged):
+      `RACKTRACK_KEYSTORE_BASE64`, `RACKTRACK_KEYSTORE_PASSWORD`,
+      `RACKTRACK_KEY_ALIAS`, `RACKTRACK_KEY_PASSWORD`.
+
+4. **Smoke test**
+   1. Actions → **Play Internal** → **Run workflow**, or merge a PR that bumps `versionCode` + notes.
+   2. Play Console → **Internal testing**: new `completed` release with that `versionCode`.
+   3. On 403: re-check SA invite + API enabled.
+
+**Order:** Enable API → Create SA + JSON → Invite in Play → Add GitHub secret → smoke.
+
+**Out of scope:** auto Closed / Production (manual only).
 
 ---
 

@@ -18,5 +18,17 @@
 -keep class com.google.android.gms.ads.** { *; }
 -keep class com.google.android.ump.** { *; }
 
+# WorkManager is pulled in by Play services / ads. Room creates WorkDatabase_Impl
+# via reflection at androidx.startup — R8 must keep the generated Impl + ctor
+# (otherwise: Unable to get provider InitializationProvider / Failed to create WorkDatabase).
+-keep class androidx.work.** { *; }
+-keep class androidx.work.impl.** { *; }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
+-keep class * extends androidx.room.RoomDatabase {
+    <init>(...);
+}
+-dontwarn androidx.work.**
+-dontwarn androidx.room.**
+
 # Local JSON history uses org.json; keep if pulled from Android SDK stubs oddly
 -dontwarn org.json.**
