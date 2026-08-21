@@ -151,14 +151,23 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
 - ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
-- ⬜ **Brand / visual identity (unified redesign)** — decide in **2.x.y** with CMP design
-  system (not a 1.2 Play-gate patch):
-  - Current launcher / Play icon (photo-real 8/9/10 balls + ✓ on felt) reads as a **pool
-    game**, feels dated (skeuomorphic), and does not carry a brand mark
-  - Prefer scoreboard / race signal (split board, numerals, stylized felt, monogram **RT**
-    or similar) — flat/modern; avoid photo balls as the hero
-  - Same pass should cover **icon + feature graphic + splash / setup** so listing and
-    in-app match; keep Play 1.2 listing as-is until then
+- ⬜ **Brand / visual identity + Design System** — **2.x.y** with CMP (not a 1.2 Play gate):
+  - **Locked art direction (2026-08-22):** **Blue Night + Cyan** — premium sport scoring,
+    modern, sober (not futuristic / casino).
+  - **Two visual worlds:**
+    - **APP** (Setup / History / Settings / chrome): uniform night-blue surfaces, light cards,
+      soft elevation, off-white text; **no felt carpet texture**.
+    - **GAME** (live Board): felt / table language — user felt tones stay a **board
+      personalization**; same accent + design principles as APP.
+  - **Accent cyan** used sparingly (selection, primary action, active). Unselected = neutral.
+  - **Avoid:** gold, casino bling, omnipresent neon, heavy textures, excess gloss, photo pool
+    balls as hero, loud gradients, borders on everything.
+  - **Brand mark:** monogram **RT** / stylized rack geometry — not photo 8-ball on START.
+  - **START MATCH** = primary visual hero on setup.
+  - Icon + feature graphic + splash aligned with the same system; keep Play 1.2 assets until then.
+  - **Before coding the system:** audit current Board (how far felt / gloss / billiard cues go)
+    then lock tokens: colors, type, radii, elevation, buttons, fields, pickers, states,
+    icons, motion. Optional light theme later — dark premium is default.
 - ⬜ Optional accounts / shared post-match stats (still **never** remote live scoring)
 - ⬜ Other game families later (e.g. English 8-Ball) — only after American multi-ruleset base
 - ⬜ Optional later (not planned): Play In-App Updates flexible nudge; Firebase Crashlytics
@@ -176,6 +185,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-22: Art direction locked with owner — **Blue Night + Cyan**; APP (no felt) vs
+  GAME (felt on board only). Design System + icon/brand in **2.x**; no UI rewrite on 1.2 gate.
 - 2026-08-20: Owner — icon/brand feedback noted; **defer unified visual redesign to 2.x.y**
   (with CMP). Keep current Play assets for 1.2 prod. No Firebase; Play crash/ANR enough.
   No in-app update overlay for now (overkill).
