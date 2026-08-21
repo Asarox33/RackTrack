@@ -1,8 +1,8 @@
 # Roadmap & TODO
 
-Overall status: ✅ **1.1.1** on GitHub · 🟨 **1.2.x** Play gate (Internal CI live · Closed
-live · **12×14 clock from 2026-08-20** · Console §E declarations ✅ · prod blocked on
-clock) · ✅ **1.2.1** code · ⬜ **2.0** on `rc/2.0.0`
+Overall status: ✅ **1.2.2** on GitHub · 🟨 **1.2.x** Play gate (Internal CI live · Closed
+live · **12×14 clock from 2026-08-20** · Console §E ✅ · prod blocked on clock) ·
+⬜ **2.0** on `rc/2.0.0` · ⬜ **Maybe 3.x+** (camera/AI parked)
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
