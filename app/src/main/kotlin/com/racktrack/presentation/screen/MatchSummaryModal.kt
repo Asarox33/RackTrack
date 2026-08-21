@@ -529,6 +529,8 @@ private fun FourteenOneInningsTable(
         )
         return
     }
+    val endWidth = 40.dp
+    val indexWidth = 28.dp
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -536,44 +538,207 @@ private fun FourteenOneInningsTable(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 4.dp),
+                .padding(horizontal = 8.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(modifier = Modifier.width(indexWidth))
+            Text(
+                text = player1Name,
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(3f),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+            Text(
+                text = player2Name,
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(3f),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "#",
                 style = MaterialTheme.typography.labelLarge,
                 color = OutlineWarm,
-                modifier = Modifier.width(36.dp),
+                modifier = Modifier.width(indexWidth),
             )
             Text(
-                text = player1Name,
+                text = "End",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.width(endWidth),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Pts",
                 style = MaterialTheme.typography.labelLarge,
                 color = OutlineWarm,
                 modifier = Modifier.weight(1f),
-                maxLines = 1,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Tot",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Tot",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Pts",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
             )
             Text(
                 text = "End",
                 style = MaterialTheme.typography.labelLarge,
                 color = OutlineWarm,
-                modifier = Modifier.width(44.dp),
-                textAlign = TextAlign.End,
+                modifier = Modifier.width(endWidth),
+                textAlign = TextAlign.Center,
             )
-            Text(
-                text = player2Name,
-                style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+        }
+        rows.forEach { row ->
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 10.dp),
-                maxLines = 1,
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Black.copy(alpha = 0.22f))
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "#${row.index}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = OutlineWarm,
+                    modifier = Modifier.width(indexWidth),
+                )
+                Text(
+                    text = row.player1?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ScoreWhite.copy(alpha = 0.55f),
+                    modifier = Modifier.width(endWidth),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+                Text(
+                    text = row.player1?.points?.toString() ?: "—",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = row.total1?.toString() ?: "—",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = ButtonDryLight,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = row.total2?.toString() ?: "—",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = ButtonDryLight,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = row.player2?.points?.toString() ?: "—",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = row.player2?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ScoreWhite.copy(alpha = 0.55f),
+                    modifier = Modifier.width(endWidth),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SoloFourteenOneInningsTable(
+    playerName: String,
+    innings: List<InningStat>,
+) {
+    val rows = MatchSummaryReport.soloInningRows(innings)
+    if (rows.isEmpty()) {
+        Text(
+            text = "No innings recorded",
+            style = MaterialTheme.typography.bodyLarge,
+            color = ScoreWhite.copy(alpha = 0.6f),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        return
+    }
+    val endWidth = 44.dp
+    val indexWidth = 36.dp
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = playerName,
+            style = MaterialTheme.typography.labelLarge,
+            color = OutlineWarm,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 2.dp),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "#",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.width(indexWidth),
             )
             Text(
                 text = "End",
                 style = MaterialTheme.typography.labelLarge,
                 color = OutlineWarm,
-                modifier = Modifier.width(44.dp),
-                textAlign = TextAlign.End,
+                modifier = Modifier.width(endWidth),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Pts",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Tot",
+                style = MaterialTheme.typography.labelLarge,
+                color = OutlineWarm,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
             )
         }
         rows.forEach { row ->
@@ -586,116 +751,31 @@ private fun FourteenOneInningsTable(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "#${row.index}",
+                    text = "#${row.inning.index}",
                     style = MaterialTheme.typography.labelLarge,
                     color = OutlineWarm,
-                    modifier = Modifier.width(36.dp),
+                    modifier = Modifier.width(indexWidth),
                 )
                 Text(
-                    text = row.player1?.points?.toString() ?: "—",
+                    text = MatchSummaryReport.inningEndLabel(row.inning.endType),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ScoreWhite.copy(alpha = 0.55f),
+                    modifier = Modifier.width(endWidth),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+                Text(
+                    text = row.inning.points.toString(),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Center,
                 )
                 Text(
-                    text = row.player1?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
-                    modifier = Modifier.width(44.dp),
-                    textAlign = TextAlign.End,
-                )
-                Text(
-                    text = row.player2?.points?.toString() ?: "—",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp),
-                    textAlign = TextAlign.End,
-                )
-                Text(
-                    text = row.player2?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
-                    modifier = Modifier.width(44.dp),
-                    textAlign = TextAlign.End,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SoloFourteenOneInningsTable(
-    playerName: String,
-    innings: List<InningStat>,
-) {
-    if (innings.isEmpty()) {
-        Text(
-            text = "No innings recorded",
-            style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.6f),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        return
-    }
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "#",
-                style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
-                modifier = Modifier.width(36.dp),
-            )
-            Text(
-                text = playerName,
-                style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-            )
-            Text(
-                text = "End",
-                style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
-                modifier = Modifier.width(44.dp),
-                textAlign = TextAlign.End,
-            )
-        }
-        innings.forEach { inning ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Black.copy(alpha = 0.22f))
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "#${inning.index}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = OutlineWarm,
-                    modifier = Modifier.width(36.dp),
-                )
-                Text(
-                    text = inning.points.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = row.total.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = ButtonDryLight,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.End,
-                )
-                Text(
-                    text = MatchSummaryReport.inningEndLabel(inning.endType),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
-                    modifier = Modifier.width(44.dp),
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Center,
                 )
             }
         }

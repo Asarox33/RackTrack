@@ -6,6 +6,14 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.2.2 — 2026-08-21
+
+### Improvements
+
+- **14/1 innings table** (match summary + PDF) — two-row header with player names, then
+  `# | End | Pts | Tot | Tot | Pts | End` so cumulative scores sit in the center. Solo
+  training uses `# | End | Pts | Tot`.
+
 ## 1.2.1 — 2026-08-19
 
 ### Features

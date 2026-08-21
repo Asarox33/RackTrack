@@ -272,8 +272,9 @@ object MatchSummaryPdfWriter {
             val name1 = truncateHeaderName(summary.player1Name)
             val name2 = truncateHeaderName(summary.player2Name)
             val weights = INNINGS_WEIGHTS
+            drawInningsNameHeader(name1, name2, weights)
             drawTableHeader(
-                cells = listOf("#", name1, "End", name2, "End"),
+                cells = listOf("#", "End", "Pts", "Tot", "Tot", "Pts", "End"),
                 weights = weights,
                 separatorAfterColumns = INNINGS_SEPARATOR_AFTER,
             )
@@ -282,8 +283,10 @@ object MatchSummaryPdfWriter {
                 drawTableRow(
                     cells = listOf(
                         "#${row.index}",
-                        row.player1?.points?.toString() ?: "—",
                         row.player1?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
+                        row.player1?.points?.toString() ?: "—",
+                        row.total1?.toString() ?: "—",
+                        row.total2?.toString() ?: "—",
                         row.player2?.points?.toString() ?: "—",
                         row.player2?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
                     ),
@@ -295,8 +298,8 @@ object MatchSummaryPdfWriter {
         }
 
         private fun drawSoloInningsTable(summary: MatchSummary) {
-            val innings = summary.inningScores1
-            if (innings.isEmpty()) {
+            val rows = MatchSummaryReport.soloInningRows(summary.inningScores1)
+            if (rows.isEmpty()) {
                 ensureSpace(20f)
                 canvas!!.drawText("No innings recorded", MARGIN_LEFT, y, mutedPaint)
                 y += 16f
@@ -304,24 +307,59 @@ object MatchSummaryPdfWriter {
             }
             val name = truncateHeaderName(summary.player1Name)
             val weights = SOLO_INNINGS_WEIGHTS
+            ensureSpace(ROW_HEIGHT + 4f)
+            val c = canvas!!
+            val top = y
+            c.drawRect(MARGIN_LEFT, top, MARGIN_LEFT + CONTENT_WIDTH, top + ROW_HEIGHT, paint(theme.feltMid))
+            val namePaint = paint(theme.onFelt, 10f, bold = true)
+            val nameWidth = namePaint.measureText(name)
+            c.drawText(
+                name,
+                MARGIN_LEFT + (CONTENT_WIDTH - nameWidth) / 2f,
+                top + 15f,
+                namePaint,
+            )
+            y = top + ROW_HEIGHT
             drawTableHeader(
-                cells = listOf("#", name, "End"),
+                cells = listOf("#", "End", "Pts", "Tot"),
                 weights = weights,
                 separatorAfterColumns = SOLO_INNINGS_SEPARATOR_AFTER,
             )
-            innings.forEachIndexed { index, inning ->
+            rows.forEachIndexed { index, row ->
                 ensureSpace(ROW_HEIGHT + 4f)
                 drawTableRow(
                     cells = listOf(
-                        "#${inning.index}",
-                        inning.points.toString(),
-                        MatchSummaryReport.inningEndLabel(inning.endType),
+                        "#${row.inning.index}",
+                        MatchSummaryReport.inningEndLabel(row.inning.endType),
+                        row.inning.points.toString(),
+                        row.total.toString(),
                     ),
                     weights = weights,
                     alt = index % 2 == 1,
                     separatorAfterColumns = SOLO_INNINGS_SEPARATOR_AFTER,
                 )
             }
+        }
+
+        /** First header row: player names spanning End|Pts|Tot on each side. */
+        private fun drawInningsNameHeader(name1: String, name2: String, weights: FloatArray) {
+            ensureSpace(ROW_HEIGHT + 4f)
+            val c = canvas!!
+            val top = y
+            c.drawRect(MARGIN_LEFT, top, MARGIN_LEFT + CONTENT_WIDTH, top + ROW_HEIGHT, paint(theme.feltMid))
+            val namePaint = paint(theme.onFelt, 10f, bold = true)
+            val indexW = CONTENT_WIDTH * weights[0]
+            val leftW = CONTENT_WIDTH * (weights[1] + weights[2] + weights[3])
+            val rightW = CONTENT_WIDTH * (weights[4] + weights[5] + weights[6])
+            val leftStart = MARGIN_LEFT + indexW
+            val rightStart = leftStart + leftW
+            val n1w = namePaint.measureText(name1)
+            val n2w = namePaint.measureText(name2)
+            c.drawText(name1, leftStart + (leftW - n1w) / 2f, top + 15f, namePaint)
+            c.drawText(name2, rightStart + (rightW - n2w) / 2f, top + 15f, namePaint)
+            // Separator under # and between the two player blocks
+            drawColumnSeparators(top, ROW_HEIGHT, weights, intArrayOf(0, 3), header = true)
+            y = top + ROW_HEIGHT
         }
 
         private fun truncateHeaderName(name: String): String {
@@ -486,9 +524,10 @@ object MatchSummaryPdfWriter {
     private const val ROW_HEIGHT = 22f
     private const val DEFAULT_ACCENT = 0xFF1B9A4A.toInt()
     private const val INNINGS_NAME_MAX = 12
-    private val INNINGS_WEIGHTS = floatArrayOf(0.10f, 0.22f, 0.18f, 0.22f, 0.28f)
-    /** After `#` and after player-1 End (columns 0 and 2). */
-    private val INNINGS_SEPARATOR_AFTER = intArrayOf(0, 2)
-    private val SOLO_INNINGS_WEIGHTS = floatArrayOf(0.12f, 0.58f, 0.30f)
+    /** `# | End | Pts | Tot | Tot | Pts | End` — totals centered. */
+    private val INNINGS_WEIGHTS = floatArrayOf(0.10f, 0.14f, 0.14f, 0.17f, 0.17f, 0.14f, 0.14f)
+    /** After `#` and between the two Tot columns (columns 0 and 3). */
+    private val INNINGS_SEPARATOR_AFTER = intArrayOf(0, 3)
+    private val SOLO_INNINGS_WEIGHTS = floatArrayOf(0.12f, 0.22f, 0.28f, 0.38f)
     private val SOLO_INNINGS_SEPARATOR_AFTER = intArrayOf(0)
 }
