@@ -124,12 +124,10 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
   interstitial unit + version bump
 - ✅ Play crash diagnostics: **R8** + mapping confirmed on App bundle explorer (Internal
   **1.2.1**); native symbols intentionally empty (pre-stripped deps — see `08`)
-- ⬜ Closed clock complete → **production** for strangers
-
-### Later on 1.x (optional, after Play launch)
 - ✅ **CI → Play Internal upload** (`play-internal.yml` after green CI on `main` when
   `versionCode` bumps; SA secret live; smoke **102015** 2026-08-20; notes in
   `play/internal-release-notes.txt`) — see `08`
+- ⬜ Closed clock complete → **production** for strangers
 
 ## On `rc/2.0.0` — next product generation (not on 1.x Play launch)
 
@@ -191,6 +189,8 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-22: Doc — removed empty **Later on 1.x**; CI Play Internal ✅ re-homed under
+  **1.2.0** Play gate (accounts → 2.x, camera → Maybe 3.x+).
 - 2026-08-22: Owner — Accounts / find players + shared post-match stats → **2.x** train
   (removed from 1.x optional); still never remote live scoring.
 - 2026-08-22: Owner — Camera / AI ball detection **off 1.x backlog**; parked under
