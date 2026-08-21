@@ -7,6 +7,14 @@ data class PairedInningRow(
     val index: Int,
     val player1: InningStat?,
     val player2: InningStat?,
+    /** Running total after this inning index (null until that player’s first visit). */
+    val total1: Int?,
+    val total2: Int?,
+)
+
+data class SoloInningRow(
+    val inning: InningStat,
+    val total: Int,
 )
 
 /** Shared copy/helpers for match summary UI and PDF export. */
@@ -89,7 +97,8 @@ object MatchSummaryReport {
 
     /**
      * One row per inning index for both players (14/1 score sheet style).
-     * Missing side shows as null (render as —).
+     * Column order for UI/PDF: `# | End | Pts | Tot | Tot | Pts | End`
+     * (player 1 left of center, player 2 right). Missing visit → null / —.
      */
     fun pairedInningRows(
         innings1: List<InningStat>,
@@ -102,12 +111,37 @@ object MatchSummaryReport {
             byIndex2.keys.maxOrNull() ?: 0,
         )
         if (maxIndex <= 0) return emptyList()
+        var run1 = 0
+        var run2 = 0
+        var seen1 = false
+        var seen2 = false
         return (1..maxIndex).map { index ->
+            val p1 = byIndex1[index]
+            val p2 = byIndex2[index]
+            if (p1 != null) {
+                run1 += p1.points
+                seen1 = true
+            }
+            if (p2 != null) {
+                run2 += p2.points
+                seen2 = true
+            }
             PairedInningRow(
                 index = index,
-                player1 = byIndex1[index],
-                player2 = byIndex2[index],
+                player1 = p1,
+                player2 = p2,
+                total1 = if (seen1) run1 else null,
+                total2 = if (seen2) run2 else null,
             )
+        }
+    }
+
+    /** Solo 14/1 rows: `# | End | Pts | Tot`. */
+    fun soloInningRows(innings: List<InningStat>): List<SoloInningRow> {
+        var run = 0
+        return innings.sortedBy { it.index }.map { inning ->
+            run += inning.points
+            SoloInningRow(inning = inning, total = run)
         }
     }
 
@@ -198,24 +232,23 @@ object MatchSummaryReport {
             if (summary.gameMode.isPointScoring) {
                 add("INNINGS")
                 if (summary.solo) {
-                    add("#  ${summary.player1Name}  End")
-                    summary.inningScores1.forEach { inning ->
+                    add("#  End  Pts  Tot")
+                    soloInningRows(summary.inningScores1).forEach { row ->
                         add(
-                            "#${inning.index}  ${inning.points}  ${inningEndLabel(inning.endType)}",
+                            "#${row.inning.index}  ${inningEndLabel(row.inning.endType)}  " +
+                                "${row.inning.points}  ${row.total}",
                         )
                     }
                 } else {
-                    add(
-                        "#  ${summary.player1Name}  End  ${summary.player2Name}  End",
-                    )
+                    add("#  End  Pts  Tot  Tot  Pts  End")
                     pairedInningRows(summary.inningScores1, summary.inningScores2).forEach { row ->
-                        val p1 = row.player1?.let {
-                            "${it.points}  ${inningEndLabel(it.endType)}"
-                        } ?: "—  —"
-                        val p2 = row.player2?.let {
-                            "${it.points}  ${inningEndLabel(it.endType)}"
-                        } ?: "—  —"
-                        add("#${row.index}  $p1  $p2")
+                        val end1 = row.player1?.let { inningEndLabel(it.endType) } ?: "—"
+                        val pts1 = row.player1?.points?.toString() ?: "—"
+                        val tot1 = row.total1?.toString() ?: "—"
+                        val tot2 = row.total2?.toString() ?: "—"
+                        val pts2 = row.player2?.points?.toString() ?: "—"
+                        val end2 = row.player2?.let { inningEndLabel(it.endType) } ?: "—"
+                        add("#${row.index}  $end1  $pts1  $tot1  $tot2  $pts2  $end2")
                     }
                 }
             } else {

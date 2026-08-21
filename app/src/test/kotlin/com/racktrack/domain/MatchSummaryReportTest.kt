@@ -109,8 +109,9 @@ class MatchSummaryReportTest {
         )
         val text = MatchSummaryReport.lines(summary).joinToString("\n")
         assertTrue(text.contains("INNINGS"))
-        assertTrue(text.contains("#1  14  pass  100  win"))
-        assertTrue(text.contains("#2  6  foul  —  —"))
+        assertTrue(text.contains("#  End  Pts  Tot  Tot  Pts  End"))
+        assertTrue(text.contains("#1  pass  14  14  100  100  win"))
+        assertTrue(text.contains("#2  foul  6  20  100  —  —"))
         val paired = MatchSummaryReport.pairedInningRows(
             summary.inningScores1,
             summary.inningScores2,
@@ -118,6 +119,10 @@ class MatchSummaryReportTest {
         assertTrue(paired.size == 2)
         assertTrue(paired[0].player1?.points == 14)
         assertTrue(paired[0].player2?.points == 100)
+        assertEquals(14, paired[0].total1)
+        assertEquals(100, paired[0].total2)
+        assertEquals(20, paired[1].total1)
+        assertEquals(100, paired[1].total2)
         assertTrue(paired[1].player2 == null)
     }
 
@@ -168,8 +173,11 @@ class MatchSummaryReportTest {
         assertTrue(!MatchSummaryReport.fileStem(summary).contains("_vs_"))
         val text = MatchSummaryReport.lines(summary).joinToString("\n")
         assertTrue(text.startsWith("TRAINING SUMMARY"))
-        assertTrue(text.contains("#  Alex  End"))
+        assertTrue(text.contains("#  End  Pts  Tot"))
         assertTrue(!text.contains("SAM"))
-        assertTrue(text.contains("#1  20  pass"))
+        assertTrue(text.contains("#1  pass  20  20"))
+        assertTrue(text.contains("#2  win  30  50"))
+        val soloRows = MatchSummaryReport.soloInningRows(summary.inningScores1)
+        assertEquals(listOf(20, 50), soloRows.map { it.total })
     }
 }
