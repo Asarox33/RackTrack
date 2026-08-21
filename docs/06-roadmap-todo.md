@@ -130,7 +130,6 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
 - ✅ **CI → Play Internal upload** (`play-internal.yml` after green CI on `main` when
   `versionCode` bumps; SA secret live; smoke **102015** 2026-08-20; notes in
   `play/internal-release-notes.txt`) — see `08`
-- ⬜ Camera / AI ball detection — only if product revisits automatic scoring
 - ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
   (may slip to 2.0 if paired with identity)
 
@@ -173,9 +172,17 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ⬜ Optional later (not planned): Play In-App Updates flexible nudge; Firebase Crashlytics
   if Play Console volume is not enough — **not** for 1.2 gate
 
+## Maybe 3.x+ (parked — not on 1.x / 2.0 path)
+
+Only reopen with an explicit owner decision. Not a near-term train.
+
+- ⬜ **Camera / AI ball detection** — prerequisite for automatic shot scoring; also unlocks
+  any deep FFB call/pocket referee UI (today Explicitly dropped as useless without it)
+
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket)~~ — useless without camera auto-detection
   (push-out scoreboard tree for 9/10 is **in product** — see progress notes)
+  · camera/AI itself parked under **Maybe 3.x+**, not 1.x/2.0
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
 - ~~PNG share of match summary~~ — PDF only
 - ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
@@ -185,6 +192,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-22: Owner — Camera / AI ball detection **off 1.x backlog**; parked under
+  **Maybe 3.x+** (not on 2.0 path). Product out-of-scope in `01` / `03` unchanged.
 - 2026-08-22: Art direction locked with owner — **Blue Night + Cyan**; APP (no felt) vs
   GAME (felt on board only). Design System + icon/brand in **2.x**; no UI rewrite on 1.2 gate.
 - 2026-08-20: Owner — icon/brand feedback noted; **defer unified visual redesign to 2.x.y**

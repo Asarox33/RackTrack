@@ -14,6 +14,7 @@ Canonical backlog detail: [`06-roadmap-todo.md`](06-roadmap-todo.md).
 | **1.2.0** | **First open / production Play** for strangers | Monetization (`09-monetization.md`) + upload keystore + privacy/Data safety for ads + R8 mapping + native debug symbols |
 | **1.2.x** | Play hotfixes after launch | Crash / store-review fixes only (no new optional feature trains planned) |
 | **2.0.0** on `rc/2.0.0` | Merge to `main` only when ready | i18n, multi-ruleset, KMP/CMP/iOS, **Blue Night + Cyan** brand/DS (APP vs GAME), optional accounts |
+| **3.x+** (maybe) | Not scheduled | Camera / AI ball detection — only if owner reopens (`06` Maybe 3.x+) |
 
 ```text
 main (1.x patchable)
