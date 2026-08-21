@@ -130,8 +130,6 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
 - ✅ **CI → Play Internal upload** (`play-internal.yml` after green CI on `main` when
   `versionCode` bumps; SA secret live; smoke **102015** 2026-08-20; notes in
   `play/internal-release-notes.txt`) — see `08`
-- ⬜ Accounts / find players + shared post-match stats — **never** remote live scoring
-  (may slip to 2.0 if paired with identity)
 
 ## On `rc/2.0.0` — next product generation (not on 1.x Play launch)
 
@@ -167,7 +165,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   - **Before coding the system:** audit current Board (how far felt / gloss / billiard cues go)
     then lock tokens: colors, type, radii, elevation, buttons, fields, pickers, states,
     icons, motion. Optional light theme later — dark premium is default.
-- ⬜ Optional accounts / shared post-match stats (still **never** remote live scoring)
+- ⬜ **Accounts / find players + shared post-match stats** — **2.x** (with identity if needed);
+  still **never** remote live scoring (one device scores the match)
 - ⬜ Other game families later (e.g. English 8-Ball) — only after American multi-ruleset base
 - ⬜ Optional later (not planned): Play In-App Updates flexible nudge; Firebase Crashlytics
   if Play Console volume is not enough — **not** for 1.2 gate
@@ -192,6 +191,8 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-22: Owner — Accounts / find players + shared post-match stats → **2.x** train
+  (removed from 1.x optional); still never remote live scoring.
 - 2026-08-22: Owner — Camera / AI ball detection **off 1.x backlog**; parked under
   **Maybe 3.x+** (not on 2.0 path). Product out-of-scope in `01` / `03` unchanged.
 - 2026-08-22: Art direction locked with owner — **Blue Night + Cyan**; APP (no felt) vs
