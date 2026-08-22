@@ -137,19 +137,18 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ### Suggested build order (do in sequence)
 
-1. 🟨 **Design System + APP chrome** — Blue Night + Cyan tokens (`AppChrome`); Setup /
-   History / Settings use flat night surfaces (no felt carpet). Board still felt.
-2. ⬜ **GAME board polish** — keep felt personalization; align accents / controls with DS
-   without turning APP into a table.
-3. ⬜ **Brand assets** — RT / rack mark; icon + feature graphic + splash aligned with DS.
-4. ⬜ **KMP + Compose Multiplatform scaffold** — shared domain (+ UI where practical);
+1. 🟨 **Design System (one world + 3 themes)** — Blue glossy / Light clean / Dark neon;
+   no felt carpet identity. Tokens in `AppThemeMode`; Settings appearance picker live.
+   Refine controls + light-theme contrast on board next.
+2. ⬜ **Brand assets** — RT / rack mark; icon + feature graphic + splash aligned with DS.
+3. ⬜ **KMP + Compose Multiplatform scaffold** — shared domain (+ UI where practical);
    unlock shared string catalogs for Android (+ iOS later).
-5. ⬜ **i18n** — en default + fr/de/es/it/nl/pt (extract UI / summary / PDF with CMP).
-6. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
+4. ⬜ **i18n** — en default + fr/de/es/it/nl/pt (extract UI / summary / PDF with CMP).
+5. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
    scoreboard-relevant deltas only.
-7. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
-8. ⬜ Other game families (e.g. English 8-Ball) — only after American multi-ruleset base.
-9. ⬜ Optional later: Play In-App Updates flexible; Crashlytics if Play vitals insufficient.
+6. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
+7. ⬜ Other game families (e.g. English 8-Ball) — only after American multi-ruleset base.
+8. ⬜ Optional later: Play In-App Updates flexible; Crashlytics if Play vitals insufficient.
 
 ### Detail (same items)
 
@@ -165,23 +164,17 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
 - ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
-- ⬜ **Brand / visual identity + Design System** — **2.x.y** with CMP (not a 1.2 Play gate):
-  - **Locked art direction (2026-08-22):** **Blue Night + Cyan** — premium sport scoring,
-    modern, sober (not futuristic / casino).
-  - **Two visual worlds:**
-    - **APP** (Setup / History / Settings / chrome): uniform night-blue surfaces, light cards,
-      soft elevation, off-white text; **no felt carpet texture**.
-    - **GAME** (live Board): felt / table language — user felt tones stay a **board
-      personalization**; same accent + design principles as APP.
-  - **Accent cyan** used sparingly (selection, primary action, active). Unselected = neutral.
-  - **Avoid:** gold, casino bling, omnipresent neon, heavy textures, excess gloss, photo pool
-    balls as hero, loud gradients, borders on everything.
-  - **Brand mark:** monogram **RT** / stylized rack geometry — not photo 8-ball on START.
+- ⬜ **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
+  - **Locked (2026-08-22, revised):** **one visual world** for the whole app (Setup,
+    History, Settings, Board, modals). No APP/GAME split; no felt carpet as identity.
+  - **Three themes** (`AppThemeMode`): **Blue glossy** (Blue Night + cyan), **Light clean**
+    (teal accents), **Dark neon** (teal neon, use sparingly). User picks in Settings.
+  - Accent used sparingly (selection / primary CTA). Unselected = neutral.
+  - **Avoid:** gold, casino bling, omnipresent neon, heavy textures, photo balls as hero,
+    borders on everything, cloth-as-chrome.
+  - **Brand mark:** monogram **RT** / stylized rack — not photo 8-ball on START.
   - **START MATCH** = primary visual hero on setup.
-  - Icon + feature graphic + splash aligned with the same system; keep Play 1.2 assets until then.
-  - **Before coding the system:** audit current Board (how far felt / gloss / billiard cues go)
-    then lock tokens: colors, type, radii, elevation, buttons, fields, pickers, states,
-    icons, motion. Optional light theme later — dark premium is default.
+  - Icon + feature graphic + splash with the same system; Play 1.2 assets until then.
 - ⬜ **Accounts / find players + shared post-match stats** — **2.x** (with identity if needed);
   still **never** remote live scoring (one device scores the match)
 - ⬜ Other game families later (e.g. English 8-Ball) — only after American multi-ruleset base
@@ -208,12 +201,13 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
-- 2026-08-22: **2.0 DS step 1 started** on `rc/2.0.0` — `AppChrome` (Blue Night + Cyan)
-  tokens + `AppChromeBackground`; Setup / History / Settings off felt carpet; board still
-  `FeltBackground`. Cloth swatches labeled as board-only. Next: refine APP controls /
-  GAME board audit polish.
+- 2026-08-22: Owner — drop APP/GAME two-worlds; **one world + 3 themes** (Blue glossy /
+  Light clean / Dark neon). Felt cloth settings removed; `AppThemeMode` in Settings.
+  Board uses `AppThemeBackground`. Refine light-theme contrast next.
+- 2026-08-22: **2.0 DS step 1 started** on `rc/2.0.0` — `AppChrome` then evolved to
+  full `AppThemeMode` (see above).
 - 2026-08-22: Owner — branch **`rc/2.0.0`** opened from `main` @ 1.2.2 while Closed 12×14
-  runs. Build order: DS/APP → GAME → brand → KMP/CMP → i18n → multi-ruleset → accounts.
+  runs. Build order: DS → brand → KMP/CMP → i18n → multi-ruleset → accounts.
   Merge to `main` only after Play production + train ready. Hotfixes 1.2 stay on `main`.
 - 2026-08-22: Doc — removed empty **Later on 1.x**; CI Play Internal ✅ re-homed under
   **1.2.0** Play gate (accounts → 2.x, camera → Maybe 3.x+).

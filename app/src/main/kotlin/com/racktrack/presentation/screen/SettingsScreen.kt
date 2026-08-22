@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.BuildConfig
-import com.racktrack.appearance.FeltTone
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
@@ -49,12 +48,11 @@ import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
+import com.racktrack.presentation.theme.AppThemeBackground
+import com.racktrack.presentation.theme.AppThemeMode
+import com.racktrack.presentation.theme.LocalAppTheme
 import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.AppChromeBackground
-import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.ScoreWhite
-import com.racktrack.presentation.theme.AppChromeBackground
-import com.racktrack.presentation.theme.LocalAppChrome
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,7 +64,7 @@ fun SettingsScreen(
     adsRemoved: Boolean = false,
     onRemoveAds: () -> Unit = {},
     onRestorePurchases: () -> Unit = {},
-    onFeltSelected: (FeltTone) -> Unit,
+    onThemeSelected: (AppThemeMode) -> Unit,
     onKeepScreenOnChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
     onDefaultRacksChange: (Int) -> Unit,
@@ -77,12 +75,12 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val chrome = LocalAppChrome.current
+    val chrome = LocalAppTheme.current
     val scrollState = rememberScrollState()
 
     BackHandler(onBack = onBack)
 
-    AppChromeBackground(modifier = modifier) {
+    AppThemeBackground(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,43 +96,42 @@ fun SettingsScreen(
             Text(
                 text = "SETTINGS",
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = chrome.textPrimary,
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel("Board cloth")
+            SectionLabel("Appearance")
             Text(
-                text = "Live match table only — not the app chrome",
+                text = "One look for Setup, board, and modals",
                 style = MaterialTheme.typography.bodyLarge,
                 color = chrome.textSecondary,
-                modifier = Modifier.padding(bottom = 4.dp),
+                modifier = Modifier.padding(bottom = 8.dp),
             )
-            Spacer(modifier = Modifier.height(10.dp))
-            Column(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(SWATCH_ROW_GAP),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                FeltTone.entries.chunked(SWATCHES_PER_ROW).forEach { rowTones ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(SWATCH_GAP),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        rowTones.forEach { tone ->
-                            FeltSwatch(
-                                tone = tone,
-                                selected = tone == settings.feltTone,
-                                onClick = { onFeltSelected(tone) },
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                        // Keep columns aligned when the last row is short.
-                        repeat(SWATCHES_PER_ROW - rowTones.size) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
+                AppThemeMode.entries.forEach { mode ->
+                    TexturedChip(
+                        label = mode.shortLabel.uppercase(),
+                        selected = mode == settings.themeMode,
+                        onClick = { onThemeSelected(mode) },
+                        modifier = Modifier.weight(1f),
+                        selectedLight = mode.palette.accentLight,
+                        selectedDark = mode.palette.accentDark,
+                        idleLight = chrome.surfaceElevated,
+                        idleDark = chrome.surfaceDeep,
+                        height = 48.dp,
+                        useFeltGrain = false,
+                    )
                 }
             }
+            Text(
+                text = settings.themeMode.label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = chrome.textSecondary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionLabel("Device")
@@ -314,7 +311,7 @@ fun SettingsScreen(
 
 @Composable
 private fun AboutPanel(onOpenRepo: () -> Unit) {
-    val chrome = LocalAppChrome.current
+    val chrome = LocalAppTheme.current
     val buildKind = if (BuildConfig.DEBUG) "debug" else "release"
     val builtAt = remember {
         SimpleDateFormat("yyyy-MM-dd HH:mm 'UTC'", Locale.US).apply {
@@ -381,10 +378,11 @@ private fun AboutMetaRow(label: String, value: String) {
 
 @Composable
 private fun SectionLabel(text: String) {
+    val chrome = LocalAppTheme.current
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
-        color = OutlineWarm,
+        color = chrome.textSecondary,
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -408,7 +406,7 @@ private fun SettingsToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    val chrome = LocalAppChrome.current
+    val chrome = LocalAppTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -436,53 +434,6 @@ private fun SettingsToggleRow(
     }
 }
 
-@Composable
-private fun FeltSwatch(
-    tone: FeltTone,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick,
-        ),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(SWATCH_CIRCLE)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        listOf(tone.palette.light, tone.palette.base, tone.palette.dark),
-                    ),
-                )
-                .border(
-                    width = if (selected) 3.dp else 1.5.dp,
-                    color = if (selected) ScoreWhite else OutlineWarm.copy(alpha = 0.45f),
-                    shape = CircleShape,
-                ),
-        )
-        Text(
-            text = tone.label,
-            style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
-            color = if (selected) ScoreWhite else ScoreWhite.copy(alpha = 0.65f),
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
 const val FFB_RULES_URL = "https://m.ffbillard.com/ext/telechargement.php?id=32249"
 
-private const val SWATCHES_PER_ROW = 3
-private val SWATCH_CIRCLE = 40.dp
-private val SWATCH_GAP = 8.dp
-private val SWATCH_ROW_GAP = 12.dp
 

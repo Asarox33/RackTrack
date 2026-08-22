@@ -3,7 +3,7 @@ package com.racktrack.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.racktrack.appearance.FeltTone
+import com.racktrack.presentation.theme.AppThemeMode
 import com.racktrack.data.AppPreferences
 import com.racktrack.data.JsonMatchHistoryStore
 import com.racktrack.data.MatchHistoryFilter
@@ -104,7 +104,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleMatchPause() = coordinator.toggleMatchPause()
 
-    fun setFeltTone(tone: FeltTone) = coordinator.setFeltTone(tone)
+    fun setThemeMode(mode: AppThemeMode) = coordinator.setThemeMode(mode)
 
     fun setKeepScreenOn(enabled: Boolean) = coordinator.setKeepScreenOn(enabled)
 

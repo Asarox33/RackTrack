@@ -40,6 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.racktrack.presentation.theme.AppThemeBackground
+import com.racktrack.presentation.theme.LocalAppTheme
 import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.domain.MatchEngine
 import com.racktrack.domain.MatchStats
@@ -110,10 +112,11 @@ fun MatchBoardScreen(
 ) {
     val landscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val theme = LocalAppTheme.current
     val felt = LocalFeltPalette.current
     val playEnabled = match.status == MatchStatus.IN_PROGRESS && !matchPaused
 
-    FeltBackground(modifier = modifier) {
+    AppThemeBackground(modifier = modifier) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val screenW = maxWidth
             val screenH = maxHeight
@@ -140,7 +143,7 @@ fun MatchBoardScreen(
                         "${match.gameMode.shortLabel()}  ·  RACE TO ${match.racksToWin}"
                     },
                     style = MaterialTheme.typography.titleLarge,
-                    color = felt.accentLight,
+                    color = theme.accentLight,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = chrome.headerSideReserve),

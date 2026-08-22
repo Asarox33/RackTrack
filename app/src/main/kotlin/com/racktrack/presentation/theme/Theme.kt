@@ -1,8 +1,9 @@
 package com.racktrack.presentation.theme
 
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
@@ -12,7 +13,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.racktrack.R
-import com.racktrack.appearance.FeltTone
 import com.racktrack.appearance.LocalFeltPalette
 
 val ScoreWhite = Color(0xFFF2F5F0)
@@ -57,59 +57,71 @@ private val RackTrackTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 104.sp,
         letterSpacing = 2.sp,
-        color = ScoreWhite,
     ),
     headlineLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.Bold,
         fontSize = 34.sp,
         letterSpacing = 1.sp,
-        color = ScoreWhite,
     ),
     titleLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         letterSpacing = 1.5.sp,
-        color = ScoreWhite,
     ),
     labelLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.Bold,
         fontSize = 17.sp,
         letterSpacing = 1.2.sp,
-        color = ScoreWhite,
     ),
     bodyLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         letterSpacing = 0.6.sp,
-        color = ScoreWhite,
     ),
 )
 
 @Composable
 fun RackTrackTheme(
-    feltTone: FeltTone = FeltTone.FOREST,
+    themeMode: AppThemeMode = AppThemeMode.BLUE_GLOSSY,
     hapticsEnabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val felt = feltTone.palette
-    val colors = darkColorScheme(
-        primary = felt.accent,
-        onPrimary = ScoreWhite,
-        secondary = felt.light,
-        onSecondary = ScoreWhite,
-        background = felt.base,
-        onBackground = ScoreWhite,
-        surface = felt.dark,
-        onSurface = ScoreWhite,
-        error = ButtonFoul,
-        onError = ScoreWhite,
-    )
+    val theme = themeMode.palette
+    val onPrimary = if (theme.isDark) ScoreWhite else Color(0xFFFFFFFF)
+    val colors = if (theme.isDark) {
+        darkColorScheme(
+            primary = theme.accent,
+            onPrimary = onPrimary,
+            secondary = theme.surfaceElevated,
+            onSecondary = theme.textPrimary,
+            background = theme.background,
+            onBackground = theme.textPrimary,
+            surface = theme.surface,
+            onSurface = theme.textPrimary,
+            error = ButtonFoul,
+            onError = ScoreWhite,
+        )
+    } else {
+        lightColorScheme(
+            primary = theme.accent,
+            onPrimary = onPrimary,
+            secondary = theme.surfaceDeep,
+            onSecondary = theme.textPrimary,
+            background = theme.background,
+            onBackground = theme.textPrimary,
+            surface = theme.surface,
+            onSurface = theme.textPrimary,
+            error = ButtonFoul,
+            onError = ScoreWhite,
+        )
+    }
     CompositionLocalProvider(
-        LocalFeltPalette provides felt,
+        LocalAppTheme provides theme,
+        LocalFeltPalette provides theme.asFeltPalette(),
         LocalHapticsEnabled provides hapticsEnabled,
     ) {
         MaterialTheme(

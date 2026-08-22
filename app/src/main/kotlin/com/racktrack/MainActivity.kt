@@ -20,7 +20,6 @@ import com.racktrack.presentation.screen.HistoryScreen
 import com.racktrack.presentation.screen.MatchBoardScreen
 import com.racktrack.presentation.screen.SettingsScreen
 import com.racktrack.presentation.screen.SetupScreen
-import com.racktrack.presentation.theme.AppChromeTheme
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.viewmodel.AppScreen
 import com.racktrack.presentation.viewmodel.MatchViewModel
@@ -60,7 +59,7 @@ class MainActivity : ComponentActivity() {
             }
 
             RackTrackTheme(
-                feltTone = settings.feltTone,
+                themeMode = settings.themeMode,
                 hapticsEnabled = settings.hapticsEnabled,
             ) {
                 val screen by viewModel.screen.collectAsStateWithLifecycle()
@@ -73,8 +72,7 @@ class MainActivity : ComponentActivity() {
                         LaunchedEffect(Unit) {
                             monetization.onSetupVisible()
                         }
-                        AppChromeTheme {
-                            SetupScreen(
+                        SetupScreen(
                                 state = setup,
                                 onPlayer1Change = viewModel::updatePlayer1Name,
                                 onPlayer2Change = viewModel::updatePlayer2Name,
@@ -93,7 +91,6 @@ class MainActivity : ComponentActivity() {
                                 onOpenHistory = viewModel::openHistory,
                                 onOpenSettings = viewModel::openSettings,
                             )
-                        }
                     }
                     is AppScreen.MatchBoard -> {
                         val matchPaused by viewModel.matchPaused.collectAsStateWithLifecycle()
@@ -123,38 +120,32 @@ class MainActivity : ComponentActivity() {
                             onTogglePause = viewModel::toggleMatchPause,
                         )
                     }
-                    AppScreen.History -> AppChromeTheme {
-                        HistoryScreen(
-                            state = history,
-                            onPlayerFilter1Change = viewModel::setHistoryPlayerFilter1,
-                            onPlayerFilter2Change = viewModel::setHistoryPlayerFilter2,
-                            onOpenMatch = viewModel::openHistoryDetail,
-                            onDeleteMatch = viewModel::deleteHistoryMatch,
-                            onBack = viewModel::closeHistory,
-                        )
-                    }
-                    is AppScreen.HistoryDetail -> AppChromeTheme {
-                        HistoryDetailScreen(
-                            match = selectedHistory,
-                            onBack = viewModel::closeHistoryDetail,
-                        )
-                    }
-                    AppScreen.Settings -> AppChromeTheme {
-                        SettingsScreen(
-                            settings = settings,
-                            adsRemoved = adsRemoved,
-                            onRemoveAds = { monetization.launchRemoveAdsPurchase(this@MainActivity) },
-                            onRestorePurchases = { monetization.restorePurchases() },
-                            onFeltSelected = viewModel::setFeltTone,
-                            onKeepScreenOnChange = viewModel::setKeepScreenOn,
-                            onHapticsChange = viewModel::setHapticsEnabled,
-                            onDefaultRacksChange = viewModel::setDefaultRacksToWin,
-                            onDefaultPointsChange = viewModel::setDefaultPointsToWin,
-                            onDefaultInningsChange = viewModel::setDefaultInningsLimit,
-                            onDefaultBreakRuleChange = viewModel::setDefaultBreakRule,
-                            onBack = viewModel::closeSettings,
-                        )
-                    }
+                    AppScreen.History -> HistoryScreen(
+                        state = history,
+                        onPlayerFilter1Change = viewModel::setHistoryPlayerFilter1,
+                        onPlayerFilter2Change = viewModel::setHistoryPlayerFilter2,
+                        onOpenMatch = viewModel::openHistoryDetail,
+                        onDeleteMatch = viewModel::deleteHistoryMatch,
+                        onBack = viewModel::closeHistory,
+                    )
+                    is AppScreen.HistoryDetail -> HistoryDetailScreen(
+                        match = selectedHistory,
+                        onBack = viewModel::closeHistoryDetail,
+                    )
+                    AppScreen.Settings -> SettingsScreen(
+                        settings = settings,
+                        adsRemoved = adsRemoved,
+                        onRemoveAds = { monetization.launchRemoveAdsPurchase(this@MainActivity) },
+                        onRestorePurchases = { monetization.restorePurchases() },
+                        onThemeSelected = viewModel::setThemeMode,
+                        onKeepScreenOnChange = viewModel::setKeepScreenOn,
+                        onHapticsChange = viewModel::setHapticsEnabled,
+                        onDefaultRacksChange = viewModel::setDefaultRacksToWin,
+                        onDefaultPointsChange = viewModel::setDefaultPointsToWin,
+                        onDefaultInningsChange = viewModel::setDefaultInningsLimit,
+                        onDefaultBreakRuleChange = viewModel::setDefaultBreakRule,
+                        onBack = viewModel::closeSettings,
+                    )
                 }
             }
         }

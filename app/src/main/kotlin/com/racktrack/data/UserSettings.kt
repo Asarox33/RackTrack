@@ -1,10 +1,10 @@
 package com.racktrack.data
 
-import com.racktrack.appearance.FeltTone
 import com.racktrack.domain.model.BreakRule
+import com.racktrack.presentation.theme.AppThemeMode
 
 data class UserSettings(
-    val feltTone: FeltTone = FeltTone.FOREST,
+    val themeMode: AppThemeMode = AppThemeMode.BLUE_GLOSSY,
     val keepScreenOn: Boolean = true,
     val hapticsEnabled: Boolean = true,
     val defaultRacksToWin: Int = 6,

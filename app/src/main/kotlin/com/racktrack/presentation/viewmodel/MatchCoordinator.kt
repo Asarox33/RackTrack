@@ -1,6 +1,6 @@
 package com.racktrack.presentation.viewmodel
 
-import com.racktrack.appearance.FeltTone
+import com.racktrack.presentation.theme.AppThemeMode
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.FourteenOneEngine
 import com.racktrack.domain.MatchEngine
@@ -78,8 +78,8 @@ class MatchCoordinator(
         _matchPaused.value = false
     }
 
-    fun setFeltTone(tone: FeltTone) {
-        updateSettings { it.copy(feltTone = tone) }
+    fun setThemeMode(mode: AppThemeMode) {
+        updateSettings { it.copy(themeMode = mode) }
     }
 
     fun setKeepScreenOn(enabled: Boolean) {

@@ -1,15 +1,15 @@
 package com.racktrack.data
 
 import android.content.Context
-import com.racktrack.appearance.FeltTone
 import com.racktrack.domain.model.BreakRule
+import com.racktrack.presentation.theme.AppThemeMode
 
 class AppPreferences(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun load(): UserSettings =
         UserSettings(
-            feltTone = feltTone(),
+            themeMode = themeMode(),
             keepScreenOn = prefs.getBoolean(KEY_KEEP_SCREEN_ON, true),
             hapticsEnabled = prefs.getBoolean(KEY_HAPTICS, true),
             defaultRacksToWin = prefs.getInt(KEY_DEFAULT_RACKS, DEFAULT_RACKS),
@@ -22,7 +22,8 @@ class AppPreferences(context: Context) {
 
     fun save(settings: UserSettings) {
         prefs.edit()
-            .putString(KEY_FELT_TONE, settings.feltTone.name)
+            .putString(KEY_THEME_MODE, settings.themeMode.name)
+            .remove(KEY_FELT_TONE)
             .putBoolean(KEY_KEEP_SCREEN_ON, settings.keepScreenOn)
             .putBoolean(KEY_HAPTICS, settings.hapticsEnabled)
             .putInt(KEY_DEFAULT_RACKS, settings.defaultRacksToWin)
@@ -32,11 +33,13 @@ class AppPreferences(context: Context) {
             .apply()
     }
 
-    private fun feltTone(): FeltTone {
-        val raw = prefs.getString(KEY_FELT_TONE, FeltTone.FOREST.name)
-        // Former "Classic" green merged into Forest.
-        if (raw == LEGACY_CLASSIC_GREEN) return FeltTone.FOREST
-        return FeltTone.entries.firstOrNull { it.name == raw } ?: FeltTone.FOREST
+    private fun themeMode(): AppThemeMode {
+        val raw = prefs.getString(KEY_THEME_MODE, null)
+        if (raw != null) {
+            return AppThemeMode.entries.firstOrNull { it.name == raw } ?: AppThemeMode.BLUE_GLOSSY
+        }
+        // Migrate former felt-cloth preference → default Blue glossy.
+        return AppThemeMode.BLUE_GLOSSY
     }
 
     private fun breakRule(): BreakRule {
@@ -46,6 +49,7 @@ class AppPreferences(context: Context) {
 
     private companion object {
         const val PREFS_NAME = "racktrack_prefs"
+        const val KEY_THEME_MODE = "theme_mode"
         const val KEY_FELT_TONE = "felt_tone"
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         const val KEY_HAPTICS = "haptics_enabled"
@@ -53,7 +57,6 @@ class AppPreferences(context: Context) {
         const val KEY_DEFAULT_POINTS = "default_points_to_win"
         const val KEY_DEFAULT_INNINGS = "default_innings_limit"
         const val KEY_DEFAULT_BREAK_RULE = "default_break_rule"
-        const val LEGACY_CLASSIC_GREEN = "CLASSIC_GREEN"
         const val DEFAULT_RACKS = 6
         const val DEFAULT_POINTS = 100
         const val DEFAULT_INNINGS = 30

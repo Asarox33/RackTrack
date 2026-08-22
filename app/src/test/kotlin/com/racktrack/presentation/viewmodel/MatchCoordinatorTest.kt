@@ -1,6 +1,6 @@
 package com.racktrack.presentation.viewmodel
 
-import com.racktrack.appearance.FeltTone
+import com.racktrack.presentation.theme.AppThemeMode
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
@@ -114,13 +114,13 @@ class MatchCoordinatorTest {
         c.setDefaultRacksToWin(9)
         c.setDefaultPointsToWin(125)
         c.setDefaultInningsLimit(null)
-        c.setFeltTone(FeltTone.BURGUNDY)
+        c.setThemeMode(AppThemeMode.DARK_NEON)
 
         assertEquals(9, c.setup.value.racksToWin)
         assertEquals(125, c.setup.value.pointsToWin)
         assertEquals(null, c.setup.value.inningsLimit)
-        assertEquals(FeltTone.BURGUNDY, c.settings.value.feltTone)
-        assertEquals(FeltTone.BURGUNDY, persisted.last().feltTone)
+        assertEquals(AppThemeMode.DARK_NEON, c.settings.value.themeMode)
+        assertEquals(AppThemeMode.DARK_NEON, persisted.last().themeMode)
         assertEquals(null, persisted.last().defaultInningsLimit)
     }
 
