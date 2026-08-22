@@ -2,7 +2,7 @@
 
 Overall status: ✅ **1.2.2** on GitHub · 🟨 **1.2.x** Play gate (Internal CI live · Closed
 live · **12×14 clock from 2026-08-20** · Console §E ✅ · prod blocked on clock) ·
-⬜ **2.0** on `rc/2.0.0` · ⬜ **Maybe 3.x+** (camera/AI parked)
+🟨 **2.0** on **`rc/2.0.0`** (opened; merge after prod) · ⬜ **Maybe 3.x+** (camera/AI parked)
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
@@ -131,8 +131,27 @@ this account (Internal = owner smoke only). **Open / production for strangers wa
 
 ## On `rc/2.0.0` — next product generation (not on 1.x Play launch)
 
-Develop on branch **`rc/2.0.0`**; merge to `main` only when ready as **2.0.0**.
+Branch **`rc/2.0.0`** opened **2026-08-22** from `main` @ 1.2.2. Develop here; merge to
+`main` only when ready as **2.0.0** (after Play production 1.2.x).  
 UI language (i18n) ≠ rule authority (multi-ruleset).
+
+### Suggested build order (do in sequence)
+
+1. ⬜ **Design System + APP chrome** — Blue Night + Cyan tokens; restyle Setup / History /
+   Settings (no felt carpet). Audit Board first for GAME boundaries.
+2. ⬜ **GAME board polish** — keep felt personalization; align accents / controls with DS
+   without turning APP into a table.
+3. ⬜ **Brand assets** — RT / rack mark; icon + feature graphic + splash aligned with DS.
+4. ⬜ **KMP + Compose Multiplatform scaffold** — shared domain (+ UI where practical);
+   unlock shared string catalogs for Android (+ iOS later).
+5. ⬜ **i18n** — en default + fr/de/es/it/nl/pt (extract UI / summary / PDF with CMP).
+6. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
+   scoreboard-relevant deltas only.
+7. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
+8. ⬜ Other game families (e.g. English 8-Ball) — only after American multi-ruleset base.
+9. ⬜ Optional later: Play In-App Updates flexible; Crashlytics if Play vitals insufficient.
+
+### Detail (same items)
 
 - ⬜ **i18n (localization)** — English default; also **fr, de, es, it, nl, pt**:
   - Extract all user-facing UI copy (today mostly hardcoded English in Compose) +
@@ -189,6 +208,9 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-22: Owner — branch **`rc/2.0.0`** opened from `main` @ 1.2.2 while Closed 12×14
+  runs. Build order: DS/APP → GAME → brand → KMP/CMP → i18n → multi-ruleset → accounts.
+  Merge to `main` only after Play production + train ready. Hotfixes 1.2 stay on `main`.
 - 2026-08-22: Doc — removed empty **Later on 1.x**; CI Play Internal ✅ re-homed under
   **1.2.0** Play gate (accounts → 2.x, camera → Maybe 3.x+).
 - 2026-08-22: Owner — Accounts / find players + shared post-match stats → **2.x** train
