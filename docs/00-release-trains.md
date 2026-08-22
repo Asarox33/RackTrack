@@ -21,11 +21,11 @@ main (1.x patchable)
   │
   ├─ 1.1.0 ✅ shipped (GitHub)
   ├─ 1.1.1 ✅ OFL font attribution
-  ├─ 1.2.0 / 1.2.1 / **1.2.2** 🔧 Play gate (Internal CI ✅ · Closed 12×14 ⏳ · §E ✅ · prod ⬜)  ← current
-  └─ 1.2.x hotfixes if needed
+  ├─ 1.2.0 / 1.2.1 / **1.2.2** 🔧 Play gate (Internal CI ✅ · Closed 12×14 ⏳ · §E ✅ · prod ⬜)  ← main
+  └─ 1.2.x hotfixes on `main` if needed
        │
-       └── branch rc/2.0.0  (open AFTER 1.2.0 is on Play production)
-                 → 2.0.0 merge when ready
+       └── branch **rc/2.0.0** ✅ opened 2026-08-22 (work while 12×14 runs)
+                 → merge to `main` only when ready as **2.0.0** (after Play production)
 ```
 
 ---
@@ -37,8 +37,9 @@ main (1.x patchable)
    remains owner smoke only and does **not** unlock production. Put monetized **1.2.0**
    on Closed while the clock runs; **open / production for strangers still = 1.2.0 with
    ads** (do not soft-launch ad-free).
-2. **`rc/2.0.0` opens after 1.2.0 is on Play production** (not in parallel with the
-   monetization rush).
+2. **`rc/2.0.0` may open while Closed 12×14 runs** (owner 2026-08-22) so design / KMP /
+   i18n can start off `main`. **Do not merge `rc/2.0.0` → `main` until Play production
+   1.2.x is live** (and the train is ready). Keep 1.2 hotfixes on `main` only.
 3. **FFB player timeouts (art. 1.2.16) are out of product** — too close to per-action
    match officiating; club **pause** (duration freeze) remains. See Explicitly dropped.
 
@@ -67,7 +68,7 @@ main (1.x patchable)
 | 3 | Repo | Privacy URL live (see `privacy-policy.md` + `08-play-store.md`) ✅ |
 | 4 | Code | Implement **1.2.0** monetization per `09-monetization.md` ✅ |
 | 5 | Human | Internal smoke ✅ → **Closed** (≥12 ✅, 14 days ⏳ from 2026-08-20) → Console `08` §E ✅ → **production 1.2.0+** ⬜ |
-| 6 | Repo | Open `rc/2.0.0` **after** 1.2.0 is live on Play |
+| 6 | Repo | Branch **`rc/2.0.0`** opened 2026-08-22 — work order in `06`; merge to `main` after prod |
 | — | Repo | CI → Play Internal (`play-internal.yml`) ✅ smoke 102015 |
 
 ---
