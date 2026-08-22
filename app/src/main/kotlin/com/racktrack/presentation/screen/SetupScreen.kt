@@ -31,7 +31,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.MatchFormatOptions
@@ -40,8 +39,15 @@ import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
 import com.racktrack.presentation.theme.OutlineWarm
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
+import com.racktrack.presentation.theme.AppChromeTheme
 import com.racktrack.presentation.theme.RackTrackTheme
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.viewmodel.SetupUiState
 
 @Composable
@@ -64,7 +70,7 @@ fun SetupScreen(
     val landscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    FeltBackground(modifier = rootModifier) {
+    AppChromeBackground(modifier = rootModifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (landscape) {
                 LandscapeSetup(
@@ -123,7 +129,7 @@ private fun LandscapeSetup(
     onStart: () -> Unit,
     onOpenHistory: () -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val solo = state.gameMode.isPointScoring && state.soloTraining
     Row(
         modifier = Modifier
@@ -197,23 +203,25 @@ private fun LandscapeSetup(
             }
             TexturedActionButton(
                 label = if (solo) "START TRAINING" else "START MATCH",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onStart,
                 modifier = Modifier.widthIn(min = 240.dp),
                 height = 52.dp,
+                useFeltGrain = false,
             )
             TexturedActionButton(
                 label = "HISTORY",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onOpenHistory,
                 modifier = Modifier.widthIn(min = 240.dp),
                 height = 48.dp,
+                useFeltGrain = false,
             )
         }
     }
@@ -234,7 +242,7 @@ private fun PortraitSetup(
     onStart: () -> Unit,
     onOpenHistory: () -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val solo = state.gameMode.isPointScoring && state.soloTraining
     Column(
         modifier = Modifier
@@ -311,24 +319,26 @@ private fun PortraitSetup(
         Spacer(modifier = Modifier.height(4.dp))
         TexturedActionButton(
             label = if (solo) "START TRAINING" else "START MATCH",
-            base = felt.accent,
-            light = felt.accentLight,
-            dark = felt.accentDark,
+            base = chrome.accent,
+            light = chrome.accentLight,
+            dark = chrome.accentDark,
             enabled = true,
             onClick = onStart,
             modifier = Modifier.widthIn(min = 280.dp),
             height = 56.dp,
-        )
+                useFeltGrain = false,
+            )
         TexturedActionButton(
             label = "HISTORY",
-            base = felt.accent,
-            light = felt.accentLight,
-            dark = felt.accentDark,
+            base = chrome.accent,
+            light = chrome.accentLight,
+            dark = chrome.accentDark,
             enabled = true,
             onClick = onOpenHistory,
             modifier = Modifier.widthIn(min = 280.dp),
             height = 52.dp,
-        )
+                useFeltGrain = false,
+            )
     }
 }
 
@@ -402,30 +412,32 @@ private fun BreakerRow(
     onBreakerChange: (Boolean) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         TexturedChip(
             label = state.player1Name.ifBlank { "Player 1" }.uppercase(),
             selected = state.player1BreaksFirst,
             onClick = { onBreakerChange(true) },
             modifier = Modifier.widthIn(min = 120.dp),
-            selectedLight = felt.accentLight,
-            selectedDark = felt.accentDark,
-            idleLight = felt.light,
-            idleDark = felt.dark,
+            selectedLight = chrome.accentLight,
+            selectedDark = chrome.accentDark,
+            idleLight = chrome.surfaceElevated,
+            idleDark = chrome.surfaceDeep,
             height = if (compact) 44.dp else 48.dp,
-        )
+                useFeltGrain = false,
+            )
         TexturedChip(
             label = state.player2Name.ifBlank { "Player 2" }.uppercase(),
             selected = !state.player1BreaksFirst,
             onClick = { onBreakerChange(false) },
             modifier = Modifier.widthIn(min = 120.dp),
-            selectedLight = felt.accentLight,
-            selectedDark = felt.accentDark,
-            idleLight = felt.light,
-            idleDark = felt.dark,
+            selectedLight = chrome.accentLight,
+            selectedDark = chrome.accentDark,
+            idleLight = chrome.surfaceElevated,
+            idleDark = chrome.surfaceDeep,
             height = if (compact) 44.dp else 48.dp,
-        )
+                useFeltGrain = false,
+            )
     }
 }
 
@@ -435,7 +447,7 @@ private fun BreakRuleRow(
     onBreakRuleChange: (BreakRule) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Break rule", style = MaterialTheme.typography.titleLarge)
         if (!compact) Box(modifier = Modifier.height(8.dp))
@@ -445,22 +457,24 @@ private fun BreakRuleRow(
                 selected = state.breakRule == BreakRule.ALTERNATE,
                 onClick = { onBreakRuleChange(BreakRule.ALTERNATE) },
                 modifier = Modifier.widthIn(min = 120.dp),
-                selectedLight = felt.accentLight,
-                selectedDark = felt.accentDark,
-                idleLight = felt.light,
-                idleDark = felt.dark,
+                selectedLight = chrome.accentLight,
+                selectedDark = chrome.accentDark,
+                idleLight = chrome.surfaceElevated,
+                idleDark = chrome.surfaceDeep,
                 height = if (compact) 40.dp else 44.dp,
+                useFeltGrain = false,
             )
             TexturedChip(
                 label = "WINNER",
                 selected = state.breakRule == BreakRule.WINNER,
                 onClick = { onBreakRuleChange(BreakRule.WINNER) },
                 modifier = Modifier.widthIn(min = 120.dp),
-                selectedLight = felt.accentLight,
-                selectedDark = felt.accentDark,
-                idleLight = felt.light,
-                idleDark = felt.dark,
+                selectedLight = chrome.accentLight,
+                selectedDark = chrome.accentDark,
+                idleLight = chrome.surfaceElevated,
+                idleDark = chrome.surfaceDeep,
                 height = if (compact) 40.dp else 44.dp,
+                useFeltGrain = false,
             )
         }
     }
@@ -471,7 +485,7 @@ private fun SoloTrainingRow(
     selected: Boolean,
     onChange: (Boolean) -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -488,10 +502,10 @@ private fun SoloTrainingRow(
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = ScoreWhite,
-                checkedTrackColor = felt.accent,
-                checkedBorderColor = felt.accentDark,
+                checkedTrackColor = chrome.accent,
+                checkedBorderColor = chrome.accentDark,
                 uncheckedThumbColor = ScoreWhite.copy(alpha = 0.85f),
-                uncheckedTrackColor = felt.dark.copy(alpha = 0.55f),
+                uncheckedTrackColor = chrome.surfaceDeep.copy(alpha = 0.55f),
                 uncheckedBorderColor = OutlineWarm.copy(alpha = 0.45f),
             ),
         )
@@ -504,7 +518,7 @@ private fun GameModeRow(
     onGameModeChange: (GameMode) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Column(
         horizontalAlignment = if (compact) Alignment.Start else Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -522,10 +536,10 @@ private fun GameModeRow(
                     selected = state.gameMode == mode,
                     onClick = { onGameModeChange(mode) },
                     modifier = Modifier.widthIn(min = if (compact) 64.dp else 72.dp),
-                    selectedLight = felt.accentLight,
-                    selectedDark = felt.accentDark,
-                    idleLight = felt.light,
-                    idleDark = felt.dark,
+                    selectedLight = chrome.accentLight,
+                    selectedDark = chrome.accentDark,
+                    idleLight = chrome.surfaceElevated,
+                    idleDark = chrome.surfaceDeep,
                     height = if (compact) 40.dp else 44.dp,
                 )
             }
@@ -540,7 +554,7 @@ private fun NameField(
     onValueChange: (String) -> Unit,
     fieldModifier: Modifier = Modifier,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -558,8 +572,8 @@ private fun NameField(
             focusedLabelColor = ScoreWhite,
             unfocusedLabelColor = ScoreWhite.copy(alpha = 0.7f),
             cursorColor = ScoreWhite,
-            focusedContainerColor = felt.dark.copy(alpha = 0.35f),
-            unfocusedContainerColor = felt.dark.copy(alpha = 0.22f),
+            focusedContainerColor = chrome.surfaceDeep.copy(alpha = 0.35f),
+            unfocusedContainerColor = chrome.surfaceDeep.copy(alpha = 0.22f),
         ),
     )
 }
@@ -568,18 +582,21 @@ private fun NameField(
 @Composable
 private fun SetupLandscapePreview() {
     RackTrackTheme {
-        SetupScreen(
-            state = SetupUiState(gameMode = GameMode.FOURTEEN_ONE),
-            onPlayer1Change = {},
-            onPlayer2Change = {},
-            onGameModeChange = {},
-            onRacksChange = {},
-            onPointsChange = {},
-            onInningsChange = {},
-            onBreakerChange = {},
-            onStart = {},
-        )
+        AppChromeTheme {
+            SetupScreen(
+                state = SetupUiState(gameMode = GameMode.FOURTEEN_ONE),
+                onPlayer1Change = {},
+                onPlayer2Change = {},
+                onGameModeChange = {},
+                onRacksChange = {},
+                onPointsChange = {},
+                onInningsChange = {},
+                onBreakerChange = {},
+                onStart = {},
+            )
+        }
     }
 }
 
 private const val LANDSCAPE_CONTROLS_WEIGHT = 1.15f
+

@@ -137,8 +137,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ### Suggested build order (do in sequence)
 
-1. ⬜ **Design System + APP chrome** — Blue Night + Cyan tokens; restyle Setup / History /
-   Settings (no felt carpet). Audit Board first for GAME boundaries.
+1. 🟨 **Design System + APP chrome** — Blue Night + Cyan tokens (`AppChrome`); Setup /
+   History / Settings use flat night surfaces (no felt carpet). Board still felt.
 2. ⬜ **GAME board polish** — keep felt personalization; align accents / controls with DS
    without turning APP into a table.
 3. ⬜ **Brand assets** — RT / rack mark; icon + feature graphic + splash aligned with DS.
@@ -208,6 +208,10 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-22: **2.0 DS step 1 started** on `rc/2.0.0` — `AppChrome` (Blue Night + Cyan)
+  tokens + `AppChromeBackground`; Setup / History / Settings off felt carpet; board still
+  `FeltBackground`. Cloth swatches labeled as board-only. Next: refine APP controls /
+  GAME board audit polish.
 - 2026-08-22: Owner — branch **`rc/2.0.0`** opened from `main` @ 1.2.2 while Closed 12×14
   runs. Build order: DS/APP → GAME → brand → KMP/CMP → i18n → multi-ruleset → accounts.
   Merge to `main` only after Play production + train ready. Hotfixes 1.2 stay on `main`.

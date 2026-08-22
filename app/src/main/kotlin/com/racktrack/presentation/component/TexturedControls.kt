@@ -42,6 +42,8 @@ fun TexturedActionButton(
     modifier: Modifier = Modifier,
     height: Dp = 44.dp,
     corner: Dp = (height.value * CORNER_FRAC_OF_HEIGHT).dp,
+    /** Felt cloth grain — keep on GAME board; disable for APP chrome. */
+    useFeltGrain: Boolean = true,
 ) {
     val performHaptic = rememberClickHaptic()
     val interaction = remember { MutableInteractionSource() }
@@ -62,7 +64,9 @@ fun TexturedActionButton(
             )
             .drawWithContent {
                 drawContent()
-                drawFeltGrain(alpha = GRAIN_OVERLAY_ALPHA * alpha)
+                if (useFeltGrain) {
+                    drawFeltGrain(alpha = GRAIN_OVERLAY_ALPHA * alpha)
+                }
                 drawRect(
                     brush = Brush.verticalGradient(
                         0f to Color.White.copy(alpha = HIGHLIGHT_ALPHA * alpha),
@@ -111,6 +115,7 @@ fun TexturedChip(
     idleLight: Color,
     idleDark: Color,
     height: Dp = 52.dp,
+    useFeltGrain: Boolean = true,
 ) {
     val performHaptic = rememberClickHaptic()
     val shape = RoundedCornerShape((height.value * CORNER_FRAC_OF_HEIGHT).dp)
@@ -124,7 +129,9 @@ fun TexturedChip(
             .background(Brush.verticalGradient(listOf(top, bottom)))
             .drawWithContent {
                 drawContent()
-                drawFeltGrain(alpha = CHIP_GRAIN_ALPHA)
+                if (useFeltGrain) {
+                    drawFeltGrain(alpha = CHIP_GRAIN_ALPHA)
+                }
             }
             .border(
                 width = (height.value * BORDER_FRAC_OF_HEIGHT).coerceIn(1f, 2f).dp,

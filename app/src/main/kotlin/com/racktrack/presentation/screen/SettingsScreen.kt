@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.BuildConfig
 import com.racktrack.appearance.FeltTone
-import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.presentation.MatchFormatOptions
@@ -51,7 +50,11 @@ import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
 import com.racktrack.presentation.theme.OutlineWarm
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,12 +77,12 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val scrollState = rememberScrollState()
 
     BackHandler(onBack = onBack)
 
-    FeltBackground(modifier = modifier) {
+    AppChromeBackground(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,7 +102,13 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel("Cloth color")
+            SectionLabel("Board cloth")
+            Text(
+                text = "Live match table only — not the app chrome",
+                style = MaterialTheme.typography.bodyLarge,
+                color = chrome.textSecondary,
+                modifier = Modifier.padding(bottom = 4.dp),
+            )
             Spacer(modifier = Modifier.height(10.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -155,23 +164,25 @@ fun SettingsScreen(
             } else {
                 TexturedActionButton(
                     label = "REMOVE ADS",
-                    base = felt.accent,
-                    light = felt.accentLight,
-                    dark = felt.accentDark,
+                    base = chrome.accent,
+                    light = chrome.accentLight,
+                    dark = chrome.accentDark,
                     enabled = true,
                     onClick = onRemoveAds,
                     height = 44.dp,
-                )
+                useFeltGrain = false,
+            )
             }
             Spacer(modifier = Modifier.height(8.dp))
             TexturedActionButton(
                 label = "RESTORE PURCHASES",
-                base = felt.mid,
-                light = felt.accentLight,
-                dark = felt.dark,
+                base = chrome.surface,
+                light = chrome.surfaceElevated,
+                dark = chrome.surfaceDeep,
                 enabled = true,
                 onClick = onRestorePurchases,
                 height = 44.dp,
+                useFeltGrain = false,
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -232,22 +243,24 @@ fun SettingsScreen(
                     label = "ALTERNATE",
                     selected = settings.defaultBreakRule == BreakRule.ALTERNATE,
                     onClick = { onDefaultBreakRuleChange(BreakRule.ALTERNATE) },
-                    selectedLight = felt.accentLight,
-                    selectedDark = felt.accentDark,
-                    idleLight = felt.mid,
-                    idleDark = felt.dark,
+                    selectedLight = chrome.accentLight,
+                    selectedDark = chrome.accentDark,
+                    idleLight = chrome.surface,
+                    idleDark = chrome.surfaceDeep,
                     height = 40.dp,
-                )
+                useFeltGrain = false,
+            )
                 TexturedChip(
                     label = "WINNER",
                     selected = settings.defaultBreakRule == BreakRule.WINNER,
                     onClick = { onDefaultBreakRuleChange(BreakRule.WINNER) },
-                    selectedLight = felt.accentLight,
-                    selectedDark = felt.accentDark,
-                    idleLight = felt.mid,
-                    idleDark = felt.dark,
+                    selectedLight = chrome.accentLight,
+                    selectedDark = chrome.accentDark,
+                    idleLight = chrome.surface,
+                    idleDark = chrome.surfaceDeep,
                     height = 40.dp,
-                )
+                useFeltGrain = false,
+            )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -256,7 +269,7 @@ fun SettingsScreen(
             Text(
                 text = "FFB American pool rules 2026–2027",
                 style = MaterialTheme.typography.bodyLarge,
-                color = felt.accentLight,
+                color = chrome.accentLight,
                 textDecoration = TextDecoration.Underline,
                 textAlign = TextAlign.Start,
                 modifier = Modifier
@@ -281,18 +294,19 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
             TexturedActionButton(
                 label = "BACK",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onBack,
                 modifier = Modifier.widthIn(min = 200.dp),
                 height = 52.dp,
+                useFeltGrain = false,
             )
             }
             ScrollMoreHint(
                 scrollState = scrollState,
-                fadeColor = felt.vignette,
+                fadeColor = chrome.background,
             )
         }
     }
@@ -300,7 +314,7 @@ fun SettingsScreen(
 
 @Composable
 private fun AboutPanel(onOpenRepo: () -> Unit) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val buildKind = if (BuildConfig.DEBUG) "debug" else "release"
     val builtAt = remember {
         SimpleDateFormat("yyyy-MM-dd HH:mm 'UTC'", Locale.US).apply {
@@ -327,7 +341,7 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
         Text(
             text = "GitHub · Asarox33/RackTrack",
             style = MaterialTheme.typography.bodyLarge,
-            color = felt.accentLight,
+            color = chrome.accentLight,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .fillMaxWidth()
@@ -394,7 +408,7 @@ private fun SettingsToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -413,7 +427,7 @@ private fun SettingsToggleRow(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = ScoreWhite,
-                checkedTrackColor = felt.accentLight,
+                checkedTrackColor = chrome.accentLight,
                 uncheckedThumbColor = ScoreWhite.copy(alpha = 0.85f),
                 uncheckedTrackColor = Color.White.copy(alpha = 0.18f),
                 uncheckedBorderColor = OutlineWarm.copy(alpha = 0.4f),
@@ -471,3 +485,4 @@ private const val SWATCHES_PER_ROW = 3
 private val SWATCH_CIRCLE = 40.dp
 private val SWATCH_GAP = 8.dp
 private val SWATCH_ROW_GAP = 12.dp
+

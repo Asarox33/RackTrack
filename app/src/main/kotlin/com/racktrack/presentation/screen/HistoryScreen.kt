@@ -38,14 +38,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.data.StoredMatch
 import com.racktrack.domain.MatchSummaryReport
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.formatDuration
 import com.racktrack.presentation.theme.OutlineWarm
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.viewmodel.HistoryUiState
 import java.text.DateFormat
 import java.util.Date
@@ -62,10 +65,10 @@ fun HistoryScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     var pendingDelete by remember { mutableStateOf<StoredMatch?>(null) }
 
-    FeltBackground(modifier = modifier) {
+    AppChromeBackground(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -142,15 +145,16 @@ fun HistoryScreen(
             Spacer(modifier = Modifier.height(12.dp))
             TexturedActionButton(
                 label = "BACK",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onBack,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .widthIn(min = 200.dp),
                 height = 52.dp,
+                useFeltGrain = false,
             )
         }
 
@@ -209,8 +213,8 @@ fun HistoryDetailScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val felt = LocalFeltPalette.current
-    FeltBackground(modifier = modifier) {
+    val chrome = LocalAppChrome.current
+    AppChromeBackground(modifier = modifier) {
         if (match == null) {
             Box(
                 modifier = Modifier
@@ -220,14 +224,15 @@ fun HistoryDetailScreen(
             ) {
                 TexturedActionButton(
                     label = "BACK",
-                    base = felt.accent,
-                    light = felt.accentLight,
-                    dark = felt.accentDark,
+                    base = chrome.accent,
+                    light = chrome.accentLight,
+                    dark = chrome.accentDark,
                     enabled = true,
                     onClick = onBack,
                     modifier = Modifier.widthIn(min = 200.dp),
                     height = 52.dp,
-                )
+                useFeltGrain = false,
+            )
             }
         } else {
             MatchSummaryScaffold(
@@ -276,13 +281,13 @@ private fun HistoryMatchRow(
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val summary = match.summary
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(felt.dark.copy(alpha = 0.72f))
+            .background(chrome.surfaceDeep.copy(alpha = 0.72f))
             .border(1.dp, OutlineWarm.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
             .padding(start = 16.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -347,3 +352,4 @@ private fun modeLabel(mode: GameMode): String =
         GameMode.TEN_BALL -> "10-BALL"
         GameMode.FOURTEEN_ONE -> "14/1"
     }
+
