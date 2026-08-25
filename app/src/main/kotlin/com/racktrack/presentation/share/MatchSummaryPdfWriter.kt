@@ -70,6 +70,7 @@ object MatchSummaryPdfWriter {
         private var y = 0f
 
         private val brandPaint = paint(theme.onFelt, 11f, bold = true)
+        private val brandTrackPaint = paint(BRAND_CYAN, 11f, bold = true)
         private val titlePaint = paint(theme.onFelt, 22f, bold = true)
         private val winnerPaint = paint(theme.winner, 28f, bold = true)
         private val onFeltBody = paint(theme.onFelt, 12f)
@@ -129,7 +130,7 @@ object MatchSummaryPdfWriter {
                 MatchSummaryReport.formatDuration(summary.totalDurationMillis),
             )
 
-            c.drawText("RACKTRACK", MARGIN_LEFT, 32f, brandPaint)
+            drawBrandWordmark(c, MARGIN_LEFT, 32f)
 
             var hy = ry + 22f
             c.drawText(title.uppercase(Locale.getDefault()), MARGIN_LEFT, hy, titlePaint)
@@ -178,8 +179,21 @@ object MatchSummaryPdfWriter {
                 CONTINUED_HEADER,
                 paint(theme.accent),
             )
-            c.drawText("RACKTRACK  ·  continued", MARGIN_LEFT, 28f, brandPaint)
+            val brandEnd = drawBrandWordmark(c, MARGIN_LEFT, 28f)
+            c.drawText("  ·  continued", brandEnd, 28f, brandPaint)
             y = CONTINUED_HEADER + 24f
+        }
+
+        /** Rack (on-felt) + Track (brand cyan) — matches Play wordmark split. */
+        private fun drawBrandWordmark(
+            c: Canvas,
+            x: Float,
+            baseline: Float,
+        ): Float {
+            c.drawText("Rack", x, baseline, brandPaint)
+            val afterRack = x + brandPaint.measureText("Rack")
+            c.drawText("Track", afterRack, baseline, brandTrackPaint)
+            return afterRack + brandTrackPaint.measureText("Track")
         }
 
         private fun drawPlayerCards(summary: MatchSummary) {
@@ -522,7 +536,10 @@ object MatchSummaryPdfWriter {
     private const val CONTINUED_HEADER = 44f
     private const val PLAYER_CARD_HEIGHT = 118f
     private const val ROW_HEIGHT = 22f
-    private const val DEFAULT_ACCENT = 0xFF1B9A4A.toInt()
+    /** Fallback when no felt accent is passed — Blue glossy accent. */
+    private const val DEFAULT_ACCENT = 0xFF2A8FB0.toInt()
+    /** Wordmark "Track" — Blue glossy accentLight. */
+    private const val BRAND_CYAN = 0xFF4EB8D4.toInt()
     private const val INNINGS_NAME_MAX = 12
     /** `# | End | Pts | Tot | Tot | Pts | End` — totals centered. */
     private val INNINGS_WEIGHTS = floatArrayOf(0.10f, 0.14f, 0.14f, 0.17f, 0.17f, 0.14f, 0.14f)

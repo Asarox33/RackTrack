@@ -140,7 +140,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 1. ✅ **Design System v1 freeze (2026-08-25)** — one world + 3 themes shipped on `rc/2.0.0`:
    **Blue glossy** / **Warm light** / **Dark teal**. Iterate later; do not regress without
    owner lock. Next DS work = brand assets, not a palette reset.
-2. ⬜ **Brand assets** — RT / rack mark; icon + feature graphic + splash aligned with DS.
+2. ✅ **Brand assets (in-app + Play masters, 2026-08-26)** — stylized **R** + RackTrack
+   wordmark (Blue glossy); Play icon 512 / feature graphic / IAP no-ads in `assets/`;
+   adaptive launcher + splash wired. **Play screenshots deferred** to 2.0 store publish.
 3. ⬜ **KMP + Compose Multiplatform scaffold** — shared domain (+ UI where practical);
    unlock shared string catalogs for Android (+ iOS later).
 4. ⬜ **i18n** — en default + fr/de/es/it/nl/pt (extract UI / summary / PDF with CMP).
@@ -164,7 +166,7 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
 - ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
-- 🟨 **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
+- ✅ **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
   - **Locked v1 (2026-08-25, owner freeze):** first DS pass frozen for iteration baseline.
     **one visual world** + **B/C/D DNA** (keep B filigree+détourage, C warm light,
     D a11y dark; **avoid** A purple neon and E/F low-contrast glass).
@@ -178,9 +180,12 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   - Accent used sparingly (selection / primary CTA). Unselected = neutral.
   - **Avoid:** gold/casino bling, omnipresent neon, photo balls as hero, glass cards,
     borders on everything, cloth-as-chrome, cold clinical Light.
-  - **Brand mark:** monogram **RT** / stylized rack — not photo 8-ball on START.
+  - **Brand mark:** stylized **R** (white + cyan leg) + RackTrack wordmark — not photo
+    8-ball / green-felt cue-ball IAP art.
   - **START MATCH** = primary visual hero on setup.
-  - Icon + feature graphic + splash with the same system; Play 1.2 assets until then.
+  - ✅ Icon + feature graphic + splash + launcher mipmaps (Blue glossy). Play screenshots
+    at 2.0 listing publish (owner). Masters: `assets/ic_launcher_play_512.png`,
+    `assets/feature_graphic_play_1024x500.png`, `assets/iap_remove_ads_icon_512.png`.
 - ⬜ **Accounts / find players + shared post-match stats** — **2.x** (with identity if needed);
   still **never** remote live scoring (one device scores the match)
 - ⬜ Other game families later (e.g. English 8-Ball) — only after American multi-ruleset base
@@ -207,6 +212,11 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-26: Brand masters in `assets/` (Play icon 512, feature graphic, IAP no-ads);
+  launcher mipmaps + adaptive FG + SplashScreen (Blue glossy `#101A28`); PDF wordmark
+  Rack/Track split. Play screenshots deferred to 2.0 listing publish.
+- 2026-08-26: Toolchain — Android Studio upgrade applied: **AGP 9.3.2** + Gradle wrapper
+  **9.7.1** (`libs.versions.toml` / `gradle-wrapper.properties`); `AGENTS.md` synced.
 - 2026-08-25: Owner — **DS v1 freeze** on `rc/2.0.0`: Blue glossy / **Warm light** /
   Dark teal; filigree on all three; HUD stat strip; iterate later, no silent palette reset.
 - 2026-08-22: Owner mocks (ChatGPT A–F) — keep **B** (filigree + textured détourage) +

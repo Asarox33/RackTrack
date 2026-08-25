@@ -32,8 +32,8 @@ When editing `docs/06-roadmap-todo.md` or related plans:
 
 ### Toolchain
 
-- JDK **25** (`JAVA_HOME=~/tools/jdk-25`), Gradle **9.6.1** wrapper, Android SDK **36**
-- AGP **9.3** has built-in Kotlin — do **not** apply `org.jetbrains.kotlin.android`; keep Compose compiler plugin
+- JDK **25** (`JAVA_HOME=~/tools/jdk-25`), Gradle **9.7.1** wrapper, Android SDK **36**
+- AGP **9.3.2** has built-in Kotlin — do **not** apply `org.jetbrains.kotlin.android`; keep Compose compiler plugin
 - Under Gradle 9, keep `testRuntimeOnly` JUnit Platform launcher
 - Release signing: `keystore.properties` (gitignored) → upload key; else debug fallback
   (`keystore.properties.example`, `docs/08-play-store.md`)
