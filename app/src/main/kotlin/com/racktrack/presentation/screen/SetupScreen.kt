@@ -38,14 +38,12 @@ import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
-import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.AppChromeBackground
 import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.AppChromeTheme
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.theme.AppChromeBackground
 import com.racktrack.presentation.theme.LocalAppChrome
-import com.racktrack.presentation.theme.ScoreWhite
 import com.racktrack.presentation.theme.AppChromeBackground
 import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.viewmodel.SetupUiState
@@ -149,7 +147,7 @@ private fun LandscapeSetup(
             Text(
                 text = "American pool",
                 style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.78f),
+                color = chrome.textSecondary,
             )
             GameModeRow(state = state, onGameModeChange = onGameModeChange, compact = true)
             if (state.gameMode.isPointScoring) {
@@ -258,7 +256,7 @@ private fun PortraitSetup(
             Text(
                 text = "American pool",
                 style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.78f),
+                color = chrome.textSecondary,
             )
         }
 
@@ -494,19 +492,19 @@ private fun SoloTrainingRow(
         Text(
             text = "Solo Training",
             style = MaterialTheme.typography.titleLarge,
-            color = ScoreWhite,
+            color = chrome.textPrimary,
             modifier = Modifier.weight(1f),
         )
         Switch(
             checked = selected,
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = ScoreWhite,
+                checkedThumbColor = chrome.onAccent,
                 checkedTrackColor = chrome.accent,
                 checkedBorderColor = chrome.accentDark,
-                uncheckedThumbColor = ScoreWhite.copy(alpha = 0.85f),
+                uncheckedThumbColor = chrome.textPrimary.copy(alpha = 0.85f),
                 uncheckedTrackColor = chrome.surfaceDeep.copy(alpha = 0.55f),
-                uncheckedBorderColor = OutlineWarm.copy(alpha = 0.45f),
+                uncheckedBorderColor = chrome.rim.copy(alpha = 0.4f),
             ),
         )
     }
@@ -565,15 +563,15 @@ private fun NameField(
         shape = RoundedCornerShape(14.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = ScoreWhite,
-            unfocusedTextColor = ScoreWhite,
-            focusedBorderColor = OutlineWarm,
-            unfocusedBorderColor = OutlineWarm.copy(alpha = 0.45f),
-            focusedLabelColor = ScoreWhite,
-            unfocusedLabelColor = ScoreWhite.copy(alpha = 0.7f),
-            cursorColor = ScoreWhite,
-            focusedContainerColor = chrome.surfaceDeep.copy(alpha = 0.35f),
-            unfocusedContainerColor = chrome.surfaceDeep.copy(alpha = 0.22f),
+            focusedTextColor = chrome.textPrimary,
+            unfocusedTextColor = chrome.textPrimary,
+            focusedBorderColor = chrome.rim,
+            unfocusedBorderColor = chrome.rim.copy(alpha = 0.4f),
+            focusedLabelColor = chrome.textSecondary,
+            unfocusedLabelColor = chrome.textSecondary.copy(alpha = 0.85f),
+            cursorColor = chrome.accent,
+            focusedContainerColor = chrome.surfaceElevated.copy(alpha = 0.9f),
+            unfocusedContainerColor = chrome.surface.copy(alpha = 0.85f),
         ),
     )
 }

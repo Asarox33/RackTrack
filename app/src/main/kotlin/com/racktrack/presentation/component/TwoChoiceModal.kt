@@ -28,8 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.racktrack.appearance.LocalFeltPalette
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 
 /** Two primary actions (no cancel) — 14/1 accept open, push-out choice, etc. */
 private const val CHOICE_MODAL_MAX_HEIGHT_FRACTION = 0.72f
@@ -52,6 +51,7 @@ fun TwoChoiceModal(
     onSecondary: () -> Unit,
 ) {
     val felt = LocalFeltPalette.current
+    val theme = LocalAppTheme.current
 
     BoxWithConstraints(
         modifier = Modifier
@@ -75,14 +75,14 @@ fun TwoChoiceModal(
                         listOf(felt.dark.copy(alpha = 0.98f), felt.vignette),
                     ),
                 )
-                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(22.dp))
+                .border(2.dp, theme.rim.copy(alpha = 0.75f), RoundedCornerShape(22.dp))
                 .padding(horizontal = 22.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = theme.textPrimary,
                 textAlign = TextAlign.Center,
             )
             if (subtitle != null) {
@@ -90,7 +90,7 @@ fun TwoChoiceModal(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = OutlineWarm,
+                    color = theme.textSecondary,
                     textAlign = TextAlign.Center,
                 )
             }

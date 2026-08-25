@@ -43,7 +43,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
@@ -54,22 +53,16 @@ import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
 import com.racktrack.presentation.component.BoardMetrics
+import com.racktrack.presentation.component.BoardQuietChip
+import com.racktrack.presentation.component.BoardStatCell
+import com.racktrack.presentation.component.BoardStatGlyph
+import com.racktrack.presentation.component.BoardStatStrip
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TwoChoiceModal
-import com.racktrack.presentation.theme.ButtonFoul
-import com.racktrack.presentation.theme.ButtonFoulDark
-import com.racktrack.presentation.theme.ButtonFoulLight
-import com.racktrack.presentation.theme.ButtonPlus
-import com.racktrack.presentation.theme.ButtonPlusDark
-import com.racktrack.presentation.theme.ButtonPlusLight
-import com.racktrack.presentation.theme.ButtonRunOut
-import com.racktrack.presentation.theme.ButtonRunOutDark
-import com.racktrack.presentation.theme.ButtonRunOutLight
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 
 private enum class VisitEndAction { PASS, FOUL }
 
@@ -94,6 +87,7 @@ fun FourteenOneBoardContent(
     topChromePad: Dp,
     modifier: Modifier = Modifier,
 ) {
+    val actions = LocalAppTheme.current.actions
     var visitEnd by remember { mutableStateOf<VisitEndDraft?>(null) }
     var dismissedIllegalOpenAt by remember { mutableStateOf<Long?>(null) }
     val lastEvent = match.history.lastOrNull()
@@ -259,13 +253,13 @@ fun FourteenOneBoardContent(
                 title = "ILLEGAL OPEN",
                 subtitle = "Opponent accepts the table?",
                 primaryLabel = "ACCEPT",
-                primaryBase = ButtonRunOut,
-                primaryLight = ButtonRunOutLight,
-                primaryDark = ButtonRunOutDark,
+                primaryBase = actions.runOut.base,
+                primaryLight = actions.runOut.light,
+                primaryDark = actions.runOut.dark,
                 secondaryLabel = "RE-BREAK",
-                secondaryBase = ButtonFoul,
-                secondaryLight = ButtonFoulLight,
-                secondaryDark = ButtonFoulDark,
+                secondaryBase = actions.foul.base,
+                secondaryLight = actions.foul.light,
+                secondaryDark = actions.foul.dark,
                 onPrimary = {
                     onAcceptIllegalOpen()
                     dismissedIllegalOpenAt = lastEvent.atMillis
@@ -338,7 +332,8 @@ private fun FourteenOnePlayerPanel(
         ) {
             Text(
                 text = player.name.uppercase(),
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.nameSp),
+                color = LocalAppTheme.current.textSecondary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
             )
@@ -389,7 +384,7 @@ private fun FourteenOneScoreCluster(
     modifier: Modifier = Modifier,
 ) {
     val foulWarn = fouls == FourteenOneEngine.CONSECUTIVE_FOULS_TO_PENALTY - 1
-    val felt = LocalFeltPalette.current
+    val actions = LocalAppTheme.current.actions
     val handAlpha by animateFloatAsState(
         targetValue = if (hasHand) 1f else 0f,
         label = "hand-alpha",
@@ -432,83 +427,61 @@ private fun FourteenOneScoreCluster(
                     size = metrics.cueBallSize,
                 )
             }
-            Text(
-                text = fourteenOneInningsLine(
-                    innings = innings,
-                    limit = match.inningsLimit,
+            BoardStatStrip(
+                cells = listOf(
+                    BoardStatCell(
+                        label = "n",
+                        value = match.inningsLimit?.let { "$innings/$it" } ?: innings.toString(),
+                        glyph = BoardStatGlyph.CLOCK,
+                    ),
+                    BoardStatCell(
+                        label = "HR",
+                        value = highRun.toString(),
+                        glyph = BoardStatGlyph.STAR,
+                        emphasized = highRun > 0,
+                        accent = actions.runOut.light,
+                    ),
+                    BoardStatCell(
+                        label = "Foul",
+                        value = "$fouls/3",
+                        glyph = BoardStatGlyph.WARNING,
+                        emphasized = fouls > 0,
+                        accent = actions.foul.light,
+                    ),
                 ),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = metrics.visitStatSp),
-                color = ScoreWhite.copy(alpha = 0.78f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = metrics.nameToScoreGap),
-            )
-            Text(
-                text = "HR $highRun  ·  Foul $fouls/3",
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = metrics.visitStatSp),
-                color = ScoreWhite.copy(alpha = 0.78f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier
+                    .padding(top = metrics.nameToScoreGap)
+                    .padding(horizontal = 4.dp),
             )
             if (hasHand) {
-                FourteenOneVisitStats(
-                    objectBallsOnTable = match.objectBallsOnTable,
-                    currentRun = match.currentRun,
-                    visitStatSize = metrics.visitStatSp,
-                    accent = felt.accentLight,
+                Row(
                     modifier = Modifier.padding(top = metrics.nameToScoreGap),
-                )
-            }
-            if (match.awaitingOpeningBreak && hasHand) {
-                Text(
-                    text = "OPENING BREAK",
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
-                    color = felt.accentLight,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BoardQuietChip(
+                        text = buildString {
+                            append("On table ${match.objectBallsOnTable}")
+                            if (match.currentRun > 0) {
+                                append(" · Run ${match.currentRun}")
+                            }
+                        },
+                    )
+                    if (match.awaitingOpeningBreak) {
+                        BoardQuietChip(text = "Opening break", accent = true)
+                    }
+                }
             }
             if (foulWarn && hasHand) {
                 Text(
                     text = "NEXT FOUL = −15",
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
-                    color = ButtonFoulLight.copy(alpha = warnAlpha),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = metrics.warnSp),
+                    color = actions.foul.light.copy(alpha = warnAlpha),
                     modifier = Modifier
                         .padding(top = 4.dp)
                         .alpha(warnAlpha),
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun FourteenOneVisitStats(
-    objectBallsOnTable: Int,
-    currentRun: Int,
-    visitStatSize: TextUnit,
-    accent: Color,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = "On Table : $objectBallsOnTable",
-            style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-            color = accent,
-        )
-        if (currentRun > 0) {
-            Text(
-                text = "  ·  ",
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                color = ScoreWhite.copy(alpha = 0.45f),
-            )
-            Text(
-                text = "RUN $currentRun",
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = visitStatSize),
-                color = ButtonRunOutLight,
-            )
         }
     }
 }
@@ -526,6 +499,7 @@ private fun FourteenOneActionButtons(
     onRequestFoul: () -> Unit,
     onBreakFoul: () -> Unit,
 ) {
+    val actions = LocalAppTheme.current.actions
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(actionGap),
@@ -536,9 +510,7 @@ private fun FourteenOneActionButtons(
         ) {
             TexturedActionButton(
                 label = "+$clearRackPoints",
-                base = ButtonPlus,
-                light = ButtonPlusLight,
-                dark = ButtonPlusDark,
+                tone = actions.plus,
                 enabled = enabled,
                 onClick = onAddPoints,
                 modifier = Modifier.weight(1f),
@@ -547,9 +519,7 @@ private fun FourteenOneActionButtons(
             )
             TexturedActionButton(
                 label = "PASS",
-                base = ButtonRunOut,
-                light = ButtonRunOutLight,
-                dark = ButtonRunOutDark,
+                tone = actions.runOut,
                 enabled = enabled,
                 onClick = onRequestPass,
                 modifier = Modifier.weight(1f),
@@ -558,9 +528,7 @@ private fun FourteenOneActionButtons(
             )
             TexturedActionButton(
                 label = "FOUL",
-                base = ButtonFoul,
-                light = ButtonFoulLight,
-                dark = ButtonFoulDark,
+                tone = actions.foul,
                 enabled = enabled,
                 onClick = onRequestFoul,
                 modifier = Modifier.weight(1f),
@@ -571,9 +539,7 @@ private fun FourteenOneActionButtons(
         if (showBreakFoul) {
             TexturedActionButton(
                 label = "BREAK −2",
-                base = ButtonFoul,
-                light = ButtonFoulLight,
-                dark = ButtonFoulDark,
+                tone = actions.foul,
                 enabled = true,
                 onClick = onBreakFoul,
                 modifier = Modifier.fillMaxWidth(),
@@ -583,7 +549,7 @@ private fun FourteenOneActionButtons(
             Text(
                 text = "Opening break",
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -599,6 +565,7 @@ private fun VisitEndBallsModal(
     onConfirm: (remaining: Int, priorPoints: Int) -> Unit,
 ) {
     val felt = LocalFeltPalette.current
+    val actions = LocalAppTheme.current.actions
     val minBalls = FourteenOneEngine.MIN_OBJECT_BALLS_REMAINING
     val maxBalls = Match.OBJECT_BALLS_FULL_RACK
     val tableAtOpen = match.objectBallsOnTable.coerceIn(minBalls, maxBalls)
@@ -627,16 +594,16 @@ private fun VisitEndBallsModal(
         VisitEndAction.FOUL -> "END INNING — FOUL"
     }
     val confirmBase = when (action) {
-        VisitEndAction.PASS -> ButtonRunOut
-        VisitEndAction.FOUL -> ButtonFoul
+        VisitEndAction.PASS -> actions.runOut.base
+        VisitEndAction.FOUL -> actions.foul.base
     }
     val confirmLight = when (action) {
-        VisitEndAction.PASS -> ButtonRunOutLight
-        VisitEndAction.FOUL -> ButtonFoulLight
+        VisitEndAction.PASS -> actions.runOut.light
+        VisitEndAction.FOUL -> actions.foul.light
     }
     val confirmDark = when (action) {
-        VisitEndAction.PASS -> ButtonRunOutDark
-        VisitEndAction.FOUL -> ButtonFoulDark
+        VisitEndAction.PASS -> actions.runOut.dark
+        VisitEndAction.FOUL -> actions.foul.dark
     }
 
     fun tapPlusFourteen() {
@@ -681,7 +648,7 @@ BoxWithConstraints(
                         listOf(felt.dark.copy(alpha = 0.98f), felt.vignette),
                     ),
                 )
-                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(corner))
+                .border(2.dp, LocalAppTheme.current.rim.copy(alpha = 0.55f), RoundedCornerShape(corner))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -705,14 +672,14 @@ BoxWithConstraints(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
-                    color = ScoreWhite.copy(alpha = 0.85f),
+                    color = LocalAppTheme.current.textPrimary.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Balls left on table",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = ScoreWhite.copy(alpha = 0.7f),
+                    color = LocalAppTheme.current.textSecondary,
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -733,9 +700,7 @@ BoxWithConstraints(
                 Spacer(modifier = Modifier.height(12.dp))
                 TexturedActionButton(
                     label = "+14",
-                    base = ButtonPlus,
-                    light = ButtonPlusLight,
-                    dark = ButtonPlusDark,
+                    tone = actions.plus,
                     enabled = true,
                     onClick = { tapPlusFourteen() },
                     modifier = Modifier.fillMaxWidth(MODAL_PLUS_FOURTEEN_WIDTH_FRACTION),
@@ -745,7 +710,7 @@ BoxWithConstraints(
                 Text(
                     text = "Full continuous rack (use for racks missed on the board)",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
+                    color = LocalAppTheme.current.textSecondary,
                     textAlign = TextAlign.Center,
                 )
 
@@ -753,7 +718,7 @@ BoxWithConstraints(
                 Text(
                     text = "$racksLabel (+$rackPoints)  ·  +$partialPoints partial  ·  Visit $visitTotal",
                     style = MaterialTheme.typography.titleLarge,
-                    color = ButtonRunOutLight,
+                    color = actions.runOut.light,
                     textAlign = TextAlign.Center,
                 )
                 if (impliesAutoRerack) {
@@ -761,7 +726,7 @@ BoxWithConstraints(
                     Text(
                         text = "On Table $draftBalls → $remaining: at most one re-rack. Tap +14 for each extra full rack.",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = OutlineWarm,
+                        color = LocalAppTheme.current.textSecondary,
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -770,7 +735,7 @@ BoxWithConstraints(
                     Text(
                         text = "Then foul −1",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = ButtonFoulLight,
+                        color = actions.foul.light,
                     )
                 }
                 }
@@ -818,11 +783,11 @@ private fun FourteenMedianDivider(
 ) {
     val brush = if (landscape) {
         Brush.verticalGradient(
-            listOf(Color.Transparent, ScoreWhite.copy(alpha = 0.35f), Color.Transparent),
+            listOf(Color.Transparent, LocalAppTheme.current.rim.copy(alpha = 0.35f), Color.Transparent),
         )
     } else {
         Brush.horizontalGradient(
-            listOf(Color.Transparent, ScoreWhite.copy(alpha = 0.35f), Color.Transparent),
+            listOf(Color.Transparent, LocalAppTheme.current.rim.copy(alpha = 0.35f), Color.Transparent),
         )
     }
     Box(

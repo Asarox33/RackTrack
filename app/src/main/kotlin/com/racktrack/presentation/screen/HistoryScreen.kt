@@ -43,10 +43,6 @@ import com.racktrack.domain.MatchSummaryReport
 import com.racktrack.domain.model.GameMode
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.formatDuration
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.AppChromeBackground
-import com.racktrack.presentation.theme.LocalAppChrome
-import com.racktrack.presentation.theme.ScoreWhite
 import com.racktrack.presentation.theme.AppChromeBackground
 import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.viewmodel.HistoryUiState
@@ -78,12 +74,12 @@ fun HistoryScreen(
             Text(
                 text = "HISTORY",
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = chrome.textPrimary,
             )
             Text(
                 text = modeLabel(state.gameMode),
                 style = MaterialTheme.typography.titleLarge,
-                color = OutlineWarm,
+                color = chrome.textSecondary,
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(
@@ -108,7 +104,7 @@ fun HistoryScreen(
             Text(
                 text = "Showing ${modeLabel(state.gameMode)} only · name filters match either seat.",
                 style = MaterialTheme.typography.labelLarge,
-                color = ScoreWhite.copy(alpha = 0.55f),
+                color = chrome.textSecondary.copy(alpha = 0.9f),
                 modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
             )
 
@@ -122,7 +118,7 @@ fun HistoryScreen(
                     Text(
                         text = "No ${modeLabel(state.gameMode)} matches yet",
                         style = MaterialTheme.typography.titleLarge,
-                        color = ScoreWhite.copy(alpha = 0.65f),
+                        color = chrome.textSecondary,
                     )
                 }
             } else {
@@ -256,6 +252,7 @@ private fun HistoryFilterField(
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
 ) {
+    val chrome = LocalAppChrome.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -263,13 +260,13 @@ private fun HistoryFilterField(
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = imeAction),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = ScoreWhite,
-            unfocusedTextColor = ScoreWhite,
-            focusedBorderColor = OutlineWarm,
-            unfocusedBorderColor = OutlineWarm.copy(alpha = 0.55f),
-            focusedLabelColor = OutlineWarm,
-            unfocusedLabelColor = ScoreWhite.copy(alpha = 0.65f),
-            cursorColor = OutlineWarm,
+            focusedTextColor = chrome.textPrimary,
+            unfocusedTextColor = chrome.textPrimary,
+            focusedBorderColor = chrome.rim,
+            unfocusedBorderColor = chrome.rim.copy(alpha = 0.45f),
+            focusedLabelColor = chrome.textSecondary,
+            unfocusedLabelColor = chrome.textSecondary.copy(alpha = 0.85f),
+            cursorColor = chrome.accent,
         ),
         modifier = modifier,
     )
@@ -288,7 +285,7 @@ private fun HistoryMatchRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(chrome.surfaceDeep.copy(alpha = 0.72f))
-            .border(1.dp, OutlineWarm.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+            .border(1.dp, chrome.rim.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
             .padding(start = 16.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -301,7 +298,7 @@ private fun HistoryMatchRow(
             Text(
                 text = modeLabel(summary.gameMode),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = chrome.textSecondary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -311,7 +308,7 @@ private fun HistoryMatchRow(
                     "${summary.player1Name}  ${summary.score1}  –  ${summary.score2}  ${summary.player2Name}"
                 },
                 style = MaterialTheme.typography.titleLarge,
-                color = ScoreWhite,
+                color = chrome.textPrimary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -329,7 +326,7 @@ private fun HistoryMatchRow(
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.7f),
+                color = chrome.textSecondary,
             )
         }
         Text(

@@ -51,8 +51,6 @@ import com.racktrack.presentation.component.TexturedChip
 import com.racktrack.presentation.theme.AppThemeBackground
 import com.racktrack.presentation.theme.AppThemeMode
 import com.racktrack.presentation.theme.LocalAppTheme
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -101,19 +99,14 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
             SectionLabel("Appearance")
-            Text(
-                text = "One look for Setup, board, and modals",
-                style = MaterialTheme.typography.bodyLarge,
-                color = chrome.textSecondary,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 AppThemeMode.entries.forEach { mode ->
                     TexturedChip(
-                        label = mode.shortLabel.uppercase(),
+                        label = mode.label.uppercase(),
                         selected = mode == settings.themeMode,
                         onClick = { onThemeSelected(mode) },
                         modifier = Modifier.weight(1f),
@@ -126,12 +119,6 @@ fun SettingsScreen(
                     )
                 }
             }
-            Text(
-                text = settings.themeMode.label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = chrome.textSecondary,
-                modifier = Modifier.padding(top = 8.dp),
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionLabel("Device")
@@ -154,7 +141,7 @@ fun SettingsScreen(
                 Text(
                     text = "Ads removed",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = ScoreWhite.copy(alpha = 0.75f),
+                    color = chrome.textSecondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -332,7 +319,7 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
         Text(
             text = "Fonts · Bebas Neue & Outfit (SIL OFL 1.1)",
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.55f),
+            color = chrome.textSecondary,
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
@@ -348,7 +335,7 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
         Text(
             text = "One device scores the table — no remote play. Match history stays on this phone in v1.",
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.55f),
+            color = chrome.textSecondary,
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -356,6 +343,7 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
 
 @Composable
 private fun AboutMetaRow(label: String, value: String) {
+    val chrome = LocalAppTheme.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -364,12 +352,12 @@ private fun AboutMetaRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.55f),
+            color = chrome.textSecondary,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite,
+            color = chrome.textPrimary,
             textAlign = TextAlign.End,
             modifier = Modifier.padding(start = 12.dp),
         )
@@ -418,17 +406,17 @@ private fun SettingsToggleRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite,
+            color = chrome.textPrimary,
         )
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = ScoreWhite,
-                checkedTrackColor = chrome.accentLight,
-                uncheckedThumbColor = ScoreWhite.copy(alpha = 0.85f),
-                uncheckedTrackColor = Color.White.copy(alpha = 0.18f),
-                uncheckedBorderColor = OutlineWarm.copy(alpha = 0.4f),
+                checkedThumbColor = chrome.onAccent,
+                checkedTrackColor = chrome.accent,
+                uncheckedThumbColor = chrome.textSecondary,
+                uncheckedTrackColor = chrome.surfaceElevated,
+                uncheckedBorderColor = chrome.rim.copy(alpha = 0.45f),
             ),
         )
     }

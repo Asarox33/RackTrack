@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
@@ -52,31 +51,16 @@ import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
 import com.racktrack.domain.model.PushOutPhase
 import com.racktrack.presentation.component.BoardMetrics
+import com.racktrack.presentation.component.BoardStatCell
+import com.racktrack.presentation.component.BoardStatGlyph
+import com.racktrack.presentation.component.BoardStatStrip
 import com.racktrack.presentation.component.CueBallBreakIndicator
 import com.racktrack.presentation.component.MatchPauseButton
-import com.racktrack.presentation.component.PlayerStatIcons
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedOutlineAction
 import com.racktrack.presentation.component.TwoChoiceModal
-import com.racktrack.presentation.theme.ButtonDry
-import com.racktrack.presentation.theme.ButtonDryDark
-import com.racktrack.presentation.theme.ButtonDryLight
-import com.racktrack.presentation.theme.ButtonFoul
-import com.racktrack.presentation.theme.ButtonFoulDark
-import com.racktrack.presentation.theme.ButtonFoulLight
-import com.racktrack.presentation.theme.ButtonGolden
-import com.racktrack.presentation.theme.ButtonGoldenDark
-import com.racktrack.presentation.theme.ButtonGoldenLight
-import com.racktrack.presentation.theme.ButtonPlus
-import com.racktrack.presentation.theme.ButtonPlusDark
-import com.racktrack.presentation.theme.ButtonPlusLight
-import com.racktrack.presentation.theme.ButtonRunOut
-import com.racktrack.presentation.theme.ButtonRunOutDark
-import com.racktrack.presentation.theme.ButtonRunOutLight
-import com.racktrack.presentation.theme.OutlineWarm
 import com.racktrack.presentation.theme.RackTrackTheme
-import com.racktrack.presentation.theme.ScoreWhite
 
 private enum class BreakAnchor {
     TowardEnd,
@@ -113,6 +97,7 @@ fun MatchBoardScreen(
     val landscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val theme = LocalAppTheme.current
+    val actions = theme.actions
     val felt = LocalFeltPalette.current
     val playEnabled = match.status == MatchStatus.IN_PROGRESS && !matchPaused
 
@@ -143,7 +128,7 @@ fun MatchBoardScreen(
                         "${match.gameMode.shortLabel()}  ·  RACE TO ${match.racksToWin}"
                     },
                     style = MaterialTheme.typography.titleLarge,
-                    color = theme.accentLight,
+                    color = theme.textSecondary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = chrome.headerSideReserve),
@@ -252,7 +237,7 @@ fun MatchBoardScreen(
                             style = MaterialTheme.typography.displayLarge.copy(
                                 fontSize = (minOf(screenW.value, screenH.value) * 0.09f).sp,
                             ),
-                            color = OutlineWarm,
+                            color = theme.textSecondary,
                             textAlign = TextAlign.Center,
                         )
                         Spacer(modifier = Modifier.height(chrome.headerToBoardGap))
@@ -265,7 +250,7 @@ fun MatchBoardScreen(
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = (minOf(screenW.value, screenH.value) * 0.035f).sp,
                             ),
-                            color = ScoreWhite.copy(alpha = 0.85f),
+                            color = theme.textPrimary.copy(alpha = 0.85f),
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -303,13 +288,13 @@ fun MatchBoardScreen(
                     title = "PUSH-OUT",
                     subtitle = "Shot result?",
                     primaryLabel = "CLEAN",
-                    primaryBase = ButtonRunOut,
-                    primaryLight = ButtonRunOutLight,
-                    primaryDark = ButtonRunOutDark,
+                    primaryBase = actions.runOut.base,
+                    primaryLight = actions.runOut.light,
+                    primaryDark = actions.runOut.dark,
                     secondaryLabel = "FOUL",
-                    secondaryBase = ButtonFoul,
-                    secondaryLight = ButtonFoulLight,
-                    secondaryDark = ButtonFoulDark,
+                    secondaryBase = actions.foul.base,
+                    secondaryLight = actions.foul.light,
+                    secondaryDark = actions.foul.dark,
                     onPrimary = { onResolvePushOutClean(announcer) },
                     onSecondary = { onResolvePushOutFoul(announcer) },
                 )
@@ -320,13 +305,13 @@ fun MatchBoardScreen(
                     title = "PUSH-OUT",
                     subtitle = "Opponent chooses",
                     primaryLabel = "TAKE",
-                    primaryBase = ButtonRunOut,
-                    primaryLight = ButtonRunOutLight,
-                    primaryDark = ButtonRunOutDark,
+                    primaryBase = actions.runOut.base,
+                    primaryLight = actions.runOut.light,
+                    primaryDark = actions.runOut.dark,
                     secondaryLabel = "GIVE BACK",
-                    secondaryBase = ButtonDry,
-                    secondaryLight = ButtonDryLight,
-                    secondaryDark = ButtonDryDark,
+                    secondaryBase = actions.dry.base,
+                    secondaryLight = actions.dry.light,
+                    secondaryDark = actions.dry.dark,
                     onPrimary = onTakePushOut,
                     onSecondary = onReturnPushOut,
                 )
@@ -488,13 +473,14 @@ private fun MedianDivider(
     thickness: Dp,
     inset: Dp,
 ) {
+    val theme = LocalAppTheme.current
     val brush = if (landscape) {
         Brush.verticalGradient(
-            listOf(Color.Transparent, ScoreWhite.copy(alpha = 0.35f), Color.Transparent),
+            listOf(Color.Transparent, theme.rim.copy(alpha = 0.45f), Color.Transparent),
         )
     } else {
         Brush.horizontalGradient(
-            listOf(Color.Transparent, ScoreWhite.copy(alpha = 0.35f), Color.Transparent),
+            listOf(Color.Transparent, theme.rim.copy(alpha = 0.45f), Color.Transparent),
         )
     }
     Box(
@@ -557,7 +543,8 @@ private fun PlayerPanel(
             screenWidth = screenWidth,
             screenHeight = screenHeight,
         )
-        val nameStyle = MaterialTheme.typography.headlineLarge.copy(fontSize = metrics.nameSp)
+        val nameStyle = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.nameSp)
+        val theme = LocalAppTheme.current
 
         Column(
             modifier = Modifier
@@ -571,6 +558,7 @@ private fun PlayerPanel(
             Text(
                 text = player.name.uppercase(),
                 style = nameStyle,
+                color = theme.textSecondary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
             )
@@ -632,6 +620,7 @@ private fun RaceScoreCluster(
     metrics: BoardMetrics,
     modifier: Modifier = Modifier,
 ) {
+    val actions = LocalAppTheme.current.actions
     val nearRackLoss =
         showFoulWarning && fouls == MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK - 1
     val breakAlpha by animateFloatAsState(
@@ -674,29 +663,46 @@ private fun RaceScoreCluster(
                     size = metrics.cueBallSize,
                 )
             }
-            PlayerStatIcons(
-                gameMode = match.gameMode,
-                runOuts = runOuts,
-                consecutiveFouls = fouls,
-                maxConsecutiveFouls = if (showFoulWarning) {
-                    MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK
-                } else {
-                    0
-                },
-                onClearFouls = if (enabled && showFoulWarning) onClearFouls else null,
-                iconSize = metrics.statIconSize,
-                iconGap = metrics.statIconGap,
-                clearHintSp = metrics.clearHintSp,
-                countSp = metrics.statCountSp,
+            BoardStatStrip(
+                cells = listOf(
+                    BoardStatCell(
+                        label = "RO",
+                        value = runOuts.toString(),
+                        glyph = BoardStatGlyph.CHECK,
+                        emphasized = runOuts > 0,
+                        accent = actions.runOut.light,
+                    ),
+                    BoardStatCell(
+                        label = "Foul",
+                        value = if (showFoulWarning) {
+                            "$fouls/${MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK}"
+                        } else {
+                            fouls.toString()
+                        },
+                        glyph = BoardStatGlyph.WARNING,
+                        emphasized = fouls > 0,
+                        accent = actions.foul.light,
+                        onClick = if (enabled && showFoulWarning && fouls > 0) {
+                            onClearFouls
+                        } else {
+                            null
+                        },
+                        contentDescription = if (fouls > 0) {
+                            "Clear consecutive fouls"
+                        } else {
+                            null
+                        },
+                    ),
+                ),
                 modifier = Modifier
                     .padding(top = metrics.nameToScoreGap)
-                    .heightIn(min = metrics.statIconSize),
+                    .padding(horizontal = metrics.panelPaddingH),
             )
             if (nearRackLoss) {
                 Text(
                     text = "1 MORE FOUL = RACK LOSS",
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = metrics.warnSp),
-                    color = ButtonFoulLight.copy(alpha = warnAlpha),
+                    color = actions.foul.light.copy(alpha = warnAlpha),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     modifier = Modifier
@@ -729,6 +735,7 @@ private fun RaceActionButtons(
     onAnnouncePushOut: () -> Unit,
     onFoul: () -> Unit,
 ) {
+    val actions = LocalAppTheme.current.actions
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(actionGap),
@@ -739,9 +746,7 @@ private fun RaceActionButtons(
         ) {
             TexturedActionButton(
                 label = "+1",
-                base = ButtonPlus,
-                light = ButtonPlusLight,
-                dark = ButtonPlusDark,
+                tone = actions.plus,
                 enabled = enabled,
                 onClick = onPlusOne,
                 modifier = Modifier.weight(1f),
@@ -750,9 +755,7 @@ private fun RaceActionButtons(
             )
             TexturedActionButton(
                 label = "RUN OUT",
-                base = ButtonRunOut,
-                light = ButtonRunOutLight,
-                dark = ButtonRunOutDark,
+                tone = actions.runOut,
                 enabled = enabled && canRunOut,
                 onClick = onRunOut,
                 modifier = Modifier.weight(1f),
@@ -761,9 +764,7 @@ private fun RaceActionButtons(
             )
             TexturedActionButton(
                 label = "FOUL",
-                base = ButtonFoul,
-                light = ButtonFoulLight,
-                dark = ButtonFoulDark,
+                tone = actions.foul,
                 enabled = enabled,
                 onClick = onFoul,
                 modifier = Modifier.weight(1f),
@@ -807,6 +808,7 @@ private fun RaceModeExtraButtons(
     onEightBallLoss: () -> Unit,
     onAnnouncePushOut: () -> Unit,
 ) {
+    val actions = LocalAppTheme.current.actions
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(actionGap),
@@ -814,9 +816,7 @@ private fun RaceModeExtraButtons(
         if (gameMode.supportsGoldenBreak) {
             TexturedActionButton(
                 label = "GOLDEN",
-                base = ButtonGolden,
-                light = ButtonGoldenLight,
-                dark = ButtonGoldenDark,
+                tone = actions.golden,
                 enabled = enabled && canGolden,
                 onClick = onGoldenBreak,
                 modifier = Modifier.weight(1f),
@@ -827,9 +827,7 @@ private fun RaceModeExtraButtons(
         if (gameMode.supportsEightBallLoss) {
             TexturedActionButton(
                 label = "EARLY 8",
-                base = ButtonFoul,
-                light = ButtonFoulLight,
-                dark = ButtonFoulDark,
+                tone = actions.foul,
                 enabled = enabled && canEarlyEight,
                 onClick = onEightBallLoss,
                 modifier = Modifier.weight(1f),
@@ -840,9 +838,7 @@ private fun RaceModeExtraButtons(
         if (gameMode.supportsDryBreak) {
             TexturedActionButton(
                 label = "DRY",
-                base = ButtonDry,
-                light = ButtonDryLight,
-                dark = ButtonDryDark,
+                tone = actions.dry,
                 enabled = enabled && canDry,
                 onClick = onDryBreak,
                 modifier = Modifier.weight(1f),
@@ -853,9 +849,7 @@ private fun RaceModeExtraButtons(
         if (gameMode.supportsPushOut) {
             TexturedActionButton(
                 label = "PUSH OUT",
-                base = ButtonDry,
-                light = ButtonDryLight,
-                dark = ButtonDryDark,
+                tone = actions.dry,
                 enabled = enabled && canPushOut,
                 onClick = onAnnouncePushOut,
                 modifier = Modifier.weight(1f),

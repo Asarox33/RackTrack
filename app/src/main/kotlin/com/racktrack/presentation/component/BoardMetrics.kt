@@ -47,22 +47,22 @@ data class BoardMetrics(
         // --- Pane vertical fractions (portrait half-board) ---
         private const val PAD_V_FRAC = 0.018f
         private const val PAD_H_FRAC = 0.045f
-        private const val NAME_FRAC = 0.072f
-        private const val NAME_SCORE_GAP_FRAC = 0.012f
-        private const val SCORE_ACTIONS_GAP_FRAC = 0.016f
-        private const val ACTION_GAP_FRAC = 0.012f
+        private const val NAME_FRAC = 0.052f
+        private const val NAME_SCORE_GAP_FRAC = 0.008f
+        private const val SCORE_ACTIONS_GAP_FRAC = 0.012f
+        private const val ACTION_GAP_FRAC = 0.010f
         /** Share of pane height for all action rows together. */
-        private const val ACTIONS_BLOCK_FRAC = 0.38f
+        private const val ACTIONS_BLOCK_FRAC = 0.34f
         private const val STAT_ICON_FRAC_OF_CLUSTER = 0.30f
-        private const val SCORE_FRAC_OF_CLUSTER = 0.58f
+        private const val SCORE_FRAC_OF_CLUSTER = 0.62f
         private const val CUE_FRAC_OF_CLUSTER = 0.36f
         private const val CUE_INSET_FRAC = 0.04f
-        private const val VISIT_STAT_FRAC = 0.045f
-        private const val WARN_FRAC = 0.038f
-        private const val HINT_FRAC = 0.030f
-        private const val STAT_COUNT_FRAC = 0.042f
-        private const val STAT_GAP_FRAC = 0.035f
-        private const val ACTION_CORNER_FRAC = 0.28f
+        private const val VISIT_STAT_FRAC = 0.038f
+        private const val WARN_FRAC = 0.034f
+        private const val HINT_FRAC = 0.028f
+        private const val STAT_COUNT_FRAC = 0.038f
+        private const val STAT_GAP_FRAC = 0.028f
+        private const val ACTION_CORNER_FRAC = 0.22f
 
         // --- Full-screen chrome (of min(screenW, screenH)) ---
         private const val SCREEN_PAD_H_FRAC = 0.028f
@@ -85,14 +85,14 @@ data class BoardMetrics(
         /** Ceilings so tablets / tall panes do not grow chrome to absurd sizes. */
         private const val ACTION_HEIGHT_CEIL_DP = 56f
         private const val FOOTER_HEIGHT_CEIL_DP = 48f
-        private const val SCORE_SP_CEIL = 92f
-        private const val NAME_SP_CEIL = 34f
+        private const val SCORE_SP_CEIL = 100f
+        private const val NAME_SP_CEIL = 22f
         private const val STAT_ICON_CEIL_DP = 52f
         private const val CUE_CEIL_DP = 56f
-        private const val VISIT_STAT_SP_CEIL = 22f
-        private const val WARN_SP_CEIL = 18f
-        private const val HINT_SP_CEIL = 14f
-        private const val STAT_COUNT_SP_CEIL = 20f
+        private const val VISIT_STAT_SP_CEIL = 18f
+        private const val WARN_SP_CEIL = 16f
+        private const val HINT_SP_CEIL = 12f
+        private const val STAT_COUNT_SP_CEIL = 17f
         private const val SCREEN_PAD_H_CEIL_DP = 24f
         private const val SCREEN_PAD_V_CEIL_DP = 14f
         private const val HEADER_SIDE_CEIL_DP = 120f

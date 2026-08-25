@@ -32,11 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
-import com.racktrack.presentation.theme.ButtonRunOut
-import com.racktrack.presentation.theme.ButtonRunOutDark
-import com.racktrack.presentation.theme.ButtonRunOutLight
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 
 /** Shared integer picker modal (race length, etc.) — swipe or tap arrows. */
 private const val MODAL_MAX_HEIGHT_FRACTION = 0.72f
@@ -64,6 +60,8 @@ fun IntStepperModal(
     onConfirm: (Int) -> Unit,
 ) {
     val felt = LocalFeltPalette.current
+    val theme = LocalAppTheme.current
+    val actions = theme.actions
     var value by remember(initial) { mutableIntStateOf(initial.coerceIn(min, max)) }
 
     BoxWithConstraints(
@@ -100,7 +98,7 @@ fun IntStepperModal(
                         listOf(felt.dark.copy(alpha = 0.98f), felt.vignette),
                     ),
                 )
-                .border(2.dp, OutlineWarm.copy(alpha = 0.75f), RoundedCornerShape(corner))
+                .border(2.dp, theme.rim.copy(alpha = 0.75f), RoundedCornerShape(corner))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -112,7 +110,7 @@ fun IntStepperModal(
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = theme.textPrimary,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(padV))
@@ -138,9 +136,7 @@ fun IntStepperModal(
                 )
                 TexturedActionButton(
                     label = "CONFIRM",
-                    base = ButtonRunOut,
-                    light = ButtonRunOutLight,
-                    dark = ButtonRunOutDark,
+                    tone = actions.runOut,
                     enabled = true,
                     onClick = { onConfirm(value) },
                     modifier = Modifier.weight(1f),

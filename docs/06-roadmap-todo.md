@@ -137,9 +137,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ### Suggested build order (do in sequence)
 
-1. 🟨 **Design System (one world + 3 themes)** — Blue glossy / Light clean / Dark neon;
-   no felt carpet identity. Tokens in `AppThemeMode`; Settings appearance picker live.
-   Refine controls + light-theme contrast on board next.
+1. ✅ **Design System v1 freeze (2026-08-25)** — one world + 3 themes shipped on `rc/2.0.0`:
+   **Blue glossy** / **Warm light** / **Dark teal**. Iterate later; do not regress without
+   owner lock. Next DS work = brand assets, not a palette reset.
 2. ⬜ **Brand assets** — RT / rack mark; icon + feature graphic + splash aligned with DS.
 3. ⬜ **KMP + Compose Multiplatform scaffold** — shared domain (+ UI where practical);
    unlock shared string catalogs for Android (+ iOS later).
@@ -164,14 +164,20 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
 - ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
-- ⬜ **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
-  - **Locked (2026-08-22, revised):** **one visual world** for the whole app (Setup,
-    History, Settings, Board, modals). No APP/GAME split; no felt carpet as identity.
-  - **Three themes** (`AppThemeMode`): **Blue glossy** (Blue Night + cyan), **Light clean**
-    (teal accents), **Dark neon** (teal neon, use sparingly). User picks in Settings.
+- 🟨 **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
+  - **Locked v1 (2026-08-25, owner freeze):** first DS pass frozen for iteration baseline.
+    **one visual world** + **B/C/D DNA** (keep B filigree+détourage, C warm light,
+    D a11y dark; **avoid** A purple neon and E/F low-contrast glass).
+  - **Three themes** (`AppThemeMode`):
+    - **Blue glossy** = DNA **B** (filigree + textured tonal board buttons)
+    - **Warm light** = DNA **C** (ivory / parchment, warm olive accents — not cold grey-blue)
+    - **Dark teal** = DNA **D** (accessible contrast, subtle filigree)
+  - Board hierarchy: **score hero**; quieter player names; **unified HUD stat strip**
+    (Inn/HR/Foul or RO/Foul) with mini icons — **no ball icons** on counters; cue ball
+    for break/hand only. Secondary status as quiet chips (On table / Opening break).
   - Accent used sparingly (selection / primary CTA). Unselected = neutral.
-  - **Avoid:** gold, casino bling, omnipresent neon, heavy textures, photo balls as hero,
-    borders on everything, cloth-as-chrome.
+  - **Avoid:** gold/casino bling, omnipresent neon, photo balls as hero, glass cards,
+    borders on everything, cloth-as-chrome, cold clinical Light.
   - **Brand mark:** monogram **RT** / stylized rack — not photo 8-ball on START.
   - **START MATCH** = primary visual hero on setup.
   - Icon + feature graphic + splash with the same system; Play 1.2 assets until then.
@@ -201,6 +207,11 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-25: Owner — **DS v1 freeze** on `rc/2.0.0`: Blue glossy / **Warm light** /
+  Dark teal; filigree on all three; HUD stat strip; iterate later, no silent palette reset.
+- 2026-08-22: Owner mocks (ChatGPT A–F) — keep **B** (filigree + textured détourage) +
+  **C** (light energy) + **D** (a11y); drop A/E/F. Board: framed Inn/HR/Foul & RO/Foul
+  (no balls on counters), score hero, quieter names, Blue filigree, board button grain.
 - 2026-08-22: Owner — drop APP/GAME two-worlds; **one world + 3 themes** (Blue glossy /
   Light clean / Dark neon). Felt cloth settings removed; `AppThemeMode` in Settings.
   Board uses `AppThemeBackground`. Refine light-theme contrast next.
