@@ -156,14 +156,18 @@ private fun LandscapeSetup(
             }
             // Stack names vertically in landscape so the text field stays tall enough to read.
             NameField(
-                label = if (solo) "Player" else "Player 1",
+                label = if (solo) {
+                    Strings.get(StringKey.PLAYER)
+                } else {
+                    Strings.get(StringKey.PLAYER_1)
+                },
                 value = state.player1Name,
                 onValueChange = onPlayer1Change,
                 fieldModifier = Modifier.fillMaxWidth(),
             )
             if (!solo) {
                 NameField(
-                    label = "Player 2",
+                    label = Strings.get(StringKey.PLAYER_2),
                     value = state.player2Name,
                     onValueChange = onPlayer2Change,
                     fieldModifier = Modifier.fillMaxWidth(),
@@ -185,7 +189,11 @@ private fun LandscapeSetup(
             )
             if (!solo) {
                 Text(
-                    text = if (state.gameMode.isPointScoring) "Who starts?" else "Who breaks first?",
+                    text = if (state.gameMode.isPointScoring) {
+                        Strings.get(StringKey.WHO_STARTS)
+                    } else {
+                        Strings.get(StringKey.WHO_BREAKS_FIRST)
+                    },
                     style = MaterialTheme.typography.titleLarge,
                 )
                 BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = true)
@@ -198,7 +206,11 @@ private fun LandscapeSetup(
                 )
             }
             TexturedActionButton(
-                label = if (solo) "START TRAINING" else "START MATCH",
+                label = if (solo) {
+                    Strings.get(StringKey.START_TRAINING)
+                } else {
+                    Strings.get(StringKey.START_MATCH)
+                },
                 base = chrome.accent,
                 light = chrome.accentLight,
                 dark = chrome.accentDark,
@@ -209,7 +221,7 @@ private fun LandscapeSetup(
                 useFeltGrain = false,
             )
             TexturedActionButton(
-                label = "HISTORY",
+                label = Strings.get(StringKey.HISTORY),
                 base = chrome.accent,
                 light = chrome.accentLight,
                 dark = chrome.accentDark,
@@ -267,14 +279,18 @@ private fun PortraitSetup(
         }
 
         NameField(
-            label = if (solo) "Player" else "Player 1",
+            label = if (solo) {
+                Strings.get(StringKey.PLAYER)
+            } else {
+                Strings.get(StringKey.PLAYER_1)
+            },
             value = state.player1Name,
             onValueChange = onPlayer1Change,
             fieldModifier = Modifier.fillMaxWidth(),
         )
         if (!solo) {
             NameField(
-                label = "Player 2",
+                label = Strings.get(StringKey.PLAYER_2),
                 value = state.player2Name,
                 onValueChange = onPlayer2Change,
                 fieldModifier = Modifier.fillMaxWidth(),
@@ -293,9 +309,9 @@ private fun PortraitSetup(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = if (state.gameMode.isPointScoring) {
-                        "Who starts?"
+                        Strings.get(StringKey.WHO_STARTS)
                     } else {
-                        "Who breaks first?"
+                        Strings.get(StringKey.WHO_BREAKS_FIRST)
                     },
                     style = MaterialTheme.typography.titleLarge,
                 )
@@ -314,7 +330,11 @@ private fun PortraitSetup(
 
         Spacer(modifier = Modifier.height(4.dp))
         TexturedActionButton(
-            label = if (solo) "START TRAINING" else "START MATCH",
+            label = if (solo) {
+                Strings.get(StringKey.START_TRAINING)
+            } else {
+                Strings.get(StringKey.START_MATCH)
+            },
             base = chrome.accent,
             light = chrome.accentLight,
             dark = chrome.accentDark,
@@ -325,7 +345,7 @@ private fun PortraitSetup(
                 useFeltGrain = false,
             )
         TexturedActionButton(
-            label = "HISTORY",
+            label = Strings.get(StringKey.HISTORY),
             base = chrome.accent,
             light = chrome.accentLight,
             dark = chrome.accentDark,
@@ -353,7 +373,7 @@ private fun FormatControls(
         verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp),
     ) {
         if (state.gameMode.isPointScoring) {
-            Text("Distance", style = MaterialTheme.typography.titleLarge)
+            Text(Strings.get(StringKey.DISTANCE), style = MaterialTheme.typography.titleLarge)
             val pointsOptions = MatchFormatOptions.pointsToWin
             val pointsIndex =
                 pointsOptions.indexOf(state.pointsToWin).let { if (it >= 0) it else 0 }
@@ -366,7 +386,7 @@ private fun FormatControls(
                 valueSp = pickerSp,
                 modifier = Modifier.widthIn(max = 420.dp),
             )
-            Text("Innings", style = MaterialTheme.typography.titleLarge)
+            Text(Strings.get(StringKey.INNINGS), style = MaterialTheme.typography.titleLarge)
             val inningsOptions = MatchFormatOptions.inningsLimits
             val unlimitedIndex = inningsOptions.size
             val inningsIndex =
@@ -389,7 +409,7 @@ private fun FormatControls(
                 modifier = Modifier.widthIn(max = 420.dp),
             )
         } else {
-            Text("Race to", style = MaterialTheme.typography.titleLarge)
+            Text(Strings.get(StringKey.RACE_TO), style = MaterialTheme.typography.titleLarge)
             SwipeIntPicker(
                 value = state.racksToWin,
                 onValueChange = onRacksChange,
@@ -411,7 +431,7 @@ private fun BreakerRow(
     val chrome = LocalAppChrome.current
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         TexturedChip(
-            label = state.player1Name.ifBlank { "Player 1" }.uppercase(),
+            label = state.player1Name.ifBlank { Strings.get(StringKey.PLAYER_1) }.uppercase(),
             selected = state.player1BreaksFirst,
             onClick = { onBreakerChange(true) },
             modifier = Modifier.widthIn(min = 120.dp),
@@ -423,7 +443,7 @@ private fun BreakerRow(
                 useFeltGrain = false,
             )
         TexturedChip(
-            label = state.player2Name.ifBlank { "Player 2" }.uppercase(),
+            label = state.player2Name.ifBlank { Strings.get(StringKey.PLAYER_2) }.uppercase(),
             selected = !state.player1BreaksFirst,
             onClick = { onBreakerChange(false) },
             modifier = Modifier.widthIn(min = 120.dp),
@@ -445,11 +465,11 @@ private fun BreakRuleRow(
 ) {
     val chrome = LocalAppChrome.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Break rule", style = MaterialTheme.typography.titleLarge)
+        Text(Strings.get(StringKey.BREAK_RULE), style = MaterialTheme.typography.titleLarge)
         if (!compact) Box(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TexturedChip(
-                label = "ALTERNATE",
+                label = Strings.get(StringKey.ALTERNATE),
                 selected = state.breakRule == BreakRule.ALTERNATE,
                 onClick = { onBreakRuleChange(BreakRule.ALTERNATE) },
                 modifier = Modifier.widthIn(min = 120.dp),
@@ -461,7 +481,7 @@ private fun BreakRuleRow(
                 useFeltGrain = false,
             )
             TexturedChip(
-                label = "WINNER",
+                label = Strings.get(StringKey.WINNER),
                 selected = state.breakRule == BreakRule.WINNER,
                 onClick = { onBreakRuleChange(BreakRule.WINNER) },
                 modifier = Modifier.widthIn(min = 120.dp),
@@ -488,7 +508,7 @@ private fun SoloTrainingRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Solo Training",
+            text = Strings.get(StringKey.SOLO_TRAINING),
             style = MaterialTheme.typography.titleLarge,
             color = chrome.textPrimary,
             modifier = Modifier.weight(1f),
@@ -519,7 +539,7 @@ private fun GameModeRow(
         horizontalAlignment = if (compact) Alignment.Start else Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("Game mode", style = MaterialTheme.typography.titleLarge)
+        Text(Strings.get(StringKey.GAME_MODE), style = MaterialTheme.typography.titleLarge)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             listOf(
                 GameMode.EIGHT_BALL to "8",

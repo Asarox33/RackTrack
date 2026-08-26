@@ -1,31 +1,48 @@
 package com.racktrack.i18n
 
-/**
- * Typed UI string keys for the upcoming i18n train.
- * English defaults live in [EnStrings]; locales plug in later without reshaping modules.
- */
-enum class StringKey {
-    APP_NAME,
-    SETUP_TAGLINE,
-}
-
 /** Resolves [StringKey] values for the active locale. */
 fun interface StringProvider {
     fun get(key: StringKey): String
 }
 
-/** English defaults (scaffold). Expand as UI copy is extracted. */
-object EnStrings : StringProvider {
-    override fun get(key: StringKey): String =
-        when (key) {
-            StringKey.APP_NAME -> "RackTrack"
-            StringKey.SETUP_TAGLINE -> "American pool"
-        }
+/**
+ * Provider that overlays a locale map on [fallback] (English by default).
+ * Missing keys fall back so catalogs can grow incrementally.
+ */
+class OverlayStringProvider(
+    private val overlay: Map<StringKey, String>,
+    private val fallback: StringProvider = EnStrings,
+) : StringProvider {
+    override fun get(key: StringKey): String = overlay[key] ?: fallback.get(key)
 }
 
-/** Process-wide provider; Android UI can swap this when locales ship. */
+/** Process-wide provider; Android sets this from the system locale at cold start. */
 object Strings {
     var provider: StringProvider = EnStrings
 
     fun get(key: StringKey): String = provider.get(key)
+
+    /** Replaces `{0}`, `{1}`, … placeholders in the resolved string. */
+    fun format(
+        key: StringKey,
+        vararg args: Any,
+    ): String {
+        var result = get(key)
+        args.forEachIndexed { index, arg ->
+            result = result.replace("{$index}", arg.toString())
+        }
+        return result
+    }
+
+    fun format(
+        provider: StringProvider,
+        key: StringKey,
+        vararg args: Any,
+    ): String {
+        var result = provider.get(key)
+        args.forEachIndexed { index, arg ->
+            result = result.replace("{$index}", arg.toString())
+        }
+        return result
+    }
 }

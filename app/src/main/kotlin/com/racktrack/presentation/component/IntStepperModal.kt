@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.appearance.LocalFeltPalette
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.theme.LocalAppTheme
 
 /** Shared integer picker modal (race length, etc.) — swipe or tap arrows. */
@@ -128,14 +130,14 @@ fun IntStepperModal(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 TexturedOutlineAction(
-                    label = "CANCEL",
+                    label = Strings.get(StringKey.CANCEL),
                     enabled = true,
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f),
                     height = actionH,
                 )
                 TexturedActionButton(
-                    label = "CONFIRM",
+                    label = Strings.get(StringKey.CONFIRM),
                     tone = actions.runOut,
                     enabled = true,
                     onClick = { onConfirm(value) },

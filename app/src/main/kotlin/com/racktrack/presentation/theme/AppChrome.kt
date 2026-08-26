@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
 import com.racktrack.appearance.FeltPalette
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import kotlin.math.min
 
 /**
@@ -23,14 +25,12 @@ import kotlin.math.min
  * DS v1 freeze 2026-08-25 — docs/06-roadmap-todo.md (rc/2.0.0).
  */
 enum class AppThemeMode(
-    val label: String,
-    val shortLabel: String,
+    val labelKey: StringKey,
     val palette: AppThemePalette,
 ) {
     /** DNA B — night blue + soft filigree + club action tones. */
     BLUE_GLOSSY(
-        label = "Blue glossy",
-        shortLabel = "Blue",
+        labelKey = StringKey.THEME_BLUE_GLOSSY,
         palette = AppThemePalette(
             background = Color(0xFF101A28),
             surface = Color(0xFF172436),
@@ -60,8 +60,7 @@ enum class AppThemeMode(
 
     /** DNA C — warm clear light (ivory / parchment, not cold blue-grey). */
     LIGHT_CLEAN(
-        label = "Warm light",
-        shortLabel = "Light",
+        labelKey = StringKey.THEME_WARM_LIGHT,
         palette = AppThemePalette(
             background = Color(0xFFE8E2D8),
             surface = Color(0xFFF0EBE3),
@@ -91,8 +90,7 @@ enum class AppThemeMode(
 
     /** DNA D — dark accessible, minimal ornament, strong contrast. */
     DARK_NEON(
-        label = "Dark teal",
-        shortLabel = "Dark",
+        labelKey = StringKey.THEME_DARK_TEAL,
         palette = AppThemePalette(
             background = Color(0xFF0E1216),
             surface = Color(0xFF161C22),
@@ -119,6 +117,9 @@ enum class AppThemeMode(
             ),
         ),
     ),
+    ;
+
+    fun displayLabel(): String = Strings.get(labelKey)
 }
 
 /** Semantic board / modal action fill (kept distinct, tuned per theme). */

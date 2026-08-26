@@ -52,6 +52,8 @@ import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.BoardQuietChip
 import com.racktrack.presentation.component.BoardStatCell
@@ -250,8 +252,8 @@ fun FourteenOneBoardContent(
 
         if (showIllegalOpenChoice) {
             TwoChoiceModal(
-                title = "ILLEGAL OPEN",
-                subtitle = "Opponent accepts the table?",
+                title = Strings.get(StringKey.ILLEGAL_OPEN_TITLE),
+                subtitle = Strings.get(StringKey.ILLEGAL_OPEN_SUBTITLE),
                 primaryLabel = "ACCEPT",
                 primaryBase = actions.runOut.base,
                 primaryLight = actions.runOut.light,
@@ -461,20 +463,20 @@ private fun FourteenOneScoreCluster(
                 ) {
                     BoardQuietChip(
                         text = buildString {
-                            append("On table ${match.objectBallsOnTable}")
+                            append(Strings.format(StringKey.ON_TABLE, match.objectBallsOnTable))
                             if (match.currentRun > 0) {
                                 append(" · Run ${match.currentRun}")
                             }
                         },
                     )
                     if (match.awaitingOpeningBreak) {
-                        BoardQuietChip(text = "Opening break", accent = true)
+                        BoardQuietChip(text = Strings.get(StringKey.OPENING_BREAK), accent = true)
                     }
                 }
             }
             if (foulWarn && hasHand) {
                 Text(
-                    text = "NEXT FOUL = −15",
+                    text = Strings.get(StringKey.NEXT_FOUL_MINUS_15),
                     style = MaterialTheme.typography.labelLarge.copy(fontSize = metrics.warnSp),
                     color = actions.foul.light.copy(alpha = warnAlpha),
                     modifier = Modifier
@@ -547,7 +549,7 @@ private fun FourteenOneActionButtons(
                 corner = actionCorner,
             )
             Text(
-                text = "Opening break",
+                text = Strings.get(StringKey.OPENING_BREAK),
                 style = MaterialTheme.typography.labelLarge,
                 color = LocalAppTheme.current.textSecondary,
                 textAlign = TextAlign.Center,
@@ -588,10 +590,14 @@ private fun VisitEndBallsModal(
     val rackPoints = totalRacks * POINTS_FOURTEEN
     val partialPoints = boardRemainder + modalClearPoints + syncPoints
     val visitTotal = match.currentRun + priorPoints + syncPoints
-    val racksLabel = if (totalRacks <= 1) "$totalRacks rack" else "$totalRacks racks"
+    val racksLabel = if (totalRacks <= 1) {
+        Strings.format(StringKey.RACK_SINGULAR, totalRacks)
+    } else {
+        Strings.format(StringKey.RACK_PLURAL, totalRacks)
+    }
     val title = when (action) {
-        VisitEndAction.PASS -> "END INNING — PASS"
-        VisitEndAction.FOUL -> "END INNING — FOUL"
+        VisitEndAction.PASS -> Strings.get(StringKey.END_INNING_PASS)
+        VisitEndAction.FOUL -> Strings.get(StringKey.END_INNING_FOUL)
     }
     val confirmBase = when (action) {
         VisitEndAction.PASS -> actions.runOut.base
@@ -677,7 +683,7 @@ BoxWithConstraints(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Balls left on table",
+                    text = Strings.get(StringKey.BALLS_LEFT_ON_TABLE),
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalAppTheme.current.textSecondary,
                 )
@@ -708,7 +714,7 @@ BoxWithConstraints(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Full continuous rack (use for racks missed on the board)",
+                    text = Strings.get(StringKey.FULL_CONTINUOUS_RACK_HINT),
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalAppTheme.current.textSecondary,
                     textAlign = TextAlign.Center,
@@ -716,7 +722,13 @@ BoxWithConstraints(
 
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "$racksLabel (+$rackPoints)  ·  +$partialPoints partial  ·  Visit $visitTotal",
+                    text = Strings.format(
+                        StringKey.VISIT_SUMMARY,
+                        racksLabel,
+                        rackPoints,
+                        partialPoints,
+                        visitTotal,
+                    ),
                     style = MaterialTheme.typography.titleLarge,
                     color = actions.runOut.light,
                     textAlign = TextAlign.Center,
@@ -724,7 +736,11 @@ BoxWithConstraints(
                 if (impliesAutoRerack) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "On Table $draftBalls → $remaining: at most one re-rack. Tap +14 for each extra full rack.",
+                        text = Strings.format(
+                            StringKey.AUTO_RERACK_HINT,
+                            draftBalls,
+                            remaining,
+                        ),
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalAppTheme.current.textSecondary,
                         textAlign = TextAlign.Center,
@@ -733,7 +749,7 @@ BoxWithConstraints(
                 if (action == VisitEndAction.FOUL) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Then foul −1",
+                        text = Strings.get(StringKey.THEN_FOUL_MINUS_1),
                         style = MaterialTheme.typography.bodyLarge,
                         color = actions.foul.light,
                     )
@@ -751,7 +767,7 @@ BoxWithConstraints(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 TexturedActionButton(
-                    label = "CANCEL",
+                    label = Strings.get(StringKey.CANCEL),
                     base = felt.mid,
                     light = felt.light,
                     dark = felt.dark,
@@ -761,7 +777,7 @@ BoxWithConstraints(
                     height = 48.dp,
                 )
                 TexturedActionButton(
-                    label = "CONFIRM",
+                    label = Strings.get(StringKey.CONFIRM),
                     base = confirmBase,
                     light = confirmLight,
                     dark = confirmDark,

@@ -16,6 +16,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.racktrack.monetization.MonetizationFacade
+import com.racktrack.i18n.LocaleCatalogs
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.screen.HistoryDetailScreen
 import com.racktrack.presentation.screen.HistoryScreen
 import com.racktrack.presentation.screen.MatchBoardScreen
@@ -24,6 +26,7 @@ import com.racktrack.presentation.screen.SetupScreen
 import com.racktrack.presentation.theme.RackTrackTheme
 import com.racktrack.presentation.viewmodel.AppScreen
 import com.racktrack.presentation.viewmodel.MatchViewModel
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MatchViewModel by viewModels()
@@ -32,6 +35,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        Strings.provider = LocaleCatalogs.resolve(Locale.getDefault().language)
         monetization = MonetizationFacade(this, lifecycleScope)
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)

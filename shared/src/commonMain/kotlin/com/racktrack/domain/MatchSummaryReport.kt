@@ -2,6 +2,9 @@ package com.racktrack.domain
 
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.MatchEventType
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.StringProvider
+import com.racktrack.i18n.Strings
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
@@ -23,47 +26,100 @@ data class SoloInningRow(
 
 /** Shared copy/helpers for match summary UI and PDF export. */
 object MatchSummaryReport {
-    fun modeLabel(mode: GameMode): String =
+    fun modeLabel(
+        mode: GameMode,
+        provider: StringProvider = Strings.provider,
+    ): String =
         when (mode) {
-            GameMode.EIGHT_BALL -> "8-BALL"
-            GameMode.NINE_BALL -> "9-BALL"
-            GameMode.TEN_BALL -> "10-BALL"
-            GameMode.FOURTEEN_ONE -> "14/1"
+            GameMode.EIGHT_BALL -> provider.get(StringKey.MODE_8_BALL)
+            GameMode.NINE_BALL -> provider.get(StringKey.MODE_9_BALL)
+            GameMode.TEN_BALL -> provider.get(StringKey.MODE_10_BALL)
+            GameMode.FOURTEEN_ONE -> provider.get(StringKey.MODE_14_1)
         }
 
     /** End-of-session modal / PDF hero title. */
-    fun sessionOverTitle(summary: MatchSummary): String = if (summary.solo) "TRAINING OVER" else "MATCH OVER"
+    fun sessionOverTitle(
+        summary: MatchSummary,
+        provider: StringProvider = Strings.provider,
+    ): String = provider.get(if (summary.solo) StringKey.TRAINING_OVER else StringKey.MATCH_OVER)
 
     /** Default PDF / text report title. */
-    fun sessionSummaryTitle(summary: MatchSummary): String = if (summary.solo) "TRAINING SUMMARY" else "MATCH SUMMARY"
+    fun sessionSummaryTitle(
+        summary: MatchSummary,
+        provider: StringProvider = Strings.provider,
+    ): String = provider.get(if (summary.solo) StringKey.TRAINING_SUMMARY else StringKey.MATCH_SUMMARY)
 
-    fun shareChooserLabel(summary: MatchSummary): String = if (summary.solo) "Share training" else "Share match"
+    fun shareChooserLabel(
+        summary: MatchSummary,
+        provider: StringProvider = Strings.provider,
+    ): String = provider.get(if (summary.solo) StringKey.SHARE_TRAINING else StringKey.SHARE_MATCH)
 
-    fun opponentsLabel(summary: MatchSummary): String =
+    fun opponentsLabel(
+        summary: MatchSummary,
+        provider: StringProvider = Strings.provider,
+    ): String =
         if (summary.solo) {
-            "${summary.player1Name} — solo"
+            Strings.format(provider, StringKey.OPPONENTS_SOLO, summary.player1Name)
         } else {
-            "${summary.player1Name} vs ${summary.player2Name}"
+            Strings.format(provider, StringKey.OPPONENTS_VS, summary.player1Name, summary.player2Name)
         }
 
-    fun subtitle(summary: MatchSummary): String =
+    fun subtitle(
+        summary: MatchSummary,
+        provider: StringProvider = Strings.provider,
+    ): String =
         if (summary.gameMode.isPointScoring) {
             if (summary.solo) {
                 val innings =
                     summary.inningsLimit?.let {
-                        "${summary.innings1} inn · lim $it"
-                    } ?: "${summary.innings1} inn"
-                "14/1 solo  ·  ${summary.score1}  ·  ${summary.pointsToWin} pts  ·  $innings"
+                        Strings.format(
+                            provider,
+                            StringKey.SUBTITLE_INNINGS_LIMITED,
+                            summary.innings1,
+                            it,
+                        )
+                    } ?: Strings.format(provider, StringKey.SUBTITLE_INNINGS, summary.innings1)
+                Strings.format(
+                    provider,
+                    StringKey.SUBTITLE_14_1_SOLO,
+                    summary.score1,
+                    summary.pointsToWin,
+                    innings,
+                )
             } else {
                 val innings =
                     summary.inningsLimit?.let {
-                        "${summary.innings1}/${summary.innings2} inn · lim $it"
-                    } ?: "${summary.innings1}/${summary.innings2} inn"
-                "14/1  ·  ${summary.score1} – ${summary.score2}  ·  ${summary.pointsToWin} pts  ·  $innings"
+                        Strings.format(
+                            provider,
+                            StringKey.SUBTITLE_INNINGS_PAIR_LIMITED,
+                            summary.innings1,
+                            summary.innings2,
+                            it,
+                        )
+                    } ?: Strings.format(
+                        provider,
+                        StringKey.SUBTITLE_INNINGS_PAIR,
+                        summary.innings1,
+                        summary.innings2,
+                    )
+                Strings.format(
+                    provider,
+                    StringKey.SUBTITLE_14_1,
+                    summary.score1,
+                    summary.score2,
+                    summary.pointsToWin,
+                    innings,
+                )
             }
         } else {
-            "${modeLabel(summary.gameMode)}  ·  ${summary.score1} – ${summary.score2}  ·  " +
-                "race to ${summary.racksToWin}"
+            Strings.format(
+                provider,
+                StringKey.SUBTITLE_RACE,
+                modeLabel(summary.gameMode, provider),
+                summary.score1,
+                summary.score2,
+                summary.racksToWin,
+            )
         }
 
     fun formatDuration(millis: Long): String {
@@ -78,23 +134,29 @@ object MatchSummaryReport {
         }
     }
 
-    fun rackEndLabel(type: MatchEventType): String =
+    fun rackEndLabel(
+        type: MatchEventType,
+        provider: StringProvider = Strings.provider,
+    ): String =
         when (type) {
             MatchEventType.PLUS_ONE -> "+1"
-            MatchEventType.RUN_OUT -> "Run out"
-            MatchEventType.GOLDEN_BREAK -> "Golden"
-            MatchEventType.EIGHT_BALL_LOSS -> "Early 8"
-            MatchEventType.THREE_FOULS_LOSS -> "3 fouls"
+            MatchEventType.RUN_OUT -> provider.get(StringKey.RACK_END_RUN_OUT)
+            MatchEventType.GOLDEN_BREAK -> provider.get(StringKey.RACK_END_GOLDEN)
+            MatchEventType.EIGHT_BALL_LOSS -> provider.get(StringKey.RACK_END_EARLY_8)
+            MatchEventType.THREE_FOULS_LOSS -> provider.get(StringKey.RACK_END_THREE_FOULS)
             else -> ""
         }
 
-    fun inningEndLabel(type: MatchEventType?): String =
+    fun inningEndLabel(
+        type: MatchEventType?,
+        provider: StringProvider = Strings.provider,
+    ): String =
         when (type) {
-            MatchEventType.PASS -> "pass"
-            MatchEventType.FOUL -> "foul"
-            MatchEventType.BREAK_FOUL -> "brk"
-            MatchEventType.ACCEPT_ILLEGAL_OPEN -> "acc"
-            null -> "win"
+            MatchEventType.PASS -> provider.get(StringKey.INNING_END_PASS)
+            MatchEventType.FOUL -> provider.get(StringKey.INNING_END_FOUL)
+            MatchEventType.BREAK_FOUL -> provider.get(StringKey.INNING_END_BRK)
+            MatchEventType.ACCEPT_ILLEGAL_OPEN -> provider.get(StringKey.INNING_END_ACC)
+            null -> provider.get(StringKey.INNING_END_WIN)
             else -> ""
         }
 
@@ -152,6 +214,7 @@ object MatchSummaryReport {
     fun playerStatLines(
         summary: MatchSummary,
         side: Int,
+        provider: StringProvider = Strings.provider,
     ): List<String> {
         val fouls = if (side == 1) summary.totalFouls1 else summary.totalFouls2
         val runOuts = if (side == 1) summary.runOuts1 else summary.runOuts2
@@ -164,19 +227,27 @@ object MatchSummaryReport {
         val innings = if (side == 1) summary.innings1 else summary.innings2
         return if (summary.gameMode.isPointScoring) {
             listOf(
-                "HR $highRun",
-                "avg ${formatAverage(average)}",
-                "Inn $innings",
-                "Fouls $fouls",
+                Strings.format(provider, StringKey.STAT_HR, highRun),
+                Strings.format(provider, StringKey.STAT_AVG, formatAverage(average)),
+                Strings.format(provider, StringKey.STAT_INN, innings),
+                Strings.format(provider, StringKey.STAT_FOULS, fouls),
             )
         } else {
             buildList {
-                add("Run outs $runOuts")
-                add("Fouls $fouls")
-                if (summary.gameMode.supportsGoldenBreak) add("Golden $golden")
-                if (summary.gameMode.supportsEightBallLoss) add("Early 8 $early8")
-                if (summary.gameMode.supportsDryBreak) add("Dry $dry")
-                if (summary.gameMode.supportsPushOut) add("Push outs $pushOuts")
+                add(Strings.format(provider, StringKey.STAT_RUN_OUTS, runOuts))
+                add(Strings.format(provider, StringKey.STAT_FOULS, fouls))
+                if (summary.gameMode.supportsGoldenBreak) {
+                    add(Strings.format(provider, StringKey.STAT_GOLDEN, golden))
+                }
+                if (summary.gameMode.supportsEightBallLoss) {
+                    add(Strings.format(provider, StringKey.STAT_EARLY_8, early8))
+                }
+                if (summary.gameMode.supportsDryBreak) {
+                    add(Strings.format(provider, StringKey.STAT_DRY, dry))
+                }
+                if (summary.gameMode.supportsPushOut) {
+                    add(Strings.format(provider, StringKey.STAT_PUSH_OUTS, pushOuts))
+                }
             }
         }
     }
@@ -240,54 +311,71 @@ object MatchSummaryReport {
         title: String = sessionSummaryTitle(summary),
         startedAtLabel: String? = null,
         endedAtLabel: String? = null,
+        provider: StringProvider = Strings.provider,
     ): List<String> =
         buildList {
             add(title)
-            if (startedAtLabel != null) add("Started  $startedAtLabel")
-            if (endedAtLabel != null) add("Ended  $endedAtLabel")
-            add("Duration  ${formatDuration(summary.totalDurationMillis)}")
+            if (startedAtLabel != null) {
+                add("${provider.get(StringKey.STARTED)}  $startedAtLabel")
+            }
+            if (endedAtLabel != null) {
+                add("${provider.get(StringKey.ENDED)}  $endedAtLabel")
+            }
+            add(
+                "${provider.get(StringKey.DURATION)}  ${formatDuration(summary.totalDurationMillis)}",
+            )
             add("")
-            val winner = summary.winnerName.ifEmpty { "DRAW" }
+            val winner =
+                summary.winnerName.ifEmpty { provider.get(StringKey.DRAW) }
             add(winner.uppercase())
-            if (summary.winnerName.isNotEmpty()) add("WINS")
-            add(subtitle(summary))
+            if (summary.winnerName.isNotEmpty()) add(provider.get(StringKey.WINS))
+            add(subtitle(summary, provider))
             add("")
             add(summary.player1Name.uppercase())
-            addAll(playerStatLines(summary, 1).map { "  $it" })
+            addAll(playerStatLines(summary, 1, provider).map { "  $it" })
             if (!summary.solo) {
                 add("")
                 add(summary.player2Name.uppercase())
-                addAll(playerStatLines(summary, 2).map { "  $it" })
+                addAll(playerStatLines(summary, 2, provider).map { "  $it" })
             }
             add("")
             if (summary.gameMode.isPointScoring) {
-                add("INNINGS")
+                add(provider.get(StringKey.INNINGS_SECTION))
                 if (summary.solo) {
-                    add("#  End  Pts  Tot")
+                    add(
+                        "#  ${provider.get(StringKey.COL_END)}  " +
+                            "${provider.get(StringKey.COL_PTS)}  ${provider.get(StringKey.COL_TOT)}",
+                    )
                     soloInningRows(summary.inningScores1).forEach { row ->
                         add(
-                            "#${row.inning.index}  ${inningEndLabel(row.inning.endType)}  " +
+                            "#${row.inning.index}  ${inningEndLabel(row.inning.endType, provider)}  " +
                                 "${row.inning.points}  ${row.total}",
                         )
                     }
                 } else {
-                    add("#  End  Pts  Tot  Tot  Pts  End")
+                    add(
+                        "#  ${provider.get(StringKey.COL_END)}  " +
+                            "${provider.get(StringKey.COL_PTS)}  ${provider.get(StringKey.COL_TOT)}  " +
+                            "${provider.get(StringKey.COL_TOT)}  ${provider.get(StringKey.COL_PTS)}  " +
+                            provider.get(StringKey.COL_END),
+                    )
                     pairedInningRows(summary.inningScores1, summary.inningScores2).forEach { row ->
-                        val end1 = row.player1?.let { inningEndLabel(it.endType) } ?: "—"
+                        val end1 = row.player1?.let { inningEndLabel(it.endType, provider) } ?: "—"
                         val pts1 = row.player1?.points?.toString() ?: "—"
                         val tot1 = row.total1?.toString() ?: "—"
                         val tot2 = row.total2?.toString() ?: "—"
                         val pts2 = row.player2?.points?.toString() ?: "—"
-                        val end2 = row.player2?.let { inningEndLabel(it.endType) } ?: "—"
+                        val end2 = row.player2?.let { inningEndLabel(it.endType, provider) } ?: "—"
                         add("#${row.index}  $end1  $pts1  $tot1  $tot2  $pts2  $end2")
                     }
                 }
             } else {
-                add("RACKS")
+                add(provider.get(StringKey.RACKS_SECTION))
                 summary.racks.forEach { rack ->
                     add(
                         "#${rack.index}  ${rack.winnerName}  " +
-                            "${rackEndLabel(rack.endType)}  ${formatDuration(rack.durationMillis)}",
+                            "${rackEndLabel(rack.endType, provider)}  " +
+                            formatDuration(rack.durationMillis),
                     )
                 }
             }

@@ -50,6 +50,8 @@ import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.Player
 import com.racktrack.domain.model.PlayerId
 import com.racktrack.domain.model.PushOutPhase
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.component.BoardMetrics
 import com.racktrack.presentation.component.BoardStatCell
 import com.racktrack.presentation.component.BoardStatGlyph
@@ -211,7 +213,11 @@ fun MatchBoardScreen(
                     )
                     Spacer(modifier = Modifier.width(chrome.footerGap))
                     TexturedOutlineAction(
-                        label = if (match.solo) "NEW TRAINING" else "NEW MATCH",
+                        label = if (match.solo) {
+                            Strings.get(StringKey.NEW_TRAINING)
+                        } else {
+                            Strings.get(StringKey.NEW_MATCH)
+                        },
                         onClick = onNewMatch,
                         enabled = true,
                         height = chrome.footerActionHeight,
@@ -233,7 +239,7 @@ fun MatchBoardScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "PAUSED",
+                            text = Strings.get(StringKey.PAUSED),
                             style = MaterialTheme.typography.displayLarge.copy(
                                 fontSize = (minOf(screenW.value, screenH.value) * 0.09f).sp,
                             ),
@@ -243,9 +249,9 @@ fun MatchBoardScreen(
                         Spacer(modifier = Modifier.height(chrome.headerToBoardGap))
                         Text(
                             text = if (match.solo) {
-                                "Training timing stopped  ·  Tap to resume"
+                                Strings.get(StringKey.PAUSE_TRAINING_HINT)
                             } else {
-                                "Match timing stopped  ·  Tap to resume"
+                                Strings.get(StringKey.PAUSE_MATCH_HINT)
                             },
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = (minOf(screenW.value, screenH.value) * 0.035f).sp,
@@ -286,7 +292,7 @@ fun MatchBoardScreen(
                 val announcer = match.currentShooterId
                 TwoChoiceModal(
                     title = "PUSH-OUT",
-                    subtitle = "Shot result?",
+                    subtitle = Strings.get(StringKey.PUSH_OUT_SHOT_RESULT),
                     primaryLabel = "CLEAN",
                     primaryBase = actions.runOut.base,
                     primaryLight = actions.runOut.light,
@@ -303,7 +309,7 @@ fun MatchBoardScreen(
             if (playEnabled && match.pushOutPhase == PushOutPhase.AWAITING_CHOICE) {
                 TwoChoiceModal(
                     title = "PUSH-OUT",
-                    subtitle = "Opponent chooses",
+                    subtitle = Strings.get(StringKey.PUSH_OUT_OPPONENT_CHOOSES),
                     primaryLabel = "TAKE",
                     primaryBase = actions.runOut.base,
                     primaryLight = actions.runOut.light,
@@ -686,7 +692,7 @@ private fun RaceScoreCluster(
                             null
                         },
                         contentDescription = if (fouls > 0) {
-                            "Clear consecutive fouls"
+                            Strings.get(StringKey.CLEAR_CONSECUTIVE_FOULS)
                         } else {
                             null
                         },

@@ -146,7 +146,9 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
    adaptive launcher + splash wired. **Play screenshots deferred** to 2.0 store publish.
 3. ✅ **KMP shared scaffold (2026-08-26)** — `:shared` (android + jvm) holds domain +
    string-key skeleton; Compose UI stays on `:app`. iOS target deferred.
-4. ⬜ **i18n** — en default + fr/de/es/it/nl/pt (extract UI / summary / PDF with CMP).
+4. ✅ **i18n (2026-08-26)** — en default + fr/de/es/it/nl/pt catalogs; system locale;
+   Setup / Settings / History / summary / PDF / prose dialogs extracted. Board jargon
+   chips stay English. Manual locale override deferred.
 5. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
    scoreboard-relevant deltas only.
 6. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
@@ -156,16 +158,15 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 ### Detail (same items)
 
 - 🟨 **KMP + Compose Multiplatform** — ✅ **scaffold (2026-08-26):** `:shared` holds
-  domain + `i18n` string-key skeleton (android + jvm). Remaining: CMP UI where practical;
-  **iOS target** later (Mac). Next train = extract UI strings into shared catalogs.
-- ⬜ **i18n (localization)** — English default; also **fr, de, es, it, nl, pt**:
-  - Extract all user-facing UI copy (today mostly hardcoded English in Compose) +
-    summary / PDF strings into `:shared` `StringKey` / catalogs
-  - Fallback: **English** (`EnStrings` today); system locale; optional Settings
-    override later if needed
-  - Short board jargon (**PASS / FOUL / RUN OUT**) may stay English where natural;
-    Settings / About / modals fully translated
-  - Prefer extracting strings **with** Compose Multiplatform so Android + iOS share catalogs
+  domain + `i18n` catalogs (android + jvm). Remaining: CMP UI where practical;
+  **iOS target** later (Mac).
+- ✅ **i18n (localization) (2026-08-26)** — English default; also **fr, de, es, it, nl, pt**:
+  - Setup / Settings / About / History / match summary / PDF / prose dialogs +
+    `MatchSummaryReport` labels via `:shared` `StringKey` / locale catalogs
+  - Fallback: **English**; cold-start **system locale** (`LocaleCatalogs.resolve`);
+    Settings manual override **not** shipped yet
+  - Short board jargon chips (**+1 / PASS / FOUL / RUN OUT / GOLDEN / …**) stay English
+  - CMP resources / iOS sharing deferred with CMP UI train
 - ⬜ **Multi-ruleset** — FFB today; later selectable packs (WPA / Matchroom / APA / BCA & CSI)
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
@@ -215,6 +216,9 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-26: **i18n** — `:shared` catalogs en/fr/de/es/it/nl/pt + `LocaleCatalogs` /
+  `format`; system locale at cold start; Setup/Settings/History/summary/PDF/prose
+  dialogs extracted; board jargon chips remain English; no Settings locale override yet.
 - 2026-08-26: **`rc/2.0.0` version bump** — `versionName` **2.0.0** / `versionCode`
   **200000** + CHANGELOG + Play notes (still merge-after-1.2-prod).
 - 2026-08-26: **KMP scaffold** — `:shared` (android+jvm) with domain + `StringKey` /

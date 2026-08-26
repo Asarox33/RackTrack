@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import com.racktrack.BuildConfig
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.MatchFormatOptions
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.SwipeIntPicker
@@ -92,13 +94,13 @@ fun SettingsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
             Text(
-                text = "SETTINGS",
+                text = Strings.get(StringKey.SETTINGS),
                 style = MaterialTheme.typography.headlineLarge,
                 color = chrome.textPrimary,
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel("Appearance")
+            SectionLabel(Strings.get(StringKey.SECTION_APPEARANCE))
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -106,7 +108,7 @@ fun SettingsScreen(
             ) {
                 AppThemeMode.entries.forEach { mode ->
                     TexturedChip(
-                        label = mode.label.uppercase(),
+                        label = mode.displayLabel().uppercase(),
                         selected = mode == settings.themeMode,
                         onClick = { onThemeSelected(mode) },
                         modifier = Modifier.weight(1f),
@@ -121,25 +123,25 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel("Device")
+            SectionLabel(Strings.get(StringKey.SECTION_DEVICE))
             Spacer(modifier = Modifier.height(6.dp))
             SettingsToggleRow(
-                label = "Keep screen on",
+                label = Strings.get(StringKey.KEEP_SCREEN_ON),
                 checked = settings.keepScreenOn,
                 onCheckedChange = onKeepScreenOnChange,
             )
             SettingsToggleRow(
-                label = "Haptics",
+                label = Strings.get(StringKey.HAPTICS),
                 checked = settings.hapticsEnabled,
                 onCheckedChange = onHapticsChange,
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel("Ads")
+            SectionLabel(Strings.get(StringKey.SECTION_ADS))
             Spacer(modifier = Modifier.height(8.dp))
             if (adsRemoved) {
                 Text(
-                    text = "Ads removed",
+                    text = Strings.get(StringKey.ADS_REMOVED),
                     style = MaterialTheme.typography.bodyMedium,
                     color = chrome.textSecondary,
                     textAlign = TextAlign.Center,
@@ -147,7 +149,7 @@ fun SettingsScreen(
                 )
             } else {
                 TexturedActionButton(
-                    label = "REMOVE ADS",
+                    label = Strings.get(StringKey.REMOVE_ADS),
                     base = chrome.accent,
                     light = chrome.accentLight,
                     dark = chrome.accentDark,
@@ -159,7 +161,7 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
             TexturedActionButton(
-                label = "RESTORE PURCHASES",
+                label = Strings.get(StringKey.RESTORE_PURCHASES),
                 base = chrome.surface,
                 light = chrome.surfaceElevated,
                 dark = chrome.surfaceDeep,
@@ -170,7 +172,7 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel("Default race to")
+            SectionLabel(Strings.get(StringKey.DEFAULT_RACE_TO))
             Spacer(modifier = Modifier.height(8.dp))
             SwipeIntPicker(
                 value = settings.defaultRacksToWin,
@@ -181,7 +183,7 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel("Default distance (14/1)")
+            SectionLabel(Strings.get(StringKey.DEFAULT_DISTANCE_14_1))
             Spacer(modifier = Modifier.height(8.dp))
             val pointsOptions = MatchFormatOptions.pointsToWin
             val pointsIndex =
@@ -196,7 +198,7 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel("Default innings (14/1)")
+            SectionLabel(Strings.get(StringKey.DEFAULT_INNINGS_14_1))
             Spacer(modifier = Modifier.height(8.dp))
             val inningsOptions = MatchFormatOptions.inningsLimits
             val unlimitedIndex = inningsOptions.size
@@ -220,11 +222,11 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel("Default break rule (8/9/10)")
+            SectionLabel(Strings.get(StringKey.DEFAULT_BREAK_RULE))
             Spacer(modifier = Modifier.height(8.dp))
             ChipRow {
                 TexturedChip(
-                    label = "ALTERNATE",
+                    label = Strings.get(StringKey.ALTERNATE),
                     selected = settings.defaultBreakRule == BreakRule.ALTERNATE,
                     onClick = { onDefaultBreakRuleChange(BreakRule.ALTERNATE) },
                     selectedLight = chrome.accentLight,
@@ -235,7 +237,7 @@ fun SettingsScreen(
                 useFeltGrain = false,
             )
                 TexturedChip(
-                    label = "WINNER",
+                    label = Strings.get(StringKey.WINNER),
                     selected = settings.defaultBreakRule == BreakRule.WINNER,
                     onClick = { onDefaultBreakRuleChange(BreakRule.WINNER) },
                     selectedLight = chrome.accentLight,
@@ -248,10 +250,10 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel("Rules")
+            SectionLabel(Strings.get(StringKey.SECTION_RULES))
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "FFB American pool rules 2026–2027",
+                text = Strings.get(StringKey.FFB_RULES_LINK),
                 style = MaterialTheme.typography.bodyLarge,
                 color = chrome.accentLight,
                 textDecoration = TextDecoration.Underline,
@@ -267,7 +269,7 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel("About")
+            SectionLabel(Strings.get(StringKey.SECTION_ABOUT))
             Spacer(modifier = Modifier.height(8.dp))
             AboutPanel(onOpenRepo = {
                 context.startActivity(
@@ -277,7 +279,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
             TexturedActionButton(
-                label = "BACK",
+                label = Strings.get(StringKey.BACK),
                 base = chrome.accent,
                 light = chrome.accentLight,
                 dark = chrome.accentDark,
@@ -309,21 +311,21 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        AboutMetaRow(label = "App", value = "RackTrack")
+        AboutMetaRow(label = Strings.get(StringKey.ABOUT_APP), value = Strings.get(StringKey.APP_NAME))
         AboutMetaRow(
-            label = "Version",
+            label = Strings.get(StringKey.ABOUT_VERSION),
             value = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
         )
-        AboutMetaRow(label = "Build", value = buildKind)
-        AboutMetaRow(label = "Built", value = builtAt)
+        AboutMetaRow(label = Strings.get(StringKey.ABOUT_BUILD), value = buildKind)
+        AboutMetaRow(label = Strings.get(StringKey.ABOUT_BUILT), value = builtAt)
         Text(
-            text = "Fonts · Bebas Neue & Outfit (SIL OFL 1.1)",
+            text = Strings.get(StringKey.ABOUT_FONTS),
             style = MaterialTheme.typography.bodyLarge,
             color = chrome.textSecondary,
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            text = "GitHub · Asarox33/RackTrack",
+            text = Strings.get(StringKey.ABOUT_GITHUB),
             style = MaterialTheme.typography.bodyLarge,
             color = chrome.accentLight,
             textDecoration = TextDecoration.Underline,
@@ -333,7 +335,7 @@ private fun AboutPanel(onOpenRepo: () -> Unit) {
                 .padding(vertical = 4.dp),
         )
         Text(
-            text = "One device scores the table — no remote play. Match history stays on this phone in v1.",
+            text = Strings.get(StringKey.ABOUT_BLURB),
             style = MaterialTheme.typography.bodyLarge,
             color = chrome.textSecondary,
             modifier = Modifier.fillMaxWidth(),

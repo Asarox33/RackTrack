@@ -4,7 +4,7 @@
 
 - **Language**: Kotlin (null-safety and idioms — see `docs/05-conventions.md`)
 - **Modules**: `:app` (Android UI / data / monetization) + `:shared` (KMP `commonMain`
-  domain + i18n string-key skeleton; targets **android** + **jvm**)
+  domain + i18n catalogs en/fr/de/es/it/nl/pt; targets **android** + **jvm**)
 - **UI**: Jetpack Compose, Material 3 (Android `:app` only for now — no CMP UI yet)
 - **Local settings**: SharedPreferences (`data/AppPreferences`)
 - **Match history**: JSON file under app files (`data/JsonMatchHistoryStore`) — no Room/KSP
@@ -27,13 +27,14 @@ shared/src/commonMain/kotlin/com/racktrack/
 │   ├── PushOutEngine.kt
 │   ├── FourteenOneEngine.kt
 │   ├── MatchStats.kt      # MatchSummary DTO + summarize()
-│   └── MatchSummaryReport.kt  # shared labels / filename stem for PDF
-└── i18n/                  # StringKey + EnStrings + Strings provider (i18n train next)
+│   └── MatchSummaryReport.kt  # shared labels / filename stem for PDF (uses StringProvider)
+└── i18n/                  # StringKey + En/Fr/De/Es/It/Nl/Pt + LocaleCatalogs + Strings
 
 app/src/main/kotlin/com/racktrack/
-├── MainActivity.kt
+├── MainActivity.kt            # resolves system locale → Strings.provider
 ├── appearance/            # FeltTone / FeltPalette (UI + prefs)
 ├── presentation/
+│   ├── i18n/              # LocalStrings CompositionLocal
 │   ├── screen/            # Setup, boards, Summary, History, SettingsScreen
 │   ├── share/             # MatchSummaryPdfWriter + MatchSummaryShare
 │   ├── component/         # BoardMetrics, SwipeIntPicker, icons, textured controls, haptics
@@ -63,8 +64,9 @@ app/src/main/kotlin/com/racktrack/
 
 Pool scoring rules stay in pure engines so JVM unit tests stay fast (`:shared:jvmTest`).
 The UI is a split scoreboard on Android. Completed matches are snapshotted as
-`MatchSummary` for history replay and PDF share. KMP unlocks shared catalogs for the
-i18n train; Compose Multiplatform UI / iOS targets come later.
+`MatchSummary` for history replay and PDF share. Locale catalogs live in `:shared`
+(`LocaleCatalogs` + `Strings`); Compose reads them via `LocalStrings` / `Strings.get`.
+Compose Multiplatform UI / iOS targets come later.
 
 ## 4. Data flow (example: race +1)
 

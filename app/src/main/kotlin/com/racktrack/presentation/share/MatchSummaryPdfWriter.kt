@@ -9,6 +9,8 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import com.racktrack.domain.MatchSummary
 import com.racktrack.domain.MatchSummaryReport
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import java.io.File
 import java.io.FileOutputStream
 import java.text.DateFormat
@@ -88,10 +90,10 @@ object MatchSummaryPdfWriter {
             drawPlayerCards(summary)
             y += 18f
             if (summary.gameMode.isPointScoring) {
-                drawSectionTitle("INNINGS")
+                drawSectionTitle(Strings.get(StringKey.INNINGS_SECTION))
                 drawInningsTable(summary)
             } else {
-                drawSectionTitle("RACKS")
+                drawSectionTitle(Strings.get(StringKey.RACKS_SECTION))
                 drawRacksTable(summary)
             }
             finishPage()
@@ -110,7 +112,7 @@ object MatchSummaryPdfWriter {
                 c,
                 rightEdge,
                 ry,
-                "Started",
+                Strings.get(StringKey.STARTED),
                 formatDateTime(summary.startedAtMillis),
             )
             ry += 14f
@@ -118,7 +120,7 @@ object MatchSummaryPdfWriter {
                 c,
                 rightEdge,
                 ry,
-                "Ended",
+                Strings.get(StringKey.ENDED),
                 formatDateTime(summary.endedAtMillis),
             )
             ry += 14f
@@ -126,7 +128,7 @@ object MatchSummaryPdfWriter {
                 c,
                 rightEdge,
                 ry,
-                "Duration",
+                Strings.get(StringKey.DURATION),
                 MatchSummaryReport.formatDuration(summary.totalDurationMillis),
             )
 
@@ -136,16 +138,20 @@ object MatchSummaryPdfWriter {
             c.drawText(title.uppercase(Locale.getDefault()), MARGIN_LEFT, hy, titlePaint)
             hy += 28f
             if (summary.solo) {
-                val name = summary.player1Name.ifEmpty { "Player" }.uppercase(Locale.getDefault())
+                val name = summary.player1Name.ifEmpty {
+                    Strings.get(StringKey.PLAYER_FALLBACK)
+                }.uppercase(Locale.getDefault())
                 c.drawText(name, MARGIN_LEFT, hy, winnerPaint)
                 hy += 16f
-                c.drawText("SOLO", MARGIN_LEFT, hy, onFeltBody)
+                c.drawText(Strings.get(StringKey.SOLO), MARGIN_LEFT, hy, onFeltBody)
             } else {
-                val winner = summary.winnerName.ifEmpty { "DRAW" }.uppercase(Locale.getDefault())
+                val winner = summary.winnerName.ifEmpty {
+                    Strings.get(StringKey.DRAW)
+                }.uppercase(Locale.getDefault())
                 c.drawText(winner, MARGIN_LEFT, hy, winnerPaint)
                 if (summary.winnerName.isNotEmpty()) {
                     hy += 16f
-                    c.drawText("WINS", MARGIN_LEFT, hy, onFeltBody)
+                    c.drawText(Strings.get(StringKey.WINS), MARGIN_LEFT, hy, onFeltBody)
                 }
             }
             hy += 18f
@@ -180,7 +186,7 @@ object MatchSummaryPdfWriter {
                 paint(theme.accent),
             )
             val brandEnd = drawBrandWordmark(c, MARGIN_LEFT, 28f)
-            c.drawText("  ·  continued", brandEnd, 28f, brandPaint)
+            c.drawText(Strings.get(StringKey.CONTINUED), brandEnd, 28f, brandPaint)
             y = CONTINUED_HEADER + 24f
         }
 
@@ -248,11 +254,24 @@ object MatchSummaryPdfWriter {
         private fun drawRacksTable(summary: MatchSummary) {
             if (summary.racks.isEmpty()) {
                 ensureSpace(20f)
-                canvas!!.drawText("No rack timings recorded", MARGIN_LEFT, y, mutedPaint)
+                canvas!!.drawText(
+                    Strings.get(StringKey.NO_RACK_TIMINGS),
+                    MARGIN_LEFT,
+                    y,
+                    mutedPaint,
+                )
                 y += 16f
                 return
             }
-            drawTableHeader(listOf("#", "Winner", "End", "Time"), floatArrayOf(0.10f, 0.42f, 0.28f, 0.20f))
+            drawTableHeader(
+                listOf(
+                    "#",
+                    Strings.get(StringKey.COL_WINNER),
+                    Strings.get(StringKey.COL_END),
+                    Strings.get(StringKey.COL_TIME),
+                ),
+                floatArrayOf(0.10f, 0.42f, 0.28f, 0.20f),
+            )
             summary.racks.forEachIndexed { index, rack ->
                 ensureSpace(ROW_HEIGHT + 4f)
                 drawTableRow(
@@ -279,7 +298,12 @@ object MatchSummaryPdfWriter {
             )
             if (rows.isEmpty()) {
                 ensureSpace(20f)
-                canvas!!.drawText("No innings recorded", MARGIN_LEFT, y, mutedPaint)
+                canvas!!.drawText(
+                    Strings.get(StringKey.NO_INNINGS_RECORDED),
+                    MARGIN_LEFT,
+                    y,
+                    mutedPaint,
+                )
                 y += 16f
                 return
             }
@@ -288,7 +312,15 @@ object MatchSummaryPdfWriter {
             val weights = INNINGS_WEIGHTS
             drawInningsNameHeader(name1, name2, weights)
             drawTableHeader(
-                cells = listOf("#", "End", "Pts", "Tot", "Tot", "Pts", "End"),
+                cells = listOf(
+                    "#",
+                    Strings.get(StringKey.COL_END),
+                    Strings.get(StringKey.COL_PTS),
+                    Strings.get(StringKey.COL_TOT),
+                    Strings.get(StringKey.COL_TOT),
+                    Strings.get(StringKey.COL_PTS),
+                    Strings.get(StringKey.COL_END),
+                ),
                 weights = weights,
                 separatorAfterColumns = INNINGS_SEPARATOR_AFTER,
             )
@@ -315,7 +347,12 @@ object MatchSummaryPdfWriter {
             val rows = MatchSummaryReport.soloInningRows(summary.inningScores1)
             if (rows.isEmpty()) {
                 ensureSpace(20f)
-                canvas!!.drawText("No innings recorded", MARGIN_LEFT, y, mutedPaint)
+                canvas!!.drawText(
+                    Strings.get(StringKey.NO_INNINGS_RECORDED),
+                    MARGIN_LEFT,
+                    y,
+                    mutedPaint,
+                )
                 y += 16f
                 return
             }
@@ -335,7 +372,12 @@ object MatchSummaryPdfWriter {
             )
             y = top + ROW_HEIGHT
             drawTableHeader(
-                cells = listOf("#", "End", "Pts", "Tot"),
+                cells = listOf(
+                    "#",
+                    Strings.get(StringKey.COL_END),
+                    Strings.get(StringKey.COL_PTS),
+                    Strings.get(StringKey.COL_TOT),
+                ),
                 weights = weights,
                 separatorAfterColumns = SOLO_INNINGS_SEPARATOR_AFTER,
             )
@@ -377,7 +419,7 @@ object MatchSummaryPdfWriter {
         }
 
         private fun truncateHeaderName(name: String): String {
-            val trimmed = name.trim().ifEmpty { "Player" }
+            val trimmed = name.trim().ifEmpty { Strings.get(StringKey.PLAYER_FALLBACK) }
             return if (trimmed.length <= INNINGS_NAME_MAX) {
                 trimmed
             } else {
@@ -475,7 +517,7 @@ object MatchSummaryPdfWriter {
             val c = canvas!!
             val footerY = PAGE_HEIGHT - 22f
             c.drawText(generatorFooter(), MARGIN_LEFT, footerY, footerPaint)
-            val pageLabel = "Page $pageNumber"
+            val pageLabel = Strings.format(StringKey.PAGE_N, pageNumber)
             val pageWidth = footerPaint.measureText(pageLabel)
             c.drawText(
                 pageLabel,
@@ -492,11 +534,15 @@ object MatchSummaryPdfWriter {
             val version = versionName.trim()
             return when {
                 version.isNotEmpty() && versionCode > 0 ->
-                    "Generated by RackTrack $version (build $versionCode)"
+                    Strings.format(
+                        StringKey.GENERATED_BY_VERSION_BUILD,
+                        version,
+                        versionCode,
+                    )
                 version.isNotEmpty() ->
-                    "Generated by RackTrack $version"
+                    Strings.format(StringKey.GENERATED_BY_VERSION, version)
                 else ->
-                    "Generated by RackTrack"
+                    Strings.get(StringKey.GENERATED_BY)
             }
         }
     }

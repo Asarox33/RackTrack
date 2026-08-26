@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.racktrack.R
 import com.racktrack.appearance.LocalFeltPalette
+import com.racktrack.i18n.Strings
+import com.racktrack.presentation.i18n.LocalStrings
 
 /** Fallback only — prefer [LocalAppTheme] text/outline for UI copy. Soft off-white. */
 val ScoreWhite = Color(0xFFE4EAEF)
@@ -138,6 +140,7 @@ fun RackTrackTheme(
         LocalAppTheme provides theme,
         LocalFeltPalette provides theme.asFeltPalette(),
         LocalHapticsEnabled provides hapticsEnabled,
+        LocalStrings provides Strings.provider,
     ) {
         MaterialTheme(
             colorScheme = colors,

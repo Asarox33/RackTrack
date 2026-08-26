@@ -14,8 +14,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
   teal (filigree + board HUD stat strip).
 - **Brand** — stylized R + RackTrack wordmark; Play icon, feature graphic, remove-ads IAP
   art; in-app launcher mipmaps + cold-start splash (Blue glossy).
-- **KMP shared module** — pure domain (+ string-key skeleton for upcoming i18n) lives in
-  `:shared` (android + jvm); Compose UI stays on Android.
+- **KMP shared module** — pure domain lives in `:shared` (android + jvm); Compose UI stays
+  on Android.
+- **i18n** — UI / summary / PDF / prose dialogs in **en** (default) + **fr / de / es / it /
+  nl / pt** from system locale; board action chips stay English abbreviations.
 
 ### Notes
 

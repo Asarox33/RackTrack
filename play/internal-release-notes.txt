@@ -1,6 +1,6 @@
 <fr-FR>
-RackTrack 2.0.0 — train 2.0 (rc). Design System (Blue glossy / Warm light / Dark teal), nouvelle identité visuelle, module partagé KMP (domain + i18n à venir). Pas encore pour le Play production 1.2.
+RackTrack 2.0.0 — train 2.0 (rc). Design System, identité visuelle, module KMP, i18n (en/fr/de/es/it/nl/pt, locale système). Pas encore le Play production 1.2.
 </fr-FR>
 <en-US>
-RackTrack 2.0.0 — 2.0 train (rc). Design System (Blue glossy / Warm light / Dark teal), new brand assets, KMP shared module (domain + upcoming i18n). Not the 1.2 Play production gate yet.
+RackTrack 2.0.0 — 2.0 train (rc). Design System, brand, KMP shared module, i18n (en/fr/de/es/it/nl/pt, system locale). Not the 1.2 Play production gate yet.
 </en-US>
