@@ -3,10 +3,9 @@ package com.racktrack.presentation.screen
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,23 +16,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -42,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
+import com.racktrack.domain.model.GameMode
+import com.racktrack.domain.model.RulesetPack
 import com.racktrack.i18n.AppLanguage
 import com.racktrack.i18n.StringKey
 import com.racktrack.i18n.Strings
@@ -63,20 +61,28 @@ fun SettingsScreen(
     onRestorePurchases: () -> Unit = {},
     onThemeSelected: (AppThemeMode) -> Unit,
     onAppLanguageSelected: (AppLanguage) -> Unit = {},
+    onRulesetPackSelected: (RulesetPack) -> Unit = {},
     onKeepScreenOnChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
-    onDefaultRacksChange: (Int) -> Unit,
+    onDefaultRacksChange: (GameMode, Int) -> Unit,
+    onDefaultBreakRuleChange: (GameMode, BreakRule) -> Unit,
     onDefaultPointsChange: (Int) -> Unit,
     onDefaultInningsChange: (Int?) -> Unit,
-    onDefaultBreakRuleChange: (BreakRule) -> Unit = {},
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val chrome = LocalAppTheme.current
     val scrollState = rememberScrollState()
+    var editingDefaultsMode by remember { mutableStateOf<GameMode?>(null) }
 
-    BackHandler(onBack = onBack)
+    BackHandler {
+        if (editingDefaultsMode != null) {
+            editingDefaultsMode = null
+        } else {
+            onBack()
+        }
+    }
 
     AppThemeBackground(modifier = modifier) {
         Box(
@@ -84,116 +90,258 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .safeDrawingPadding(),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-            Text(
-                text = Strings.get(StringKey.SETTINGS),
-                style = MaterialTheme.typography.headlineLarge,
-                color = chrome.textPrimary,
-            )
+            val editingMode = editingDefaultsMode
+            if (editingMode != null) {
+                ModeDefaultsEditor(
+                    mode = editingMode,
+                    settings = settings,
+                    scrollState = scrollState,
+                    onDefaultRacksChange = onDefaultRacksChange,
+                    onDefaultBreakRuleChange = onDefaultBreakRuleChange,
+                    onDefaultPointsChange = onDefaultPointsChange,
+                    onDefaultInningsChange = onDefaultInningsChange,
+                    onClose = { editingDefaultsMode = null },
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = Strings.get(StringKey.SETTINGS),
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = chrome.textPrimary,
+                    )
 
-            Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel(Strings.get(StringKey.SECTION_APPEARANCE))
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                AppThemeMode.entries.forEach { mode ->
-                    TexturedChip(
-                        label = mode.displayLabel().uppercase(),
-                        selected = mode == settings.themeMode,
-                        onClick = { onThemeSelected(mode) },
-                        modifier = Modifier.weight(1f),
-                        selectedLight = mode.palette.accentLight,
-                        selectedDark = mode.palette.accentDark,
-                        idleLight = chrome.surfaceElevated,
-                        idleDark = chrome.surfaceDeep,
-                        height = 48.dp,
+                    Spacer(modifier = Modifier.height(14.dp))
+                    SectionLabel(Strings.get(StringKey.SECTION_APPEARANCE))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        AppThemeMode.entries.forEach { mode ->
+                            TexturedChip(
+                                label = mode.displayLabel().uppercase(),
+                                selected = mode == settings.themeMode,
+                                onClick = { onThemeSelected(mode) },
+                                modifier = Modifier.weight(1f),
+                                selectedLight = mode.palette.accentLight,
+                                selectedDark = mode.palette.accentDark,
+                                idleLight = chrome.surfaceElevated,
+                                idleDark = chrome.surfaceDeep,
+                                height = 48.dp,
+                                useFeltGrain = false,
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionLabel(Strings.get(StringKey.SECTION_LANGUAGE))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SwipeLanguagePicker(
+                        language = settings.appLanguage,
+                        onLanguageChange = onAppLanguageSelected,
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionLabel(Strings.get(StringKey.SECTION_DEVICE))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    SettingsToggleRow(
+                        label = Strings.get(StringKey.KEEP_SCREEN_ON),
+                        checked = settings.keepScreenOn,
+                        onCheckedChange = onKeepScreenOnChange,
+                    )
+                    SettingsToggleRow(
+                        label = Strings.get(StringKey.HAPTICS),
+                        checked = settings.hapticsEnabled,
+                        onCheckedChange = onHapticsChange,
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionLabel(Strings.get(StringKey.SECTION_MATCH_DEFAULTS))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = Strings.get(StringKey.MATCH_DEFAULTS_HINT),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = chrome.textSecondary,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    DefaultsModeTabs.forEach { mode ->
+                        SettingsNavRow(
+                            title = mode.settingsLabel(),
+                            subtitle = settings.defaultsSummary(mode),
+                            onClick = { editingDefaultsMode = mode },
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionLabel(Strings.get(StringKey.SECTION_RULESET))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = Strings.get(StringKey.RULESET_HINT),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = chrome.textSecondary,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ChipRow {
+                        RulesetPack.entries.forEach { pack ->
+                            TexturedChip(
+                                label = pack.shortLabel,
+                                selected = settings.rulesetPack == pack,
+                                onClick = { onRulesetPackSelected(pack) },
+                                selectedLight = chrome.accentLight,
+                                selectedDark = chrome.accentDark,
+                                idleLight = chrome.surface,
+                                idleDark = chrome.surfaceDeep,
+                                height = 40.dp,
+                                useFeltGrain = false,
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = Strings.format(
+                            StringKey.RULES_OFFICIAL_LINK,
+                            settings.rulesetPack.shortLabel,
+                        ),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = chrome.accentLight,
+                        textDecoration = TextDecoration.Underline,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(settings.rulesetPack.officialRulesUrl()),
+                                    ),
+                                )
+                            }
+                            .padding(vertical = 6.dp),
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SectionLabel(Strings.get(StringKey.SECTION_ADS))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (adsRemoved) {
+                        Text(
+                            text = Strings.get(StringKey.ADS_REMOVED),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = chrome.textSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TexturedActionButton(
+                            label = Strings.get(StringKey.RESTORE_PURCHASES),
+                            base = chrome.surface,
+                            light = chrome.surfaceElevated,
+                            dark = chrome.surfaceDeep,
+                            enabled = true,
+                            onClick = onRestorePurchases,
+                            height = 52.dp,
+                            maxLines = 2,
+                            useFeltGrain = false,
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            TexturedActionButton(
+                                label = Strings.get(StringKey.REMOVE_ADS),
+                                base = chrome.accent,
+                                light = chrome.accentLight,
+                                dark = chrome.accentDark,
+                                enabled = true,
+                                onClick = onRemoveAds,
+                                modifier = Modifier.weight(1f),
+                                height = 52.dp,
+                                maxLines = 2,
+                                useFeltGrain = false,
+                            )
+                            TexturedActionButton(
+                                label = Strings.get(StringKey.RESTORE_PURCHASES),
+                                base = chrome.surface,
+                                light = chrome.surfaceElevated,
+                                dark = chrome.surfaceDeep,
+                                enabled = true,
+                                onClick = onRestorePurchases,
+                                modifier = Modifier.weight(1f),
+                                height = 52.dp,
+                                maxLines = 2,
+                                useFeltGrain = false,
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TexturedActionButton(
+                        label = Strings.get(StringKey.BACK),
+                        base = chrome.accent,
+                        light = chrome.accentLight,
+                        dark = chrome.accentDark,
+                        enabled = true,
+                        onClick = onBack,
+                        modifier = Modifier.widthIn(min = 200.dp),
+                        height = 52.dp,
                         useFeltGrain = false,
                     )
                 }
             }
+            ScrollMoreHint(
+                scrollState = scrollState,
+                fadeColor = chrome.background,
+            )
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel(Strings.get(StringKey.SECTION_LANGUAGE))
-            Spacer(modifier = Modifier.height(8.dp))
-            SwipeLanguagePicker(
-                language = settings.appLanguage,
-                onLanguageChange = onAppLanguageSelected,
-            )
+@Composable
+private fun ModeDefaultsEditor(
+    mode: GameMode,
+    settings: UserSettings,
+    scrollState: ScrollState,
+    onDefaultRacksChange: (GameMode, Int) -> Unit,
+    onDefaultBreakRuleChange: (GameMode, BreakRule) -> Unit,
+    onDefaultPointsChange: (Int) -> Unit,
+    onDefaultInningsChange: (Int?) -> Unit,
+    onClose: () -> Unit,
+) {
+    val chrome = LocalAppTheme.current
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = Strings.format(StringKey.MODE_DEFAULTS_TITLE, mode.settingsLabel()),
+            style = MaterialTheme.typography.headlineLarge,
+            color = chrome.textPrimary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel(Strings.get(StringKey.SECTION_DEVICE))
-            Spacer(modifier = Modifier.height(6.dp))
-            SettingsToggleRow(
-                label = Strings.get(StringKey.KEEP_SCREEN_ON),
-                checked = settings.keepScreenOn,
-                onCheckedChange = onKeepScreenOnChange,
-            )
-            SettingsToggleRow(
-                label = Strings.get(StringKey.HAPTICS),
-                checked = settings.hapticsEnabled,
-                onCheckedChange = onHapticsChange,
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel(Strings.get(StringKey.SECTION_ADS))
-            Spacer(modifier = Modifier.height(8.dp))
-            if (adsRemoved) {
-                Text(
-                    text = Strings.get(StringKey.ADS_REMOVED),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = chrome.textSecondary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
-                TexturedActionButton(
-                    label = Strings.get(StringKey.REMOVE_ADS),
-                    base = chrome.accent,
-                    light = chrome.accentLight,
-                    dark = chrome.accentDark,
-                    enabled = true,
-                    onClick = onRemoveAds,
-                    height = 44.dp,
-                useFeltGrain = false,
-            )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            TexturedActionButton(
-                label = Strings.get(StringKey.RESTORE_PURCHASES),
-                base = chrome.surface,
-                light = chrome.surfaceElevated,
-                dark = chrome.surfaceDeep,
-                enabled = true,
-                onClick = onRestorePurchases,
-                height = 44.dp,
-                useFeltGrain = false,
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-            SectionLabel(Strings.get(StringKey.DEFAULT_RACE_TO))
-            Spacer(modifier = Modifier.height(8.dp))
-            SwipeIntPicker(
-                value = settings.defaultRacksToWin,
-                onValueChange = onDefaultRacksChange,
-                min = MatchFormatOptions.RACE_TO_MIN,
-                max = MatchFormatOptions.RACE_TO_MAX,
-                valueSp = 44.sp,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel(Strings.get(StringKey.DEFAULT_DISTANCE_14_1))
+        Spacer(modifier = Modifier.height(16.dp))
+        if (mode.isPointScoring) {
+            SectionLabel(Strings.get(StringKey.DISTANCE))
             Spacer(modifier = Modifier.height(8.dp))
             val pointsOptions = MatchFormatOptions.pointsToWin
             val pointsIndex =
-                pointsOptions.indexOf(settings.defaultPointsToWin).let { if (it >= 0) it else 0 }
+                pointsOptions.indexOf(settings.defaultPointsToWin).let {
+                    if (it >= 0) it else 0
+                }
             SwipeIntPicker(
                 value = pointsIndex,
                 onValueChange = { onDefaultPointsChange(pointsOptions[it]) },
@@ -204,7 +352,7 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel(Strings.get(StringKey.DEFAULT_INNINGS_14_1))
+            SectionLabel(Strings.get(StringKey.INNINGS))
             Spacer(modifier = Modifier.height(8.dp))
             val inningsOptions = MatchFormatOptions.inningsLimits
             val unlimitedIndex = inningsOptions.size
@@ -226,74 +374,142 @@ fun SettingsScreen(
                 },
                 valueSp = 44.sp,
             )
+        } else {
+            SectionLabel(Strings.get(StringKey.RACE_TO))
+            Spacer(modifier = Modifier.height(8.dp))
+            SwipeIntPicker(
+                value = settings.defaultRacksFor(mode),
+                onValueChange = { onDefaultRacksChange(mode, it) },
+                min = MatchFormatOptions.RACE_TO_MIN,
+                max = MatchFormatOptions.RACE_TO_MAX,
+                valueSp = 44.sp,
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel(Strings.get(StringKey.DEFAULT_BREAK_RULE))
+            SectionLabel(Strings.get(StringKey.BREAK_RULE))
             Spacer(modifier = Modifier.height(8.dp))
+            val breakRule = settings.defaultBreakFor(mode)
             ChipRow {
                 TexturedChip(
                     label = Strings.get(StringKey.ALTERNATE),
-                    selected = settings.defaultBreakRule == BreakRule.ALTERNATE,
-                    onClick = { onDefaultBreakRuleChange(BreakRule.ALTERNATE) },
+                    selected = breakRule == BreakRule.ALTERNATE,
+                    onClick = { onDefaultBreakRuleChange(mode, BreakRule.ALTERNATE) },
                     selectedLight = chrome.accentLight,
                     selectedDark = chrome.accentDark,
                     idleLight = chrome.surface,
                     idleDark = chrome.surfaceDeep,
                     height = 40.dp,
-                useFeltGrain = false,
-            )
+                    useFeltGrain = false,
+                )
                 TexturedChip(
                     label = Strings.get(StringKey.WINNER),
-                    selected = settings.defaultBreakRule == BreakRule.WINNER,
-                    onClick = { onDefaultBreakRuleChange(BreakRule.WINNER) },
+                    selected = breakRule == BreakRule.WINNER,
+                    onClick = { onDefaultBreakRuleChange(mode, BreakRule.WINNER) },
                     selectedLight = chrome.accentLight,
                     selectedDark = chrome.accentDark,
                     idleLight = chrome.surface,
                     idleDark = chrome.surfaceDeep,
                     height = 40.dp,
-                useFeltGrain = false,
-            )
+                    useFeltGrain = false,
+                )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel(Strings.get(StringKey.SECTION_RULES))
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = Strings.get(StringKey.FFB_RULES_LINK),
-                style = MaterialTheme.typography.bodyLarge,
-                color = chrome.accentLight,
-                textDecoration = TextDecoration.Underline,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(FFB_RULES_URL)),
-                        )
-                    }
-                    .padding(vertical = 6.dp),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            TexturedActionButton(
-                label = Strings.get(StringKey.BACK),
-                base = chrome.accent,
-                light = chrome.accentLight,
-                dark = chrome.accentDark,
-                enabled = true,
-                onClick = onBack,
-                modifier = Modifier.widthIn(min = 200.dp),
-                height = 52.dp,
-                useFeltGrain = false,
-            )
-            }
-            ScrollMoreHint(
-                scrollState = scrollState,
-                fadeColor = chrome.background,
-            )
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+        TexturedActionButton(
+            label = Strings.get(StringKey.BACK),
+            base = chrome.accent,
+            light = chrome.accentLight,
+            dark = chrome.accentDark,
+            enabled = true,
+            onClick = onClose,
+            modifier = Modifier.widthIn(min = 200.dp),
+            height = 52.dp,
+            useFeltGrain = false,
+        )
     }
 }
+
+@Composable
+private fun SettingsNavRow(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+) {
+    val chrome = LocalAppTheme.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 12.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = chrome.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = chrome.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Text(
+            text = "›",
+            style = MaterialTheme.typography.titleLarge,
+            color = chrome.textSecondary,
+        )
+    }
+}
+
+private val DefaultsModeTabs =
+    listOf(
+        GameMode.EIGHT_BALL,
+        GameMode.NINE_BALL,
+        GameMode.TEN_BALL,
+        GameMode.FOURTEEN_ONE,
+    )
+
+private fun GameMode.settingsLabel(): String =
+    when (this) {
+        GameMode.EIGHT_BALL -> "8-Ball"
+        GameMode.NINE_BALL -> "9-Ball"
+        GameMode.TEN_BALL -> "10-Ball"
+        GameMode.FOURTEEN_ONE -> "14/1"
+    }
+
+private fun UserSettings.defaultsSummary(mode: GameMode): String =
+    if (mode.isPointScoring) {
+        val innings = defaultInningsLimit?.toString() ?: "∞"
+        Strings.format(
+            StringKey.MATCH_DEFAULTS_SUMMARY_14_1,
+            defaultPointsToWin,
+            innings,
+        )
+    } else {
+        val breakLabel =
+            when (defaultBreakFor(mode)) {
+                BreakRule.ALTERNATE -> Strings.get(StringKey.ALTERNATE)
+                BreakRule.WINNER -> Strings.get(StringKey.WINNER)
+            }
+        Strings.format(
+            StringKey.MATCH_DEFAULTS_SUMMARY_RACE,
+            defaultRacksFor(mode),
+            breakLabel,
+        )
+    }
 
 @Composable
 private fun SectionLabel(text: String) {
@@ -352,7 +568,3 @@ private fun SettingsToggleRow(
         )
     }
 }
-
-const val FFB_RULES_URL = "https://m.ffbillard.com/ext/telechargement.php?id=32249"
-
-

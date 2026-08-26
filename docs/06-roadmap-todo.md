@@ -151,8 +151,10 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
    by default + Settings **Language** swipe (flags / endonyms); unknown locales → EN;
    Setup / Settings / History / summary / PDF / prose dialogs extracted. Board jargon
    chips stay English. **About** moved to Setup info control (not on live board).
-5. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
-   scoreboard-relevant deltas only. **← next on 2.0**
+5. ✅ **Multi-ruleset (2026-08-26)** — Settings packs **FFB / WPA / APA / BCA·CSI /
+   Matchroom**; scoreboard deltas only (push-out, 3-foul rack loss, APA **8OB**,
+   14/1 illegal-open −3 vs CSI −2). Official-rules link follows pack. Shot clock /
+   call trees / rail auto-detect stay out of product.
 6. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
 7. ⬜ Other game families (e.g. English 8-Ball) — only after American multi-ruleset base.
 8. ⬜ Optional later: Play In-App Updates flexible; Crashlytics if Play vitals insufficient.
@@ -168,9 +170,14 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
     Settings **Language** swipe (`AppLanguage` + Twemoji flags, CC BY 4.0)
   - **About** screen from Setup (info glyph, top-start); live board keeps pause + gear only
   - Short board jargon chips (**+1 / PASS / FOUL / RUN OUT / GOLDEN / …**) stay English
-- ⬜ **Multi-ruleset** — FFB today; later selectable packs (WPA / Matchroom / APA / BCA & CSI)
-  for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
-  concepts separate.
+- ✅ **Multi-ruleset (2026-08-26)** — Settings `RulesetPack` (**FFB default**, WPA, APA,
+  BCA/CSI, **Matchroom (9)**). Pack stamped on match start via `forMode`: Matchroom only
+  on 9-ball, else FFB. Scoreboard-only deltas:
+  - APA: no push-out / no 3-foul rack loss; 8-ball **8OB** win tap (+ EARLY 8 for scratch)
+  - BCA/CSI 14/1: illegal open stays −2 (no classic −1 stack → −3)
+  - FFB/WPA: prior FFB-shaped behavior; Matchroom = 9-ball overlay (WPA-like scoreboard)
+  - Settings hint + official-rules URL per pack (`resources/README.md` authorities)
+  - Not in product: shot clock, BIH zones, rail/3-ball auto-detect, full illegal-break trees
 - ✅ **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
   - **Locked v1 (2026-08-25, owner freeze):** first DS pass frozen for iteration baseline.
     **one visual world** + **B/C/D DNA** (keep B filigree+détourage, C warm light,
@@ -229,6 +236,13 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-26: **Settings match defaults** — drill-down list (mode row + summary › editor),
+  not mode chips; ads Remove+Restore on one row. Per-mode break + race prefs.
+- 2026-08-26: **Per-mode default race to** — Settings 8/9/10 (shipped **5 / 7 / 7**);
+  Setup applies the mode default on mode switch; legacy single race preference migrates.
+- 2026-08-26: **Multi-ruleset** — `RulesetPack` in `:shared` + Settings chips + prefs;
+  push-out / 3-foul / APA 8OB / 14/1 −3 vs CSI −2 wired; board shows pack + **8OB**.
+  Matchroom → 9 only (`forMode` → FFB else). Next on `rc/2.0.0`: **accounts / find players**.
 - 2026-08-26: Owner — **CMP UI + iOS → train 3.0.0** (not on Android 2.0 critical path).
   KMP `:shared` scaffold stays in 2.x; Compose remains on `:app` through 2.x.
   Camera/AI re-homed **Maybe 3.x+ → Maybe 4.x+**. Docs: `00`, `01`, `04`, `06`, `AGENTS`.
@@ -260,6 +274,7 @@ Only reopen with an explicit owner decision. Not a near-term train.
   runs. Build order (updated 2026-08-26): DS → brand → KMP scaffold → i18n →
   multi-ruleset → accounts; **CMP/iOS = 3.0**. Merge to `main` only after Play production
   + train ready. Hotfixes 1.2 stay on `main`.
+  Multi-ruleset **done** same day (scoreboard packs); accounts still open.
 - 2026-08-22: Doc — removed empty **Later on 1.x**; CI Play Internal ✅ re-homed under
   **1.2.0** Play gate (accounts → 2.x, camera → Maybe 3.x+ then **4.x+** in 2026-08-26).
 - 2026-08-22: Owner — Accounts / find players + shared post-match stats → **2.x** train

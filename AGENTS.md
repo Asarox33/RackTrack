@@ -10,9 +10,9 @@ American pool **race board** (8 / 9 / 10) + **14/1 continuous** (+ **14/1 solo**
 split screen, multi-felt cloth, per-mode actions (incl. 9/10 push-out), break/hand
 indicator, undo, end-of-match summary (SHARE + SAVE PDF + BACK), local match history
 (mode-scoped, player filters, delete, same stats), PDF share with start/end/duration +
-versioned footer, Settings **page** (felt incl. Golden, screen on, haptics, defaults,
-ads, FFB link). Adaptive board metrics (% pane/screen, floor + ceiling). Orientation:
-`fullSensor`. No per-shot ball/pocket entry.
+versioned footer, Settings **page** (theme, language, device, Match defaults tabs
+8/9/10/14.1, ruleset pack, ads). Adaptive board metrics (% pane/screen, floor + ceiling).
+Orientation: `fullSensor`. No per-shot ball/pocket entry.
 
 ### Release trains (do not invent)
 

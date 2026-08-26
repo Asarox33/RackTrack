@@ -10,6 +10,8 @@ data class Match(
     val player1: Player,
     val player2: Player,
     val gameMode: GameMode,
+    /** Scoreboard ruleset stamped at match start (Settings default). */
+    val rulesetPack: RulesetPack = RulesetPack.FFB,
     val racksToWin: Int,
     val pointsToWin: Int = 0,
     /** Setup innings cap; null = unlimited (race to points only). Never mutated by overtime. */
@@ -146,6 +148,7 @@ data class Match(
             inningsLimit: Int? = null,
             breakRule: BreakRule = BreakRule.ALTERNATE,
             solo: Boolean = false,
+            rulesetPack: RulesetPack = RulesetPack.FFB,
         ): Match {
             require(!solo || gameMode.isPointScoring) { "solo is only valid for 14/1" }
             val p1 = Player(PlayerId("p1"), player1Name.trim().ifEmpty { "Player 1" })
@@ -161,6 +164,7 @@ data class Match(
                 player1 = p1,
                 player2 = p2,
                 gameMode = gameMode,
+                rulesetPack = rulesetPack,
                 racksToWin = if (gameMode.isPointScoring) 1 else racksToWin,
                 pointsToWin = pointsToWin,
                 inningsLimitBase = inningsLimit,
@@ -172,7 +176,7 @@ data class Match(
                 currentShooterId = starter,
                 awaitingOpeningBreak = gameMode.isPointScoring,
                 pushOutPhase =
-                    if (gameMode.supportsPushOut) {
+                    if (rulesetPack.allowsPushOut(gameMode)) {
                         PushOutPhase.AVAILABLE
                     } else {
                         PushOutPhase.NONE

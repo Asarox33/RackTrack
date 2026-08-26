@@ -153,6 +153,7 @@ private fun RackTrackRoot(
                     onPlusOne = viewModel::plusOne,
                     onRunOut = viewModel::runOut,
                     onGoldenBreak = viewModel::goldenBreak,
+                    onEightOnBreak = viewModel::eightOnBreak,
                     onDryBreak = viewModel::dryBreak,
                     onEightBallLoss = viewModel::eightBallLoss,
                     onAddPoints = viewModel::addPoints,
@@ -193,12 +194,13 @@ private fun RackTrackRoot(
                 onRestorePurchases = { monetization.restorePurchases() },
                 onThemeSelected = viewModel::setThemeMode,
                 onAppLanguageSelected = viewModel::setAppLanguage,
+                onRulesetPackSelected = viewModel::setRulesetPack,
                 onKeepScreenOnChange = viewModel::setKeepScreenOn,
                 onHapticsChange = viewModel::setHapticsEnabled,
-                onDefaultRacksChange = viewModel::setDefaultRacksToWin,
+                onDefaultRacksChange = viewModel::setDefaultRacksFor,
+                onDefaultBreakRuleChange = viewModel::setDefaultBreakFor,
                 onDefaultPointsChange = viewModel::setDefaultPointsToWin,
                 onDefaultInningsChange = viewModel::setDefaultInningsLimit,
-                onDefaultBreakRuleChange = viewModel::setDefaultBreakRule,
                 onBack = viewModel::closeSettings,
             )
             AppScreen.About -> AboutScreen(

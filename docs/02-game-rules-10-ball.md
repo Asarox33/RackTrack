@@ -1,110 +1,80 @@
-# 10-Ball Game Rules (FFB, 2026-2027) — Modeling + v1 coverage
+# 10-Ball — multi-ruleset notes + RackTrack coverage
 
-> Rewritten technical specification, not the official regulatory text. Authority:
-> `resources/code-sportif-americain-2026-2027.pdf` (Chapter 5, arts 1.5.01–1.5.07;
-> general Chapter 2, arts 1.2.01–1.2.20).
->
-> Domain: `MatchEngine` + `GameMode.TEN_BALL`. Product scope: `docs/01-product-specification.md`.
+> Rewritten technical / modeling notes — **not** official regulatory text.  
+> Domain: `MatchEngine` + `GameMode.TEN_BALL`. Spec: `docs/01-product-specification.md`.  
+> PDF authorities: [`resources/README.md`](../resources/README.md).
 
-## RackTrack v1 — what is implemented
+## Authorities
 
-The shipped app is a **race scoreboard**, not a shot-by-shot referee. Players (or a
-table partner) judge legality; the app records outcomes.
+| Entity | PDF | Primary refs |
+|--------|-----|----------------|
+| **FFB** | `resources/code-sportif-americain-2026-2027.pdf` | Ch. 5 arts **1.5.01–1.5.07**; general Ch. 2 |
+| **WPA** | `resources/wpa-rules-2026-01-02.pdf` | §**6** (6.1–6.11) |
+| **APA** | — | **N/A** — Team Manual Game Rules cover 8 & 9 only |
+| **BCA/CSI** | `resources/csi-official-rules-2025-08-12.pdf` | Rules Section **4** (4-1 … 4-9) |
 
-| FFB topic | v1 |
-|---|---|
-| Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
-| Alternating / winner break | **Yes** — setup `BreakRule`; cue follows breaker |
-| Foul increments consecutive counter | **Yes** — `FOUL` |
-| 3 consecutive fouls → lose rack (1.5.07) | **Yes** — `THREE_FOULS_LOSS` |
-| Warning after 2 consecutive fouls | **Yes** — on-screen “1 MORE FOUL = RACK LOSS” |
-| Legal shot resets consecutive fouls | **Partial** — tap foul chip (`FOULS_CLEARED`); no auto “legal shot” |
-| Golden break / Dry break buttons | **No** — flags off for 10-ball |
-| Push-out after legal break | **Yes** — same decision tree as 9-ball (`PUSH OUT`); summary / PDF / history count announcements |
-| Call ball + pocket, 10 respot, ball-in-hand geometry, ball order | **No** — operator judgment |
-| Undo last event; match summary (incl. foul / push-out counts) | **Yes** |
+Matchroom WNT is **9-Ball only** — see `02-game-rules-9-ball.md`.
 
 ---
 
-## 1. Objective
+## Common rules (entities that govern 10-Ball: FFB · WPA · BCA/CSI)
 
-- 10 numbered balls (1 to 10) + cue ball.
-- Balls must be contacted/played in ascending numerical order (a higher-numbered ball may be pocketed via carom/combination as long as the lowest-numbered ball on the table is contacted first).
-- Every shot must be **called**: target ball + target pocket.
-- The rack is won by legally pocketing the 10-ball **last**, in the called pocket.
-- A match is played over several racks (number defined before the match).
+- **Objective family:** rotation 1→10 with cue + ten object balls; win by legally pocketing the **10** under each code’s win condition (see matrix — **CSI wording differs** from FFB/WPA on “early 10”).
+- **Call shot:** every non-break shot must be called (ball + pocket) — all three codes.
+- **Rack:** triangle / dedicated shape; **1** at apex on foot spot; **10** in the center of the rack; other balls largely random (CSI additionally fixes **2** and **3** on the rear corners).
+- **Break:** cue behind head string; must contact **1** first; if no pocket, ≥4 object balls to rail/cushion else foul; foul → opponent BIH anywhere.
+- **Push-out:** available after a **non-foul** break for the player with the shot; suspends lowest-ball-first and rail-after-contact; **10** pocketed on push-out → spotted; opponent chooses take or give-back if clean.
+- **10 special:** 10 pocketed / jumped irregularly → **spotted** (except on the winning shot under that code).
+- **Three consecutive / successive fouls** → lose the rack/game.
+- Match model for RackTrack: **race-to-N racks**.
 
-## 2. Rack setup
+---
 
-- Dedicated 10-ball triangle rack: ball 1 at the apex on the foot spot, ball 10 in the center, other balls placed freely around it (different arrangement for each new rack).
+## Difference matrix
 
-## 3. Break
+Final row **`RackTrack?`**: Yes / Partial / No. **Yes (already)** = taps exist; operator
+judges rails (no geometry auto). **10-ball has no `DRY`** — break failures use `FOUL`.
 
-- The breaking player has ball-in-hand behind the head string.
-- Must contact ball 1 first, otherwise → **foul**.
-- If no ball is pocketed: at least 4 object balls must contact a rail, otherwise → **foul** ("illegal break").
-- On a foul break: the opponent gets ball-in-hand anywhere on the table.
-- *(Masters category only: "break box" rule — mandatory break from a defined zone. Out of v1 scope.)*
+| Entity | Win condition | Call / safety | Legal break | Push-out | Early / irregular 10 | Foul → BIH | Three consecutive fouls |
+|--------|---------------|---------------|-------------|----------|----------------------|------------|-------------------------|
+| **FFB** | Legal **10 last** after 1–9 down (1.5.01, 1.5.06). | Every shot announced (1.5.01); “Safe” allowed — if a ball is pocketed, opponent chooses take or give-back (1.5.05). | Hit **1**; ≥4 rails if no pocket; Masters **break box** (1.5.03). | After legal break (1.5.04). | Early legal pocket → **spot 10**, shooter **continues**; foul/unannounced → spot + hand passes (1.5.06). | Foul → BIH **anywhere** (break covered in 1.5.03). | Lose rack; warn after 2nd; unwarned 3rd stays at 2 (1.5.07). |
+| **WPA** | Legal 10 when it is the **only** object ball left (intro §6 / 6.7). | Call shot (6.5); **no** “safety” call at 10-Ball. | Hit pattern + ≥4 rails if no pocket (6.3). | 6.4 after non-foul break. | 10 spotted if off table or pocketed other than final win (6.8). Wrongful pocket → opponent chooses next shooter (6.6). | Standard foul → BIH **anywhere** (6.9). | 3.13 → lose rack (6.10). |
+| **APA** | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| **BCA/CSI** | “Pocket the 10 on **any legal shot after the break**” (4-1) / “legally pockets the 10” (4-5-3) — **early called 10 can win**; 10 pocketed **in addition** to another called ball is spotted (4-5-2). | Call shot; illegally pocketed non-10 stay down; opponent option on illegal pocket (4-7, 4-8). | Must hit **1**; pocket or ≥4 cushions (4-3). | 4-4 (same structure as CSI 9-Ball). | 10 on break → spot & continue (4-3-3); illegally pocketed / jumped 10 spotted (4-5, 4-7). | Foul → BIH (general CSI). | Three successive fouls → lose (4-9). |
+| **RackTrack?** | **Partial** — no ball tracking; pack text for +1 / run-out; CSI early-10 = judgment | **No** | **Yes (already)** — miss 1 / fewer than 4 rails → **`FOUL`** (no `DRY` on 10); clears push-out | **Yes (already)** — same tree as 9; pack: APA **off** | **No** — respot/continue operator | **No** — no BIH UI | **Yes (already)** — `THREE_FOULS_LOSS`; pack: APA **off** |
 
-## 4. Push-out
+---
 
-- Only available after a **legal break**, for the player with the shot.
-- Must be explicitly called before being played.
-- During this shot, the normal "must contact the lowest ball" and "a ball must contact a rail after contact" rules are suspended.
-- If the 10-ball is pocketed during the push-out → it is respotted; other pocketed balls stay pocketed.
-- If the push-out is played without a foul: the **opponent** chooses whether to play the table as-is or pass the shot back to the push-out player.
-- If the push-out results in a foul: the opponent gets ball-in-hand anywhere on the table.
+## RackTrack v1 — what is implemented
 
-## 5. Normal rack flow
+Race scoreboard — not shot-by-shot referee. Players judge legality; app records outcomes.
 
-- The player at the table must call ball + pocket on every shot.
-- Must contact the lowest-numbered ball still on the table first (may pocket another ball via combination/carom as long as the call matches).
-- As long as the player legally pockets the called ball, they continue their turn.
-- If a non-called ball is pocketed, or the called ball goes in the wrong pocket: not a foul, but the turn passes to the opponent (pocketed balls stay pocketed, except the 10-ball — see §6).
-- **Safety**: the player may call "Safety" instead of calling a pot; the turn passes to the opponent at the end of the shot. If a ball is pocketed during a called safety, the opponent chooses whether to play the table as-is or let the shooter continue.
+| Topic | v1 |
+|---|---|
+| Race-to-N racks; +1 / Run out award rack | **Yes** — `PLUS_ONE` / `RUN_OUT` |
+| Alternating / winner break | **Yes** — setup `BreakRule` |
+| Foul increments consecutive counter | **Yes** — `FOUL` |
+| 3 consecutive fouls → lose rack | **Yes** — `THREE_FOULS_LOSS` |
+| Warning after 2 consecutive fouls | **Yes** — on-screen banner |
+| Legal shot resets consecutive fouls | **Partial** — tap foul chip (`FOULS_CLEARED`) |
+| Golden break / Dry break buttons | **No** — `supportsGoldenBreak` / `supportsDryBreak` off for 10 |
+| Illegal / soft break (≥4 rails, miss 1) | **Yes** — **`FOUL`** (clears push-out); no separate DRY |
+| Push-out after legal break | **Yes** — same tree as 9-ball; summary / PDF / history count |
+| Call ball + pocket, 10 respot, BIH, ball order | **No** — operator judgment |
+| Undo; match summary (incl. foul / push-out counts) | **Yes** |
 
-## 6. Special case: the 10-ball
+---
 
-The 10-ball must only be pocketed last, legally, in the called pocket. In every other case where it is pocketed or leaves the table early:
-- It is **respotted** (on the foot spot, or just behind it if occupied).
-- Other balls pocketed on the same shot stay pocketed.
-- Turn: if pocketed early on an otherwise **legal** called shot → shooter **continues**; if irregular / foul / unannounced → hand to opponent (art. 1.5.06).
+## FFB narrative (modeling baseline)
 
-## 7. Fouls (applicable to 10-ball)
+### 1. Objective
+Balls 1–10; ascending contact; **call** every shot; win by legal **10 last** (1.5.01 / 1.5.06).
 
-A foul results in: **ball-in-hand for the opponent, anywhere on the table** (except break-specific cases already covered above).
+### 2–4. Rack / break / push-out
+Dedicated triangle; 1 apex on foot spot; 10 center (1.5.02). Break & push-out (1.5.03–1.5.04).
 
-Main fouls to model (see article 1.2.09 of the sporting code, full list in the PDF):
-- Cue ball pocketed or knocked off the table
-- Wrong ball contacted first (ascending order violation)
-- No rail contacted after contact, when no ball is pocketed
-- Player's foot not touching the floor during the shot
-- Object ball knocked off the table
-- Ball accidentally touched/moved outside of a normal shot
-- Shooting while balls are still in motion
-- Ball-in-hand misplacement (in front of the head string when required behind it)
-- Shooting out of turn
-- Shooting with an object ball instead of the cue ball
+### 5–8. Flow / 10 / fouls / three fouls
+1.5.05–1.5.07. Full foul list art. 1.2.09. **v1:** warning UI + auto rack loss; “no warning → 3rd doesn’t count” **not** modeled.
 
-*(v1: unsportsmanlike conduct, slow play/shot clock, and dispute cases requiring a human referee are not modeled — trusted play / self-refereeing.)*
-
-## 8. Three consecutive fouls rule
-
-- If a player commits 3 consecutive fouls (not interrupted by a legal shot), they **immediately lose the rack**.
-- After the 2nd consecutive foul, the opponent or referee **must** warn the player; if a 3rd foul occurs without that notification, FFB keeps the count at 2 (art. 1.5.07).
-- A legal shot resets the consecutive foul counter to zero.
-
-**v1:** warning UI + auto rack loss on 3rd foul; clear via tap on foul chip. The “no warning → 3rd doesn’t count” exception is **not** modeled.
-
-## 9. End of rack / end of match
-
-- A rack ends when the 10-ball is legally pocketed last, or when a player loses due to three consecutive fouls.
-- The match ends when a player reaches the required number of racks won.
-
-## 10. Deliberately not modeled (deep mode / later)
-
-- Shot clock / timing (article 1.2.13)
-- Disciplinary cards and sanctions (article 1.2.17)
-- Masters category specific rules (break box)
-- Federal context (leagues, rankings, official competitions — Title III of the sporting code)
-- Per-shot call/pocket entry, respot geometry, ball-in-hand state
+### Deliberately not modeled
+Shot clock; disciplinary cards; Masters break box; per-shot call/pocket entry; respot geometry; BIH state; federal Title III.

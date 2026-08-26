@@ -4,7 +4,8 @@ Reference for the **current** `domain/` layer. This is a race / points scoreboar
 shot-by-shot referee. Per-mode FFB notes and v1 coverage:
 `docs/02-game-rules-8-ball.md`, `9-ball`, `10-ball`, `14-1`.
 
-Authority for mode-specific rules: `resources/code-sportif-americain-2026-2027.pdf`.
+Authority for mode-specific rules (multi-ruleset PDFs): [`resources/README.md`](../resources/README.md).
+Current app modeling baseline remains **FFB** until packs ship.
 
 ## 1. Core entities
 

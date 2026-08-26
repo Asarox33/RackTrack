@@ -250,6 +250,7 @@ object MatchStats {
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,
             MatchEventType.GOLDEN_BREAK,
+            MatchEventType.EIGHT_ON_BREAK,
             -> event.playerId
             MatchEventType.THREE_FOULS_LOSS,
             MatchEventType.EIGHT_BALL_LOSS,
@@ -274,6 +275,7 @@ object MatchStats {
         this == MatchEventType.PLUS_ONE ||
             this == MatchEventType.RUN_OUT ||
             this == MatchEventType.GOLDEN_BREAK ||
+            this == MatchEventType.EIGHT_ON_BREAK ||
             this == MatchEventType.THREE_FOULS_LOSS ||
             this == MatchEventType.EIGHT_BALL_LOSS
 }

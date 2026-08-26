@@ -89,6 +89,35 @@ object FourteenOneEngine {
         if (!isActiveFourteenOne(match)) return match
         if (playerId != match.currentShooterId) return match
 
+        // Illegal open + classic foul on the same opening (FFB 1.6.03(g) → −3 total).
+        if (match.awaitingOpeningBreak &&
+            match.history.lastOrNull()?.type == MatchEventType.BREAK_FOUL
+        ) {
+            if (!match.rulesetPack.openingIllegalPlusClassicStacks(match.gameMode)) {
+                // BCA/CSI: open violation already −2 only; no extra classic −1.
+                return match
+            }
+            val afterRun = commitCurrentRun(match, playerId)
+            val scored = applyScoreDelta(afterRun, playerId, CLASSIC_FOUL_PENALTY)
+            return finishIfDistanceReached(
+                scored.copy(
+                    foul1 = if (playerId == match.player1.id) 0 else afterRun.foul1,
+                    foul2 = if (playerId == match.player2.id) 0 else afterRun.foul2,
+                    awaitingOpeningBreak = true,
+                    currentShooterId = playerId,
+                    currentBreakerId = playerId,
+                    history =
+                        scored.history +
+                            MatchEvent(
+                                MatchEventType.FOUL,
+                                playerId,
+                                nowMillis,
+                                value = CLASSIC_FOUL_PENALTY,
+                            ),
+                ),
+            )
+        }
+
         val afterRun = commitCurrentRun(match, playerId)
         val nextFoul = afterRun.foulsFor(playerId) + 1
         val scored = applyScoreDelta(afterRun, playerId, CLASSIC_FOUL_PENALTY)

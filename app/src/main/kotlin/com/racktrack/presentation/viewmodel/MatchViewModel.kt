@@ -15,6 +15,7 @@ import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.domain.model.RulesetPack
 import com.racktrack.i18n.AppLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,7 @@ data class SetupUiState(
     val player1Name: String = "",
     val player2Name: String = "",
     val gameMode: GameMode = GameMode.TEN_BALL,
-    val racksToWin: Int = 6,
+    val racksToWin: Int = UserSettings.DEFAULT_RACKS_TEN,
     val pointsToWin: Int = 100,
     /** Null = unlimited innings. */
     val inningsLimit: Int? = 30,
@@ -114,17 +115,31 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setAppLanguage(language: AppLanguage) = coordinator.setAppLanguage(language)
 
+    fun setRulesetPack(pack: RulesetPack) = coordinator.setRulesetPack(pack)
+
     fun setKeepScreenOn(enabled: Boolean) = coordinator.setKeepScreenOn(enabled)
 
     fun setHapticsEnabled(enabled: Boolean) = coordinator.setHapticsEnabled(enabled)
 
-    fun setDefaultRacksToWin(value: Int) = coordinator.setDefaultRacksToWin(value)
+    fun setDefaultRacksEight(value: Int) = coordinator.setDefaultRacksEight(value)
+
+    fun setDefaultRacksNine(value: Int) = coordinator.setDefaultRacksNine(value)
+
+    fun setDefaultRacksTen(value: Int) = coordinator.setDefaultRacksTen(value)
+
+    fun setDefaultRacksFor(
+        mode: GameMode,
+        value: Int,
+    ) = coordinator.setDefaultRacksFor(mode, value)
 
     fun setDefaultPointsToWin(value: Int) = coordinator.setDefaultPointsToWin(value)
 
     fun setDefaultInningsLimit(value: Int?) = coordinator.setDefaultInningsLimit(value)
 
-    fun setDefaultBreakRule(value: BreakRule) = coordinator.setDefaultBreakRule(value)
+    fun setDefaultBreakFor(
+        mode: GameMode,
+        value: BreakRule,
+    ) = coordinator.setDefaultBreakFor(mode, value)
 
     fun updatePlayer1Name(value: String) = coordinator.updatePlayer1Name(value)
 
@@ -151,6 +166,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun runOut(playerId: PlayerId) = coordinator.runOut(playerId)
 
     fun goldenBreak(playerId: PlayerId) = coordinator.goldenBreak(playerId)
+
+    fun eightOnBreak(playerId: PlayerId) = coordinator.eightOnBreak(playerId)
 
     fun dryBreak(playerId: PlayerId) = coordinator.dryBreak(playerId)
 

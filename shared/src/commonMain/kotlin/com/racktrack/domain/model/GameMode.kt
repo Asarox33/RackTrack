@@ -21,7 +21,8 @@ enum class GameMode {
 
     /**
      * Break with no object ball pocketed (stat).
-     * Relevant for 9-ball (art. 1.4.03) and 8-ball illegal/empty break (art. 1.3.03).
+     * 9-ball empty/soft/three-ball open contexts and 8-ball illegal/empty open (arts
+     * 1.4.03 / 1.3.03): operator judgment via DRY — not geometry auto-detect.
      */
     val supportsDryBreak: Boolean
         get() = this == NINE_BALL || this == EIGHT_BALL

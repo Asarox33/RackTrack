@@ -44,6 +44,7 @@ fun TexturedActionButton(
     height: Dp = 44.dp,
     corner: Dp = (height.value * CORNER_FRAC_OF_HEIGHT).dp,
     useFeltGrain: Boolean = true,
+    maxLines: Int = 1,
 ) {
     TexturedActionButton(
         label = label,
@@ -58,6 +59,7 @@ fun TexturedActionButton(
         useFeltGrain = useFeltGrain,
         // Same hue as the fill, one step darker — not chrome cyan.
         rimColor = tone.dark,
+        maxLines = maxLines,
     )
 }
 
@@ -76,6 +78,7 @@ fun TexturedActionButton(
     useFeltGrain: Boolean = false,
     /** Border color; defaults to [dark] (tonal edge). */
     rimColor: Color? = null,
+    maxLines: Int = 1,
 ) {
     val theme = LocalAppTheme.current
     val performHaptic = rememberClickHaptic()
@@ -133,14 +136,19 @@ fun TexturedActionButton(
     ) {
         Text(
             text = label,
-            style = if (height.value < 40f) {
-                MaterialTheme.typography.labelMedium
-            } else {
-                MaterialTheme.typography.labelLarge
+            style = when {
+                height.value < 40f -> MaterialTheme.typography.labelMedium
+                maxLines > 1 -> MaterialTheme.typography.labelMedium
+                else -> MaterialTheme.typography.labelLarge
             },
             color = labelColor,
-            maxLines = 1,
+            maxLines = maxLines,
+            softWrap = true,
+            textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
         )
     }
 }

@@ -10,6 +10,7 @@ import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PauseSpan
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.domain.model.RulesetPack
 import com.racktrack.i18n.AppLanguage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,6 +102,10 @@ class MatchCoordinator(
         updateSettings { it.copy(appLanguage = language) }
     }
 
+    fun setRulesetPack(pack: RulesetPack) {
+        updateSettings { it.copy(rulesetPack = pack) }
+    }
+
     fun setKeepScreenOn(enabled: Boolean) {
         updateSettings { it.copy(keepScreenOn = enabled) }
     }
@@ -109,9 +114,37 @@ class MatchCoordinator(
         updateSettings { it.copy(hapticsEnabled = enabled) }
     }
 
-    fun setDefaultRacksToWin(value: Int) {
-        updateSettings { it.copy(defaultRacksToWin = value) }
-        _setup.update { it.copy(racksToWin = value) }
+    fun setDefaultRacksFor(
+        mode: GameMode,
+        value: Int,
+    ) {
+        when (mode) {
+            GameMode.EIGHT_BALL -> setDefaultRacksEight(value)
+            GameMode.NINE_BALL -> setDefaultRacksNine(value)
+            GameMode.TEN_BALL -> setDefaultRacksTen(value)
+            GameMode.FOURTEEN_ONE -> Unit
+        }
+    }
+
+    fun setDefaultRacksEight(value: Int) {
+        updateSettings { it.copy(defaultRacksEight = value) }
+        _setup.update { setup ->
+            if (setup.gameMode == GameMode.EIGHT_BALL) setup.copy(racksToWin = value) else setup
+        }
+    }
+
+    fun setDefaultRacksNine(value: Int) {
+        updateSettings { it.copy(defaultRacksNine = value) }
+        _setup.update { setup ->
+            if (setup.gameMode == GameMode.NINE_BALL) setup.copy(racksToWin = value) else setup
+        }
+    }
+
+    fun setDefaultRacksTen(value: Int) {
+        updateSettings { it.copy(defaultRacksTen = value) }
+        _setup.update { setup ->
+            if (setup.gameMode == GameMode.TEN_BALL) setup.copy(racksToWin = value) else setup
+        }
     }
 
     fun setDefaultPointsToWin(value: Int) {
@@ -124,9 +157,25 @@ class MatchCoordinator(
         _setup.update { it.copy(inningsLimit = value) }
     }
 
-    fun setDefaultBreakRule(value: BreakRule) {
-        updateSettings { it.copy(defaultBreakRule = value) }
-        _setup.update { it.copy(breakRule = value) }
+    fun setDefaultBreakFor(
+        mode: GameMode,
+        value: BreakRule,
+    ) {
+        updateSettings {
+            when (mode) {
+                GameMode.EIGHT_BALL -> it.copy(defaultBreakEight = value)
+                GameMode.NINE_BALL -> it.copy(defaultBreakNine = value)
+                GameMode.TEN_BALL -> it.copy(defaultBreakTen = value)
+                GameMode.FOURTEEN_ONE -> it
+            }
+        }
+        _setup.update { setup ->
+            if (!setup.gameMode.isPointScoring && setup.gameMode == mode) {
+                setup.copy(breakRule = value)
+            } else {
+                setup
+            }
+        }
     }
 
     fun updatePlayer1Name(value: String) {
@@ -138,9 +187,17 @@ class MatchCoordinator(
     }
 
     fun updateGameMode(value: GameMode) {
+        val settings = _settings.value
         _setup.update {
             it.copy(
                 gameMode = value,
+                racksToWin = if (value.isPointScoring) it.racksToWin else settings.defaultRacksFor(value),
+                breakRule =
+                    if (value.isPointScoring) {
+                        it.breakRule
+                    } else {
+                        settings.defaultBreakFor(value)
+                    },
                 soloTraining = if (value.isPointScoring) it.soloTraining else false,
             )
         }
@@ -183,6 +240,7 @@ class MatchCoordinator(
         clearPauseState()
         val s = _setup.value
         val now = clock()
+        val pack = _settings.value.rulesetPack.forMode(s.gameMode)
         val match = if (s.gameMode.isPointScoring) {
             Match.start(
                 player1Name = s.player1Name,
@@ -194,6 +252,7 @@ class MatchCoordinator(
                 pointsToWin = s.pointsToWin,
                 inningsLimit = s.inningsLimit,
                 solo = s.soloTraining,
+                rulesetPack = pack,
             )
         } else {
             Match.start(
@@ -204,6 +263,7 @@ class MatchCoordinator(
                 startedAtMillis = now,
                 gameMode = s.gameMode,
                 breakRule = s.breakRule,
+                rulesetPack = pack,
             )
         }
         _screen.value = AppScreen.MatchBoard(match)
@@ -219,6 +279,10 @@ class MatchCoordinator(
 
     fun goldenBreak(playerId: PlayerId) = mutateMatch {
         MatchEngine.recordGoldenBreak(it, playerId, clock())
+    }
+
+    fun eightOnBreak(playerId: PlayerId) = mutateMatch {
+        MatchEngine.recordEightOnBreak(it, playerId, clock())
     }
 
     fun dryBreak(playerId: PlayerId) = mutateMatch {
@@ -343,12 +407,15 @@ class MatchCoordinator(
     }
 
     private companion object {
-        fun setupFromPreferences(settings: UserSettings): SetupUiState =
-            SetupUiState(
-                racksToWin = settings.defaultRacksToWin,
+        fun setupFromPreferences(settings: UserSettings): SetupUiState {
+            val mode = SetupUiState().gameMode
+            return SetupUiState(
+                gameMode = mode,
+                racksToWin = settings.defaultRacksFor(mode),
                 pointsToWin = settings.defaultPointsToWin,
                 inningsLimit = settings.defaultInningsLimit,
-                breakRule = settings.defaultBreakRule,
+                breakRule = settings.defaultBreakFor(mode),
             )
+        }
     }
 }

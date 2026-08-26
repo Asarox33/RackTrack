@@ -31,6 +31,12 @@ enum class MatchEventType {
      */
     EIGHT_BALL_LOSS,
 
+    /**
+     * 8-ball APA pack — legal break that pockets the 8 wins the rack
+     * ([RulesetPack.eightOnBreakAwardsRack]). Scratch on that break → [EIGHT_BALL_LOSS].
+     */
+    EIGHT_ON_BREAK,
+
     /** 14/1 — points added this shot/burst ([MatchEvent.value] > 0). */
     POINTS,
 

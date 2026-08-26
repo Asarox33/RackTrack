@@ -59,9 +59,10 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
   - Filter by player names (either seat); reopen the same stats as end-of-match
   - Delete with red ✕ + confirmation
 - Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
-- **Settings** full screen (like History): felt, keep screen on, haptics, default
-  race/distance/innings/break rule, Remove ads / Restore, open FFB PDF rules link
-- About (in Settings): version, build type/time, GitHub repo link
+- **Settings** full screen (like History): theme, keep screen on, haptics, **Match
+  defaults** as mode rows (8 / 9 / 10 / 14/1) with summary → drill-down editor, ruleset
+  pack + official-rules link, Remove ads / Restore on one row
+- About (from Setup): version, build type/time, credits, GitHub repo link
 
 ## 7. Explicitly out of scope
 

@@ -75,6 +75,7 @@ fun MatchBoardScreen(
     onPlusOne: (PlayerId) -> Unit,
     onRunOut: (PlayerId) -> Unit,
     onGoldenBreak: (PlayerId) -> Unit,
+    onEightOnBreak: (PlayerId) -> Unit = {},
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
     onAddPoints: (PlayerId, Int) -> Unit = { _, _ -> },
@@ -127,7 +128,8 @@ fun MatchBoardScreen(
                     text = if (match.gameMode.isPointScoring) {
                         fourteenOneHeader(match)
                     } else {
-                        "${match.gameMode.shortLabel()}  ·  RACE TO ${match.racksToWin}"
+                        "${match.gameMode.shortLabel()}  ·  RACE TO ${match.racksToWin}" +
+                            "  ·  ${match.rulesetPack.shortLabel}"
                     },
                     style = MaterialTheme.typography.titleLarge,
                     color = theme.textSecondary,
@@ -163,6 +165,7 @@ fun MatchBoardScreen(
                         onPlusOne = onPlusOne,
                         onRunOut = onRunOut,
                         onGoldenBreak = onGoldenBreak,
+                        onEightOnBreak = onEightOnBreak,
                         onDryBreak = onDryBreak,
                         onEightBallLoss = onEightBallLoss,
                         onAnnouncePushOut = onAnnouncePushOut,
@@ -182,6 +185,7 @@ fun MatchBoardScreen(
                         onPlusOne = onPlusOne,
                         onRunOut = onRunOut,
                         onGoldenBreak = onGoldenBreak,
+                        onEightOnBreak = onEightOnBreak,
                         onDryBreak = onDryBreak,
                         onEightBallLoss = onEightBallLoss,
                         onAnnouncePushOut = onAnnouncePushOut,
@@ -332,6 +336,7 @@ private fun LandscapeBoard(
     onPlusOne: (PlayerId) -> Unit,
     onRunOut: (PlayerId) -> Unit,
     onGoldenBreak: (PlayerId) -> Unit,
+    onEightOnBreak: (PlayerId) -> Unit,
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
     onAnnouncePushOut: (PlayerId) -> Unit,
@@ -356,6 +361,7 @@ private fun LandscapeBoard(
             onPlusOne = { onPlusOne(match.player1.id) },
             onRunOut = { onRunOut(match.player1.id) },
             onGoldenBreak = { onGoldenBreak(match.player1.id) },
+            onEightOnBreak = { onEightOnBreak(match.player1.id) },
             onDryBreak = { onDryBreak(match.player1.id) },
             onEightBallLoss = { onEightBallLoss(match.player1.id) },
             onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
@@ -384,6 +390,7 @@ private fun LandscapeBoard(
             onPlusOne = { onPlusOne(match.player2.id) },
             onRunOut = { onRunOut(match.player2.id) },
             onGoldenBreak = { onGoldenBreak(match.player2.id) },
+            onEightOnBreak = { onEightOnBreak(match.player2.id) },
             onDryBreak = { onDryBreak(match.player2.id) },
             onEightBallLoss = { onEightBallLoss(match.player2.id) },
             onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
@@ -404,6 +411,7 @@ private fun PortraitBoard(
     onPlusOne: (PlayerId) -> Unit,
     onRunOut: (PlayerId) -> Unit,
     onGoldenBreak: (PlayerId) -> Unit,
+    onEightOnBreak: (PlayerId) -> Unit,
     onDryBreak: (PlayerId) -> Unit,
     onEightBallLoss: (PlayerId) -> Unit,
     onAnnouncePushOut: (PlayerId) -> Unit,
@@ -429,6 +437,7 @@ private fun PortraitBoard(
             onPlusOne = { onPlusOne(match.player1.id) },
             onRunOut = { onRunOut(match.player1.id) },
             onGoldenBreak = { onGoldenBreak(match.player1.id) },
+            onEightOnBreak = { onEightOnBreak(match.player1.id) },
             onDryBreak = { onDryBreak(match.player1.id) },
             onEightBallLoss = { onEightBallLoss(match.player1.id) },
             onAnnouncePushOut = { onAnnouncePushOut(match.player1.id) },
@@ -458,6 +467,7 @@ private fun PortraitBoard(
             onPlusOne = { onPlusOne(match.player2.id) },
             onRunOut = { onRunOut(match.player2.id) },
             onGoldenBreak = { onGoldenBreak(match.player2.id) },
+            onEightOnBreak = { onEightOnBreak(match.player2.id) },
             onDryBreak = { onDryBreak(match.player2.id) },
             onEightBallLoss = { onEightBallLoss(match.player2.id) },
             onAnnouncePushOut = { onAnnouncePushOut(match.player2.id) },
@@ -519,6 +529,7 @@ private fun PlayerPanel(
     onPlusOne: () -> Unit,
     onRunOut: () -> Unit,
     onGoldenBreak: () -> Unit,
+    onEightOnBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
     onAnnouncePushOut: () -> Unit,
@@ -530,15 +541,19 @@ private fun PlayerPanel(
 ) {
     val canRunOut = MatchEngine.canBreakAndClear(match, player.id)
     val canGolden = MatchEngine.canRecordGoldenBreak(match, player.id)
+    val canEightOnBreak = MatchEngine.canRecordEightOnBreak(match, player.id)
     val canDry = MatchEngine.canRecordDryBreak(match, player.id)
     val canEarlyEight = MatchEngine.canRecordEightBallLoss(match, player.id)
     val canPushOut = MatchEngine.canAnnouncePushOut(match, player.id)
-    val showFoulWarning = match.gameMode.supportsThreeFoulRackLoss
+    val showFoulWarning = match.rulesetPack.allowsThreeFoulRackLoss(match.gameMode)
+    val showPushOut = match.rulesetPack.allowsPushOut(match.gameMode)
+    val showEightOnBreak = match.rulesetPack.eightOnBreakAwardsRack(match.gameMode)
     val showModeExtras =
         match.gameMode.supportsGoldenBreak ||
             match.gameMode.supportsDryBreak ||
             match.gameMode.supportsEightBallLoss ||
-            match.gameMode.supportsPushOut
+            showPushOut ||
+            showEightOnBreak
 
     BoxWithConstraints(modifier = modifier) {
         val actionRows = if (showModeExtras) 2 else 1
@@ -592,9 +607,12 @@ private fun PlayerPanel(
                 enabled = enabled,
                 canRunOut = canRunOut,
                 canGolden = canGolden,
+                canEightOnBreak = canEightOnBreak,
                 canDry = canDry,
                 canEarlyEight = canEarlyEight,
                 canPushOut = canPushOut,
+                showPushOut = showPushOut,
+                showEightOnBreak = showEightOnBreak,
                 showModeExtras = showModeExtras,
                 actionHeight = metrics.actionHeight,
                 actionGap = metrics.actionGap,
@@ -602,6 +620,7 @@ private fun PlayerPanel(
                 onPlusOne = onPlusOne,
                 onRunOut = onRunOut,
                 onGoldenBreak = onGoldenBreak,
+                onEightOnBreak = onEightOnBreak,
                 onDryBreak = onDryBreak,
                 onEightBallLoss = onEightBallLoss,
                 onAnnouncePushOut = onAnnouncePushOut,
@@ -724,9 +743,12 @@ private fun RaceActionButtons(
     enabled: Boolean,
     canRunOut: Boolean,
     canGolden: Boolean,
+    canEightOnBreak: Boolean,
     canDry: Boolean,
     canEarlyEight: Boolean,
     canPushOut: Boolean,
+    showPushOut: Boolean,
+    showEightOnBreak: Boolean,
     showModeExtras: Boolean,
     actionHeight: Dp,
     actionGap: Dp,
@@ -734,6 +756,7 @@ private fun RaceActionButtons(
     onPlusOne: () -> Unit,
     onRunOut: () -> Unit,
     onGoldenBreak: () -> Unit,
+    onEightOnBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
     onAnnouncePushOut: () -> Unit,
@@ -781,13 +804,17 @@ private fun RaceActionButtons(
                 gameMode = gameMode,
                 enabled = enabled,
                 canGolden = canGolden,
+                canEightOnBreak = canEightOnBreak,
                 canDry = canDry,
                 canEarlyEight = canEarlyEight,
                 canPushOut = canPushOut,
+                showPushOut = showPushOut,
+                showEightOnBreak = showEightOnBreak,
                 actionHeight = actionHeight,
                 actionGap = actionGap,
                 actionCorner = actionCorner,
                 onGoldenBreak = onGoldenBreak,
+                onEightOnBreak = onEightOnBreak,
                 onDryBreak = onDryBreak,
                 onEightBallLoss = onEightBallLoss,
                 onAnnouncePushOut = onAnnouncePushOut,
@@ -801,13 +828,17 @@ private fun RaceModeExtraButtons(
     gameMode: GameMode,
     enabled: Boolean,
     canGolden: Boolean,
+    canEightOnBreak: Boolean,
     canDry: Boolean,
     canEarlyEight: Boolean,
     canPushOut: Boolean,
+    showPushOut: Boolean,
+    showEightOnBreak: Boolean,
     actionHeight: Dp,
     actionGap: Dp,
     actionCorner: Dp,
     onGoldenBreak: () -> Unit,
+    onEightOnBreak: () -> Unit,
     onDryBreak: () -> Unit,
     onEightBallLoss: () -> Unit,
     onAnnouncePushOut: () -> Unit,
@@ -823,6 +854,17 @@ private fun RaceModeExtraButtons(
                 tone = actions.golden,
                 enabled = enabled && canGolden,
                 onClick = onGoldenBreak,
+                modifier = Modifier.weight(1f),
+                height = actionHeight,
+                corner = actionCorner,
+            )
+        }
+        if (showEightOnBreak) {
+            TexturedActionButton(
+                label = "8OB",
+                tone = actions.golden,
+                enabled = enabled && canEightOnBreak,
+                onClick = onEightOnBreak,
                 modifier = Modifier.weight(1f),
                 height = actionHeight,
                 corner = actionCorner,
@@ -850,7 +892,7 @@ private fun RaceModeExtraButtons(
                 corner = actionCorner,
             )
         }
-        if (gameMode.supportsPushOut) {
+        if (showPushOut) {
             TexturedActionButton(
                 label = "PUSH OUT",
                 tone = actions.dry,

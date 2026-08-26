@@ -19,7 +19,8 @@ Semver releases are cut automatically after green CI on `main` when `racktrack.v
 - Break / hand indicator, undo, end-of-match summary (**SHARE PDF** + **BACK**)
 - Match history (per selected mode): player filters, reopen stats, delete with confirm
 - Styled PDF share (start / end / duration; filename includes start date-time)
-- Settings: felt color, keep screen on, haptics, default race/distance/innings, FFB rules link
+- Settings: theme, language, device, **Match defaults** (tabs 8/9/10/14.1), ruleset pack,
+  ads IAP
 - Local only — no accounts, no cloud, no per-shot ball/pocket entry
 
 Out of scope today: shot-by-shot call/pocket scoring, camera/AI (**Maybe 4.x+**), iOS
@@ -65,7 +66,7 @@ redistribution and store listing require permission. Official APKs/AABs are stor
 | [docs/09-monetization.md](docs/09-monetization.md) | Ads + Remove Ads IAP (1.2.0) |
 | [docs/privacy-policy.md](docs/privacy-policy.md) | Privacy policy stub (store URL) |
 | [CHANGELOG.md](CHANGELOG.md) | User-facing release notes (Features / Bug fixes) |
-| `resources/code-sportif-americain-2026-2027.pdf` | Official FFB text |
+| [resources/README.md](resources/README.md) | Rule PDF authorities (FFB / WPA / APA / CSI; Matchroom = 9-Ball) |
 
 ## Tech stack
 

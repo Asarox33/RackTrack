@@ -22,6 +22,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
   English abbreviations.
 - **About** — dedicated screen from Setup info control (not during live match); credits
   fonts (SIL OFL) and Twemoji flags (CC BY 4.0).
+- **Multi-ruleset packs** — Settings choose **FFB** (default) / WPA / APA / BCA·CSI /
+  **Matchroom (9)**. Scoreboard deltas only (APA: no push-out / no 3-foul rack loss + **8OB**;
+  BCA/CSI 14/1: illegal open −2 only). Matchroom applies to **9-ball only**; other modes
+  stamp FFB. Official-rules link follows the selected pack.
+- **Per-mode match defaults** — Settings list rows (iOS/Android style): **8-Ball /
+  9-Ball / 10-Ball / 14/1** with current summary, tap to edit that mode only (race +
+  break, or distance + innings). Shipped race lengths **5 / 7 / 7**. Setup applies the
+  selected mode’s defaults; legacy single race / break prefs migrate until edited.
+  Remove-ads + Restore sit on one row.
 
 ### Notes
 

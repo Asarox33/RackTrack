@@ -142,6 +142,7 @@ object MatchSummaryReport {
             MatchEventType.PLUS_ONE -> "+1"
             MatchEventType.RUN_OUT -> provider.get(StringKey.RACK_END_RUN_OUT)
             MatchEventType.GOLDEN_BREAK -> provider.get(StringKey.RACK_END_GOLDEN)
+            MatchEventType.EIGHT_ON_BREAK -> provider.get(StringKey.RACK_END_EIGHT_ON_BREAK)
             MatchEventType.EIGHT_BALL_LOSS -> provider.get(StringKey.RACK_END_EARLY_8)
             MatchEventType.THREE_FOULS_LOSS -> provider.get(StringKey.RACK_END_THREE_FOULS)
             else -> ""

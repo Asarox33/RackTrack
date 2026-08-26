@@ -15,6 +15,7 @@ object PushOutEngine {
     ): Boolean =
         match.status != MatchStatus.COMPLETED &&
             match.gameMode.supportsPushOut &&
+            match.rulesetPack.allowsPushOut(match.gameMode) &&
             match.pushOutPhase == PushOutPhase.AVAILABLE &&
             playerId == match.currentShooterId
 
@@ -61,7 +62,7 @@ object PushOutEngine {
         val nextFoul2 = if (playerId == match.player2.id) match.foul2 + 1 else match.foul2
         val consecutive = if (playerId == match.player1.id) nextFoul1 else nextFoul2
         val threeFoulLossApplies =
-            match.gameMode.supportsThreeFoulRackLoss &&
+            match.rulesetPack.allowsThreeFoulRackLoss(match.gameMode) &&
                 consecutive >= MatchEngine.CONSECUTIVE_FOULS_TO_LOSE_RACK
 
         if (threeFoulLossApplies) {
@@ -123,6 +124,7 @@ object PushOutEngine {
         history: List<MatchEvent>,
     ): PushOutPhase {
         if (!match.gameMode.supportsPushOut) return PushOutPhase.NONE
+        if (!match.rulesetPack.allowsPushOut(match.gameMode)) return PushOutPhase.NONE
         var phase = PushOutPhase.AVAILABLE
         for (event in history) {
             if (event.type in MatchEngine.RACK_ENDING_TYPES) {
@@ -193,6 +195,7 @@ object PushOutEngine {
                 MatchEventType.PLUS_ONE,
                 MatchEventType.RUN_OUT,
                 MatchEventType.GOLDEN_BREAK,
+                MatchEventType.EIGHT_ON_BREAK,
                 MatchEventType.THREE_FOULS_LOSS,
                 MatchEventType.EIGHT_BALL_LOSS,
                 -> return null

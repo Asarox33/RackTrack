@@ -17,6 +17,7 @@ object MatchEngine {
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,
             MatchEventType.GOLDEN_BREAK,
+            MatchEventType.EIGHT_ON_BREAK,
             MatchEventType.THREE_FOULS_LOSS,
             MatchEventType.EIGHT_BALL_LOSS,
         )
@@ -83,6 +84,10 @@ object MatchEngine {
     /**
      * Break with no object ball pocketed (stat only; rack continues).
      * Distinct from a break foul (use [recordFoul]).
+     *
+     * Scoreboard coverage for empty / soft / illegal open (≥4 rails, three-ball soft
+     * contexts on 9): operator taps DRY. Engine treats DRY as a legal break so
+     * push-out stays available ([PushOutEngine.phaseFromHistory]).
      */
     fun recordDryBreak(
         match: Match,
@@ -152,6 +157,7 @@ object MatchEngine {
     ): Match {
         if (match.status == MatchStatus.COMPLETED) return match
         if (!match.gameMode.supportsThreeFoulRackLoss) return match
+        if (!match.rulesetPack.allowsThreeFoulRackLoss(match.gameMode)) return match
         requireKnownPlayer(match, playerId)
         if (match.foulsFor(playerId) == 0) return match
         return match.copy(
@@ -178,7 +184,7 @@ object MatchEngine {
         val consecutive = if (playerId == match.player1.id) nextFoul1 else nextFoul2
 
         val threeFoulLossApplies =
-            match.gameMode.supportsThreeFoulRackLoss &&
+            match.rulesetPack.allowsThreeFoulRackLoss(match.gameMode) &&
                 consecutive >= CONSECUTIVE_FOULS_TO_LOSE_RACK
 
         if (!threeFoulLossApplies) {
@@ -258,6 +264,7 @@ object MatchEngine {
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,
             MatchEventType.GOLDEN_BREAK,
+            MatchEventType.EIGHT_ON_BREAK,
             -> undoRackWin(match, last, withoutLast)
             MatchEventType.THREE_FOULS_LOSS,
             MatchEventType.EIGHT_BALL_LOSS,
@@ -401,6 +408,32 @@ object MatchEngine {
         playerId: PlayerId,
     ): Boolean = match.gameMode.supportsGoldenBreak && canBreakAndClear(match, playerId)
 
+    /**
+     * APA 8-ball — legal break that pockets the 8 wins the rack.
+     * Scratch / foul on that break: use [recordEightBallLoss] on the breaker instead.
+     */
+    fun recordEightOnBreak(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
+        if (match.pushOutPhase == PushOutPhase.ANNOUNCED ||
+            match.pushOutPhase == PushOutPhase.AWAITING_CHOICE
+        ) {
+            return match
+        }
+        if (!match.rulesetPack.eightOnBreakAwardsRack(match.gameMode)) return match
+        if (!canBreakAndClear(match, playerId)) return match
+        return awardRack(match, playerId, MatchEventType.EIGHT_ON_BREAK, nowMillis)
+    }
+
+    fun canRecordEightOnBreak(
+        match: Match,
+        playerId: PlayerId,
+    ): Boolean =
+        match.rulesetPack.eightOnBreakAwardsRack(match.gameMode) &&
+            canBreakAndClear(match, playerId)
+
     fun canRecordEightBallLoss(
         match: Match,
         playerId: PlayerId,
@@ -430,7 +463,7 @@ object MatchEngine {
             currentShooterId = nextBreaker,
             pushOutPhase =
                 PushOutEngine.phaseAfterRack(
-                    supportsPushOut = match.gameMode.supportsPushOut,
+                    supportsPushOut = match.rulesetPack.allowsPushOut(match.gameMode),
                     completed = completed,
                 ),
             status = if (completed) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
@@ -460,7 +493,7 @@ object MatchEngine {
             currentShooterId = nextBreaker,
             pushOutPhase =
                 PushOutEngine.phaseAfterRack(
-                    supportsPushOut = match.gameMode.supportsPushOut,
+                    supportsPushOut = match.rulesetPack.allowsPushOut(match.gameMode),
                     completed = completed,
                 ),
             status = if (completed) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
@@ -505,6 +538,7 @@ object MatchEngine {
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,
             MatchEventType.GOLDEN_BREAK,
+            MatchEventType.EIGHT_ON_BREAK,
             -> event.playerId
             MatchEventType.THREE_FOULS_LOSS,
             MatchEventType.EIGHT_BALL_LOSS,
@@ -526,6 +560,7 @@ object MatchEngine {
                 MatchEventType.PLUS_ONE,
                 MatchEventType.RUN_OUT,
                 MatchEventType.GOLDEN_BREAK,
+                MatchEventType.EIGHT_ON_BREAK,
                 MatchEventType.THREE_FOULS_LOSS,
                 MatchEventType.EIGHT_BALL_LOSS,
                 MatchEventType.POINTS,
@@ -559,6 +594,7 @@ object MatchEngine {
                 MatchEventType.PLUS_ONE,
                 MatchEventType.RUN_OUT,
                 MatchEventType.GOLDEN_BREAK,
+                MatchEventType.EIGHT_ON_BREAK,
                 MatchEventType.THREE_FOULS_LOSS,
                 MatchEventType.EIGHT_BALL_LOSS,
                 MatchEventType.POINTS,
@@ -595,6 +631,7 @@ object MatchEngine {
                 MatchEventType.PLUS_ONE,
                 MatchEventType.RUN_OUT,
                 MatchEventType.GOLDEN_BREAK,
+                MatchEventType.EIGHT_ON_BREAK,
                 MatchEventType.THREE_FOULS_LOSS,
                 MatchEventType.EIGHT_BALL_LOSS,
                 MatchEventType.POINTS,
@@ -630,6 +667,7 @@ object MatchEngine {
                 MatchEventType.PLUS_ONE,
                 MatchEventType.RUN_OUT,
                 MatchEventType.GOLDEN_BREAK,
+                MatchEventType.EIGHT_ON_BREAK,
                 MatchEventType.THREE_FOULS_LOSS,
                 MatchEventType.EIGHT_BALL_LOSS,
                 -> {

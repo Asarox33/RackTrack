@@ -1,12 +1,13 @@
 package com.racktrack.presentation.viewmodel
 
-import com.racktrack.presentation.theme.AppThemeMode
-import com.racktrack.data.UserSettings
+import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.presentation.theme.AppThemeMode
+import com.racktrack.data.UserSettings
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -109,19 +110,52 @@ class MatchCoordinatorTest {
     }
 
     @Test
-    fun `given defaults changed in settings, when persisted, then setup mirrors them`() {
+    fun `given defaults changed in settings, when persisted, then setup mirrors matching mode`() {
         val c = coordinator()
-        c.setDefaultRacksToWin(9)
+        c.updateGameMode(GameMode.NINE_BALL)
+        c.setDefaultRacksNine(9)
+        c.setDefaultRacksEight(4)
+        c.setDefaultBreakFor(GameMode.NINE_BALL, BreakRule.WINNER)
+        c.setDefaultBreakFor(GameMode.EIGHT_BALL, BreakRule.ALTERNATE)
         c.setDefaultPointsToWin(125)
         c.setDefaultInningsLimit(null)
         c.setThemeMode(AppThemeMode.DARK_NEON)
 
         assertEquals(9, c.setup.value.racksToWin)
+        assertEquals(BreakRule.WINNER, c.setup.value.breakRule)
+        assertEquals(4, c.settings.value.defaultRacksEight)
+        assertEquals(9, c.settings.value.defaultRacksNine)
+        assertEquals(BreakRule.ALTERNATE, c.settings.value.defaultBreakEight)
         assertEquals(125, c.setup.value.pointsToWin)
         assertEquals(null, c.setup.value.inningsLimit)
         assertEquals(AppThemeMode.DARK_NEON, c.settings.value.themeMode)
         assertEquals(AppThemeMode.DARK_NEON, persisted.last().themeMode)
         assertEquals(null, persisted.last().defaultInningsLimit)
+    }
+
+    @Test
+    fun `switching race mode applies that mode default race and break`() {
+        val c = coordinator(
+            UserSettings(
+                defaultRacksEight = 5,
+                defaultRacksNine = 9,
+                defaultRacksTen = 3,
+                defaultBreakEight = BreakRule.WINNER,
+                defaultBreakNine = BreakRule.ALTERNATE,
+                defaultBreakTen = BreakRule.WINNER,
+            ),
+        )
+        assertEquals(GameMode.TEN_BALL, c.setup.value.gameMode)
+        assertEquals(3, c.setup.value.racksToWin)
+        assertEquals(BreakRule.WINNER, c.setup.value.breakRule)
+
+        c.updateGameMode(GameMode.EIGHT_BALL)
+        assertEquals(5, c.setup.value.racksToWin)
+        assertEquals(BreakRule.WINNER, c.setup.value.breakRule)
+
+        c.updateGameMode(GameMode.NINE_BALL)
+        assertEquals(9, c.setup.value.racksToWin)
+        assertEquals(BreakRule.ALTERNATE, c.setup.value.breakRule)
     }
 
     @Test
