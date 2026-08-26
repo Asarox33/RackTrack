@@ -1,7 +1,7 @@
 # Monetization — RackTrack
 
-**Status:** product decision locked · implementation target **1.2.0** (first open /
-production Play release to end users). See `docs/06-roadmap-todo.md`.
+**Status:** product decision locked · implemented on **1.2.0** · first open /
+production Play promote = **1.2.2**. See `docs/06-roadmap-todo.md`.
 
 **Authority for placement & UX:** this document. Do not invent banners, mid-rack ads,
 subscriptions, or “ad loading” wait screens.
@@ -279,7 +279,7 @@ Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
   declarations done 2026-08-20; Production promote still waits on Closed 12×14)
 - [x] R8 minify + shrink + native `SYMBOL_TABLE` in release AAB (mapping at
   `app/build/outputs/mapping/release/`); verify on next Play upload
-  (deferred from Internal 1.1.1 warnings; do before strangers see 1.2.0)
+  (deferred from Internal 1.1.1 warnings; do before strangers see **1.2.2**)
 - [x] Gate unit tests (Premium, cooldown, not loaded → immediate start)
 - [x] Play Billing product `remove_ads` Active (~4,99 € HT / TTC per store)
 - [ ] **AdMob real interstitial** — after Production listing is linkable: associate Play in

@@ -2,14 +2,14 @@
 
 Publish **binaries via Play** (AAB). GitHub Releases stay **notes-only** (`LICENSE`).
 
-**End-user / production gate:** version **1.2.0** with monetization
-([`09-monetization.md`](09-monetization.md)). Do **not** soft-launch ad-free production
-then add ads later. See [`00-release-trains.md`](00-release-trains.md).
+**End-user / production gate:** version **1.2.2** with monetization
+([`09-monetization.md`](09-monetization.md); code since **1.2.0**). Do **not** soft-launch
+ad-free production then add ads later. See [`00-release-trains.md`](00-release-trains.md).
 
 **Testing:** **Internal** = owner smoke. **Closed** = mandatory before production on this
 account (Google: ≥**12** closed testers opted in ≥**14** consecutive days + Console
-questionnaire). Internal alone does **not** unlock Production. Put monetized **1.2.0** on
-Closed while waiting; strangers only after production access.
+questionnaire). Internal alone does **not** unlock Production. Closed runs monetized
+**1.2.2**; strangers only after production access.
 
 ---
 
@@ -120,9 +120,10 @@ Closed and Production.
 </en-US>
 ```
 
-### E. Production 1.2.0 — after Closed 12×14 (do not forget)
+### E. Production 1.2.2 — after Closed 12×14 (do not forget)
 
-First stranger-facing production = **1.2.0** with AdMob + Remove Ads IAP.
+First stranger-facing production = **1.2.2** with AdMob + Remove Ads IAP (monetization
+train from **1.2.0**; Closed started on **1.2.1** then **1.2.2**).
 **Prerequisite:** Closed testing track with ≥12 opted-in testers for ≥14 consecutive days,
 then answer Play’s production-access questionnaire (Internal does not count).
 
@@ -133,7 +134,7 @@ revisit the declarations below when promoting the monetized build (before **2.0.
 **Closed track (start the clock now)**
 
 - [x] Create **Closed testing** release with monetized **1.2.1** AAB (`102012`) —
-  live 2026-08-20
+  live 2026-08-20; track now on **1.2.2** (initial Production promote target)
 - [x] ≥12 testers opted in (2026-08-20)
 - [ ] Wait ≥14 consecutive days with ≥12 still enrolled → request production access
   (**clock started 2026-08-20** → earliest ~**2026-09-03** if count holds)
