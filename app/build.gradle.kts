@@ -108,7 +108,9 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":shared"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -145,46 +147,13 @@ tasks.withType<Test>().configureEach {
 }
 
 /**
- * Domain-focused JaCoCo report (race / 14.1 engines). UI is mostly untested Compose.
- * HTML: app/build/reports/jacoco/domainCoverage/html/index.html
- * XML:  app/build/reports/jacoco/domainCoverage/domainCoverage.xml
+ * Domain coverage lives on `:shared` after the KMP split.
+ * Keep this task name so CI / AGENTS (`:app:domainCoverage`) still work.
  */
-tasks.register<JacocoReport>("domainCoverage") {
+tasks.register("domainCoverage") {
     group = "verification"
-    description = "Generate JaCoCo coverage report for domain sources"
-    dependsOn("testDebugUnitTest")
-
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        csv.required.set(false)
-    }
-
-    // AGP 9 built-in Kotlin compiler output (not tmp/kotlin-classes).
-    val kotlinClasses =
-        layout.buildDirectory.dir(
-            "intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
-        )
-    classDirectories.setFrom(
-        files(
-            fileTree(kotlinClasses) {
-                include("**/domain/**")
-                exclude(
-                    "**/*\$*",
-                    "**/BuildConfig.*",
-                    "**/R.class",
-                    "**/R\$*.class",
-                    "**/Manifest*.*",
-                )
-            },
-        ),
-    )
-    sourceDirectories.setFrom(files("src/main/kotlin"))
-    executionData.setFrom(
-        fileTree(layout.buildDirectory) {
-            include("outputs/unit_test_code_coverage/debugUnitTest/*.exec")
-        },
-    )
+    description = "Delegate to :shared:domainCoverage (KMP domain module)"
+    dependsOn(":shared:domainCoverage")
 }
 
 ktlint {

@@ -31,17 +31,20 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.MatchFormatOptions
+import com.racktrack.presentation.component.AboutHelpButton
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
-import com.racktrack.presentation.theme.OutlineWarm
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.AppChromeTheme
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.RackTrackTheme
-import com.racktrack.presentation.theme.ScoreWhite
 import com.racktrack.presentation.viewmodel.SetupUiState
 
 @Composable
@@ -59,12 +62,13 @@ fun SetupScreen(
     onStart: () -> Unit,
     onOpenHistory: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenAbout: () -> Unit = {},
     rootModifier: Modifier = Modifier,
 ) {
     val landscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    FeltBackground(modifier = rootModifier) {
+    AppChromeBackground(modifier = rootModifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (landscape) {
                 LandscapeSetup(
@@ -97,6 +101,13 @@ fun SetupScreen(
                     onOpenHistory = onOpenHistory,
                 )
             }
+            AboutHelpButton(
+                onClick = onOpenAbout,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .safeDrawingPadding()
+                    .padding(top = 6.dp, start = 10.dp),
+            )
             SettingsGearButton(
                 onClick = onOpenSettings,
                 modifier = Modifier
@@ -123,7 +134,7 @@ private fun LandscapeSetup(
     onStart: () -> Unit,
     onOpenHistory: () -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val solo = state.gameMode.isPointScoring && state.soloTraining
     Row(
         modifier = Modifier
@@ -139,11 +150,11 @@ private fun LandscapeSetup(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("RackTrack", style = MaterialTheme.typography.headlineLarge)
+            Text(Strings.get(StringKey.APP_NAME), style = MaterialTheme.typography.headlineLarge)
             Text(
-                text = "American pool",
+                text = Strings.get(StringKey.SETUP_TAGLINE),
                 style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.78f),
+                color = chrome.textSecondary,
             )
             GameModeRow(state = state, onGameModeChange = onGameModeChange, compact = true)
             if (state.gameMode.isPointScoring) {
@@ -154,14 +165,18 @@ private fun LandscapeSetup(
             }
             // Stack names vertically in landscape so the text field stays tall enough to read.
             NameField(
-                label = if (solo) "Player" else "Player 1",
+                label = if (solo) {
+                    Strings.get(StringKey.PLAYER)
+                } else {
+                    Strings.get(StringKey.PLAYER_1)
+                },
                 value = state.player1Name,
                 onValueChange = onPlayer1Change,
                 fieldModifier = Modifier.fillMaxWidth(),
             )
             if (!solo) {
                 NameField(
-                    label = "Player 2",
+                    label = Strings.get(StringKey.PLAYER_2),
                     value = state.player2Name,
                     onValueChange = onPlayer2Change,
                     fieldModifier = Modifier.fillMaxWidth(),
@@ -183,7 +198,11 @@ private fun LandscapeSetup(
             )
             if (!solo) {
                 Text(
-                    text = if (state.gameMode.isPointScoring) "Who starts?" else "Who breaks first?",
+                    text = if (state.gameMode.isPointScoring) {
+                        Strings.get(StringKey.WHO_STARTS)
+                    } else {
+                        Strings.get(StringKey.WHO_BREAKS_FIRST)
+                    },
                     style = MaterialTheme.typography.titleLarge,
                 )
                 BreakerRow(state = state, onBreakerChange = onBreakerChange, compact = true)
@@ -196,24 +215,30 @@ private fun LandscapeSetup(
                 )
             }
             TexturedActionButton(
-                label = if (solo) "START TRAINING" else "START MATCH",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                label = if (solo) {
+                    Strings.get(StringKey.START_TRAINING)
+                } else {
+                    Strings.get(StringKey.START_MATCH)
+                },
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onStart,
                 modifier = Modifier.widthIn(min = 240.dp),
                 height = 52.dp,
+                useFeltGrain = false,
             )
             TexturedActionButton(
-                label = "HISTORY",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                label = Strings.get(StringKey.HISTORY),
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onOpenHistory,
                 modifier = Modifier.widthIn(min = 240.dp),
                 height = 48.dp,
+                useFeltGrain = false,
             )
         }
     }
@@ -234,7 +259,7 @@ private fun PortraitSetup(
     onStart: () -> Unit,
     onOpenHistory: () -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val solo = state.gameMode.isPointScoring && state.soloTraining
     Column(
         modifier = Modifier
@@ -246,11 +271,11 @@ private fun PortraitSetup(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("RackTrack", style = MaterialTheme.typography.headlineLarge)
+            Text(Strings.get(StringKey.APP_NAME), style = MaterialTheme.typography.headlineLarge)
             Text(
-                text = "American pool",
+                text = Strings.get(StringKey.SETUP_TAGLINE),
                 style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.78f),
+                color = chrome.textSecondary,
             )
         }
 
@@ -263,14 +288,18 @@ private fun PortraitSetup(
         }
 
         NameField(
-            label = if (solo) "Player" else "Player 1",
+            label = if (solo) {
+                Strings.get(StringKey.PLAYER)
+            } else {
+                Strings.get(StringKey.PLAYER_1)
+            },
             value = state.player1Name,
             onValueChange = onPlayer1Change,
             fieldModifier = Modifier.fillMaxWidth(),
         )
         if (!solo) {
             NameField(
-                label = "Player 2",
+                label = Strings.get(StringKey.PLAYER_2),
                 value = state.player2Name,
                 onValueChange = onPlayer2Change,
                 fieldModifier = Modifier.fillMaxWidth(),
@@ -289,9 +318,9 @@ private fun PortraitSetup(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = if (state.gameMode.isPointScoring) {
-                        "Who starts?"
+                        Strings.get(StringKey.WHO_STARTS)
                     } else {
-                        "Who breaks first?"
+                        Strings.get(StringKey.WHO_BREAKS_FIRST)
                     },
                     style = MaterialTheme.typography.titleLarge,
                 )
@@ -310,25 +339,31 @@ private fun PortraitSetup(
 
         Spacer(modifier = Modifier.height(4.dp))
         TexturedActionButton(
-            label = if (solo) "START TRAINING" else "START MATCH",
-            base = felt.accent,
-            light = felt.accentLight,
-            dark = felt.accentDark,
+            label = if (solo) {
+                Strings.get(StringKey.START_TRAINING)
+            } else {
+                Strings.get(StringKey.START_MATCH)
+            },
+            base = chrome.accent,
+            light = chrome.accentLight,
+            dark = chrome.accentDark,
             enabled = true,
             onClick = onStart,
             modifier = Modifier.widthIn(min = 280.dp),
             height = 56.dp,
-        )
+                useFeltGrain = false,
+            )
         TexturedActionButton(
-            label = "HISTORY",
-            base = felt.accent,
-            light = felt.accentLight,
-            dark = felt.accentDark,
+            label = Strings.get(StringKey.HISTORY),
+            base = chrome.accent,
+            light = chrome.accentLight,
+            dark = chrome.accentDark,
             enabled = true,
             onClick = onOpenHistory,
             modifier = Modifier.widthIn(min = 280.dp),
             height = 52.dp,
-        )
+                useFeltGrain = false,
+            )
     }
 }
 
@@ -347,7 +382,7 @@ private fun FormatControls(
         verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp),
     ) {
         if (state.gameMode.isPointScoring) {
-            Text("Distance", style = MaterialTheme.typography.titleLarge)
+            Text(Strings.get(StringKey.DISTANCE), style = MaterialTheme.typography.titleLarge)
             val pointsOptions = MatchFormatOptions.pointsToWin
             val pointsIndex =
                 pointsOptions.indexOf(state.pointsToWin).let { if (it >= 0) it else 0 }
@@ -360,7 +395,7 @@ private fun FormatControls(
                 valueSp = pickerSp,
                 modifier = Modifier.widthIn(max = 420.dp),
             )
-            Text("Innings", style = MaterialTheme.typography.titleLarge)
+            Text(Strings.get(StringKey.INNINGS), style = MaterialTheme.typography.titleLarge)
             val inningsOptions = MatchFormatOptions.inningsLimits
             val unlimitedIndex = inningsOptions.size
             val inningsIndex =
@@ -383,7 +418,7 @@ private fun FormatControls(
                 modifier = Modifier.widthIn(max = 420.dp),
             )
         } else {
-            Text("Race to", style = MaterialTheme.typography.titleLarge)
+            Text(Strings.get(StringKey.RACE_TO), style = MaterialTheme.typography.titleLarge)
             SwipeIntPicker(
                 value = state.racksToWin,
                 onValueChange = onRacksChange,
@@ -402,30 +437,32 @@ private fun BreakerRow(
     onBreakerChange: (Boolean) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         TexturedChip(
-            label = state.player1Name.ifBlank { "Player 1" }.uppercase(),
+            label = state.player1Name.ifBlank { Strings.get(StringKey.PLAYER_1) }.uppercase(),
             selected = state.player1BreaksFirst,
             onClick = { onBreakerChange(true) },
             modifier = Modifier.widthIn(min = 120.dp),
-            selectedLight = felt.accentLight,
-            selectedDark = felt.accentDark,
-            idleLight = felt.light,
-            idleDark = felt.dark,
+            selectedLight = chrome.accentLight,
+            selectedDark = chrome.accentDark,
+            idleLight = chrome.surfaceElevated,
+            idleDark = chrome.surfaceDeep,
             height = if (compact) 44.dp else 48.dp,
-        )
+                useFeltGrain = false,
+            )
         TexturedChip(
-            label = state.player2Name.ifBlank { "Player 2" }.uppercase(),
+            label = state.player2Name.ifBlank { Strings.get(StringKey.PLAYER_2) }.uppercase(),
             selected = !state.player1BreaksFirst,
             onClick = { onBreakerChange(false) },
             modifier = Modifier.widthIn(min = 120.dp),
-            selectedLight = felt.accentLight,
-            selectedDark = felt.accentDark,
-            idleLight = felt.light,
-            idleDark = felt.dark,
+            selectedLight = chrome.accentLight,
+            selectedDark = chrome.accentDark,
+            idleLight = chrome.surfaceElevated,
+            idleDark = chrome.surfaceDeep,
             height = if (compact) 44.dp else 48.dp,
-        )
+                useFeltGrain = false,
+            )
     }
 }
 
@@ -435,32 +472,34 @@ private fun BreakRuleRow(
     onBreakRuleChange: (BreakRule) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Break rule", style = MaterialTheme.typography.titleLarge)
+        Text(Strings.get(StringKey.BREAK_RULE), style = MaterialTheme.typography.titleLarge)
         if (!compact) Box(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TexturedChip(
-                label = "ALTERNATE",
+                label = Strings.get(StringKey.ALTERNATE),
                 selected = state.breakRule == BreakRule.ALTERNATE,
                 onClick = { onBreakRuleChange(BreakRule.ALTERNATE) },
                 modifier = Modifier.widthIn(min = 120.dp),
-                selectedLight = felt.accentLight,
-                selectedDark = felt.accentDark,
-                idleLight = felt.light,
-                idleDark = felt.dark,
+                selectedLight = chrome.accentLight,
+                selectedDark = chrome.accentDark,
+                idleLight = chrome.surfaceElevated,
+                idleDark = chrome.surfaceDeep,
                 height = if (compact) 40.dp else 44.dp,
+                useFeltGrain = false,
             )
             TexturedChip(
-                label = "WINNER",
+                label = Strings.get(StringKey.WINNER),
                 selected = state.breakRule == BreakRule.WINNER,
                 onClick = { onBreakRuleChange(BreakRule.WINNER) },
                 modifier = Modifier.widthIn(min = 120.dp),
-                selectedLight = felt.accentLight,
-                selectedDark = felt.accentDark,
-                idleLight = felt.light,
-                idleDark = felt.dark,
+                selectedLight = chrome.accentLight,
+                selectedDark = chrome.accentDark,
+                idleLight = chrome.surfaceElevated,
+                idleDark = chrome.surfaceDeep,
                 height = if (compact) 40.dp else 44.dp,
+                useFeltGrain = false,
             )
         }
     }
@@ -471,28 +510,28 @@ private fun SoloTrainingRow(
     selected: Boolean,
     onChange: (Boolean) -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Solo Training",
+            text = Strings.get(StringKey.SOLO_TRAINING),
             style = MaterialTheme.typography.titleLarge,
-            color = ScoreWhite,
+            color = chrome.textPrimary,
             modifier = Modifier.weight(1f),
         )
         Switch(
             checked = selected,
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = ScoreWhite,
-                checkedTrackColor = felt.accent,
-                checkedBorderColor = felt.accentDark,
-                uncheckedThumbColor = ScoreWhite.copy(alpha = 0.85f),
-                uncheckedTrackColor = felt.dark.copy(alpha = 0.55f),
-                uncheckedBorderColor = OutlineWarm.copy(alpha = 0.45f),
+                checkedThumbColor = chrome.onAccent,
+                checkedTrackColor = chrome.accent,
+                checkedBorderColor = chrome.accentDark,
+                uncheckedThumbColor = chrome.textPrimary.copy(alpha = 0.85f),
+                uncheckedTrackColor = chrome.surfaceDeep.copy(alpha = 0.55f),
+                uncheckedBorderColor = chrome.rim.copy(alpha = 0.4f),
             ),
         )
     }
@@ -504,12 +543,12 @@ private fun GameModeRow(
     onGameModeChange: (GameMode) -> Unit,
     compact: Boolean,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     Column(
         horizontalAlignment = if (compact) Alignment.Start else Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("Game mode", style = MaterialTheme.typography.titleLarge)
+        Text(Strings.get(StringKey.GAME_MODE), style = MaterialTheme.typography.titleLarge)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             listOf(
                 GameMode.EIGHT_BALL to "8",
@@ -522,10 +561,10 @@ private fun GameModeRow(
                     selected = state.gameMode == mode,
                     onClick = { onGameModeChange(mode) },
                     modifier = Modifier.widthIn(min = if (compact) 64.dp else 72.dp),
-                    selectedLight = felt.accentLight,
-                    selectedDark = felt.accentDark,
-                    idleLight = felt.light,
-                    idleDark = felt.dark,
+                    selectedLight = chrome.accentLight,
+                    selectedDark = chrome.accentDark,
+                    idleLight = chrome.surfaceElevated,
+                    idleDark = chrome.surfaceDeep,
                     height = if (compact) 40.dp else 44.dp,
                 )
             }
@@ -540,7 +579,7 @@ private fun NameField(
     onValueChange: (String) -> Unit,
     fieldModifier: Modifier = Modifier,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -551,15 +590,15 @@ private fun NameField(
         shape = RoundedCornerShape(14.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = ScoreWhite,
-            unfocusedTextColor = ScoreWhite,
-            focusedBorderColor = OutlineWarm,
-            unfocusedBorderColor = OutlineWarm.copy(alpha = 0.45f),
-            focusedLabelColor = ScoreWhite,
-            unfocusedLabelColor = ScoreWhite.copy(alpha = 0.7f),
-            cursorColor = ScoreWhite,
-            focusedContainerColor = felt.dark.copy(alpha = 0.35f),
-            unfocusedContainerColor = felt.dark.copy(alpha = 0.22f),
+            focusedTextColor = chrome.textPrimary,
+            unfocusedTextColor = chrome.textPrimary,
+            focusedBorderColor = chrome.rim,
+            unfocusedBorderColor = chrome.rim.copy(alpha = 0.4f),
+            focusedLabelColor = chrome.textSecondary,
+            unfocusedLabelColor = chrome.textSecondary.copy(alpha = 0.85f),
+            cursorColor = chrome.accent,
+            focusedContainerColor = chrome.surfaceElevated.copy(alpha = 0.9f),
+            unfocusedContainerColor = chrome.surface.copy(alpha = 0.85f),
         ),
     )
 }
@@ -568,18 +607,21 @@ private fun NameField(
 @Composable
 private fun SetupLandscapePreview() {
     RackTrackTheme {
-        SetupScreen(
-            state = SetupUiState(gameMode = GameMode.FOURTEEN_ONE),
-            onPlayer1Change = {},
-            onPlayer2Change = {},
-            onGameModeChange = {},
-            onRacksChange = {},
-            onPointsChange = {},
-            onInningsChange = {},
-            onBreakerChange = {},
-            onStart = {},
-        )
+        AppChromeTheme {
+            SetupScreen(
+                state = SetupUiState(gameMode = GameMode.FOURTEEN_ONE),
+                onPlayer1Change = {},
+                onPlayer2Change = {},
+                onGameModeChange = {},
+                onRacksChange = {},
+                onPointsChange = {},
+                onInningsChange = {},
+                onBreakerChange = {},
+                onStart = {},
+            )
+        }
     }
 }
 
 private const val LANDSCAPE_CONTROLS_WEIGHT = 1.15f
+

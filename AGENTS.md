@@ -10,16 +10,18 @@ American pool **race board** (8 / 9 / 10) + **14/1 continuous** (+ **14/1 solo**
 split screen, multi-felt cloth, per-mode actions (incl. 9/10 push-out), break/hand
 indicator, undo, end-of-match summary (SHARE + SAVE PDF + BACK), local match history
 (mode-scoped, player filters, delete, same stats), PDF share with start/end/duration +
-versioned footer, Settings **page** (felt incl. Golden, screen on, haptics, defaults,
-ads, FFB link). Adaptive board metrics (% pane/screen, floor + ceiling). Orientation:
-`fullSensor`. No per-shot ball/pocket entry.
+versioned footer, Settings **page** (theme, language, device, Match defaults tabs
+8/9/10/14.1, ruleset pack, ads). Adaptive board metrics (% pane/screen, floor + ceiling).
+Orientation: `fullSensor`. No per-shot ball/pocket entry.
 
 ### Release trains (do not invent)
 
 Read **`docs/00-release-trains.md`** first.
 
 - **1.2.0** — monetization implementation (`docs/09-monetization.md`); first Play production gate
-- **2.0.0** on `rc/2.0.0` — i18n, multi-ruleset, KMP/CMP — **not** on the 1.2 Play gate
+- **2.0.0** on `rc/2.0.0` — i18n, multi-ruleset, KMP `:shared` (android+jvm), DS —
+  **not** on the 1.2 Play gate; **not** CMP UI / iOS
+- **3.0.0** — Compose Multiplatform UI + iOS (Mac); see `docs/00-release-trains.md`
 
 ### Anti-drift (mandatory)
 
@@ -32,9 +34,11 @@ When editing `docs/06-roadmap-todo.md` or related plans:
 
 ### Toolchain
 
-- JDK **25** (`JAVA_HOME=~/tools/jdk-25`), Gradle **9.6.1** wrapper, Android SDK **36**
-- AGP **9.3** has built-in Kotlin — do **not** apply `org.jetbrains.kotlin.android`; keep Compose compiler plugin
-- Under Gradle 9, keep `testRuntimeOnly` JUnit Platform launcher
+- JDK **25** (`JAVA_HOME=~/tools/jdk-25`), Gradle **9.7.1** wrapper, Android SDK **36**
+- AGP **9.3.2** has built-in Kotlin — do **not** apply `org.jetbrains.kotlin.android`; keep Compose compiler plugin
+- KMP `:shared` uses `org.jetbrains.kotlin.multiplatform` +
+  `com.android.kotlin.multiplatform.library` (android + jvm; iOS target = train **3.0.0**)
+- Under Gradle 9, keep `testRuntimeOnly` / `runtimeOnly` JUnit Platform launcher
 - Release signing: `keystore.properties` (gitignored) → upload key; else debug fallback
   (`keystore.properties.example`, `docs/08-play-store.md`)
 - Play privacy HTTPS: GitHub Pages from `docs/` →
@@ -47,14 +51,14 @@ When editing `docs/06-roadmap-todo.md` or related plans:
 ### Commands
 
 ```bash
-./gradlew testDebugUnitTest
-./gradlew :app:domainCoverage # JaCoCo HTML/XML for domain/
+./gradlew :shared:jvmTest
+./gradlew :app:domainCoverage   # delegates to :shared:domainCoverage (JaCoCo)
 ./gradlew ktlintCheck detekt
 ./gradlew :app:assembleDebug
-./gradlew :app:bundleRelease  # Play AAB when keystore.properties present
+./gradlew :app:bundleRelease    # Play AAB when keystore.properties present
 ```
 
-Prefer domain + `MatchCoordinator` + history JSON/filter unit tests. No Compose screenshot tests.
+Prefer `:shared` domain + `MatchCoordinator` + history JSON/filter unit tests. No Compose screenshot tests.
 
 No emulator/GUI in this VM — validate with unit tests + APK assemble/`apkanalyzer`.
 

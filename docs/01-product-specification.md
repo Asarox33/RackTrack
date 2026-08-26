@@ -33,9 +33,6 @@ or share past match stats.
 
 ### Later (only if product asks)
 - Camera / AI ball detection — prerequisite for any automatic shot scoring
-- Optional **accounts / player identity** so each player can find others and **retrieve
-  stats for matches they played**, even when the scoreboard run was on someone else’s
-  phone — **still one device scores the live match** (never remote two-table play)
 
 Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 
@@ -59,9 +56,10 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
   - Filter by player names (either seat); reopen the same stats as end-of-match
   - Delete with red ✕ + confirmation
 - Share styled PDF of the full summary (start / end / duration; not a scrolled screenshot)
-- **Settings** full screen (like History): felt, keep screen on, haptics, default
-  race/distance/innings/break rule, Remove ads / Restore, open FFB PDF rules link
-- About (in Settings): version, build type/time, GitHub repo link
+- **Settings** full screen (like History): theme, keep screen on, haptics, **Match
+  defaults** as mode rows (8 / 9 / 10 / 14/1) with summary → drill-down editor, ruleset
+  pack + official-rules link, Remove ads / Restore on one row
+- About (from Setup): version, build type/time, credits, GitHub repo link
 
 ## 7. Explicitly out of scope
 
@@ -75,11 +73,13 @@ Mode-by-mode FFB summary vs what the app encodes: `docs/02-game-rules-*.md`.
 - Screenshot / UI golden tests
 - PNG export of match summary (PDF only)
 
-Accounts + cloud history sync are **not in v1**; they may appear later only for
-identity / find-players / shared post-match stats — not for remote play.
+Accounts / cloud identity and **peer match import** (QR / nearby / file) are **out**
+(owner 2026-08-26). Match handoff stays **PDF share** + local history on the scoring phone.
 
-**Later (2.0 / `rc/2.0.0`, see roadmap):** **i18n** (en default + fr/de/es/it/nl/pt),
-multi-ruleset packs, KMP/CMP / iOS — UI language ≠ rule authority.
+**Later (2.0 / `rc/2.0.0`, see roadmap):** **i18n**, multi-ruleset packs, KMP `:shared`
+(feature scope closed aside from polish / store). UI language ≠ rule authority.
+
+**Later (3.0):** Compose Multiplatform UI + **iOS** (see `00-release-trains.md`).
 
 ## 8. Constraints
 
@@ -94,12 +94,12 @@ find that match in history — without entering shot details.
 
 ## 10. Product version
 
-**1.2.1** — adaptive boards, race/14-1 swipe pickers, Settings page, 14/1 ACCEPT/RE-BREAK,
-9/10 push-out tree (on top of **1.2.0** monetization). Versioning and GitHub Release notes:
-`docs/07-versioning-and-releases.md`. Binaries for end users ship via app stores (see `LICENSE`).
+**1.2.2** on `main` / Closed — 14/1 innings table layout (on top of **1.2.1** adaptive boards
++ **1.2.0** monetization). **2.0.0** develops on `rc/2.0.0` (merge after 1.2 prod).
+Versioning and GitHub Release notes: `docs/07-versioning-and-releases.md`. Binaries for
+end users ship via app stores (see `LICENSE`).
 
-**Play production gate:** first open / production release to strangers is **1.2.0** and must
+**Play production gate:** first open / production release to strangers is **1.2.2** and must
 include monetization per `docs/09-monetization.md` (AdMob interstitial on Start only,
-5‑min cooldown, never block start, lifetime Remove Ads ~**4,99 €** + Restore).
-Do not publish an ad-free Play build then add ads later. **1.2.1** may ship on Closed /
-Internal as the next named build while that gate runs.
+5‑min cooldown, never block start, lifetime Remove Ads ~**4,99 €** + Restore; code since
+**1.2.0**). Do not publish an ad-free Play build then add ads later.

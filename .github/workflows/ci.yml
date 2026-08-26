@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # Need full history so coverage can diff PR base…head for changed lines.
+          fetch-depth: 0
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -34,28 +37,26 @@ jobs:
       - name: Unit tests + domain coverage
         run: ./gradlew :app:domainCoverage
 
-      - name: Coverage report on PR
+      - name: Domain coverage PR comment + gates
         if: github.event_name == 'pull_request'
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.8.0
-        with:
-          paths: ${{ github.workspace }}/app/build/reports/jacoco/domainCoverage/domainCoverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Domain coverage
-          update-comment: true
-          # Madrapps uses instruction coverage (not line %). Domain overall ~85%.
-          min-coverage-overall: 80
-          min-coverage-changed-files: 0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 .github/scripts/domain-coverage-pr.py
 
       - name: Coverage summary
-        if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
+        if: always() && hashFiles('shared/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
         run: |
           python3 <<'PY'
           import os
           import xml.etree.ElementTree as ET
           from pathlib import Path
 
-          xml_path = Path("app/build/reports/jacoco/domainCoverage/domainCoverage.xml")
+          xml_path = Path("shared/build/reports/jacoco/domainCoverage/domainCoverage.xml")
           root = ET.parse(xml_path).getroot()
           counters = {c.get("type"): c for c in root.findall("counter")}
           line = counters.get("LINE")
@@ -67,11 +68,12 @@ jobs:
           pct = (100.0 * covered / total) if total else 0.0
           summary = os.environ.get("GITHUB_STEP_SUMMARY")
           body = (
-              "## Domain coverage\n\n"
+              "## Domain coverage (line)\n\n"
               f"- **Line coverage:** {pct:.1f}% ({covered}/{total})\n"
-              f"- HTML report uploaded as CI artifact `domain-coverage`\n"
-              f"- Local: `./gradlew :app:domainCoverage` → "
-              "`app/build/reports/jacoco/domainCoverage/html/index.html`\n"
+              f"- HTML report: artifact `domain-coverage`\n"
+              f"- Local: `./gradlew :app:domainCoverage`\n"
+              f"- PR decoration + instruction gates: "
+              "`.github/scripts/domain-coverage-pr.py`\n"
           )
           print(body)
           if summary:
@@ -80,9 +82,9 @@ jobs:
           PY
 
       - name: Upload coverage HTML
-        if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/html/**') != ''
+        if: always() && hashFiles('shared/build/reports/jacoco/domainCoverage/html/**') != ''
         uses: actions/upload-artifact@v7
         with:
           name: domain-coverage
-          path: app/build/reports/jacoco/domainCoverage/html
+          path: shared/build/reports/jacoco/domainCoverage/html
           if-no-files-found: ignore

@@ -44,21 +44,15 @@ import com.racktrack.domain.InningStat
 import com.racktrack.domain.MatchSummary
 import com.racktrack.domain.MatchSummaryReport
 import com.racktrack.domain.model.GameMode
-import com.racktrack.domain.model.MatchEventType
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.component.FoulIcon
 import com.racktrack.presentation.component.RunOutIcon
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.formatDuration
 import com.racktrack.presentation.share.MatchSummaryShare
-import com.racktrack.presentation.theme.ButtonDryLight
-import com.racktrack.presentation.theme.ButtonFoulLight
-import com.racktrack.presentation.theme.ButtonGoldenLight
-import com.racktrack.presentation.theme.ButtonRunOut
-import com.racktrack.presentation.theme.ButtonRunOutDark
-import com.racktrack.presentation.theme.ButtonRunOutLight
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -70,7 +64,7 @@ fun MatchSummaryModal(
     MatchSummaryScaffold(
         title = MatchSummaryReport.sessionOverTitle(summary),
         summary = summary,
-        actionLabel = "BACK",
+        actionLabel = Strings.get(StringKey.BACK),
         onAction = onNewMatch,
         modifier = modifier,
         scrim = true,
@@ -102,7 +96,7 @@ fun MatchSummaryScaffold(
                 listOf(felt.dark.copy(alpha = PANEL_TOP_ALPHA), felt.vignette),
             ),
         )
-        .border(2.dp, OutlineWarm.copy(alpha = PANEL_BORDER_ALPHA), RoundedCornerShape(22.dp))
+        .border(2.dp, LocalAppTheme.current.rim.copy(alpha = PANEL_BORDER_ALPHA), RoundedCornerShape(22.dp))
 
     val panelBody: @Composable () -> Unit = {
         Box(modifier = panel) {
@@ -190,39 +184,46 @@ private fun MatchSummaryContent(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            color = ScoreWhite.copy(alpha = 0.7f),
+            color = LocalAppTheme.current.textSecondary,
         )
         Text(
             text = if (summary.solo) {
-                summary.player1Name.uppercase().ifEmpty { "PLAYER" }
+                summary.player1Name.uppercase().ifEmpty {
+                    Strings.get(StringKey.PLAYER_FALLBACK).uppercase()
+                }
             } else {
-                summary.winnerName.uppercase().ifEmpty { "DRAW" }
+                summary.winnerName.uppercase().ifEmpty {
+                    Strings.get(StringKey.DRAW)
+                }
             },
             style = MaterialTheme.typography.displayLarge.copy(fontSize = WINNER_FONT_SP.sp),
-            color = ButtonRunOutLight,
+            color = LocalAppTheme.current.actions.runOut.light,
             textAlign = TextAlign.Center,
         )
         when {
             summary.solo -> Text(
-                text = "SOLO",
+                text = Strings.get(StringKey.SOLO),
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = LocalAppTheme.current.textPrimary,
             )
             summary.winnerName.isNotEmpty() -> Text(
-                text = "WINS",
+                text = Strings.get(StringKey.WINS),
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = LocalAppTheme.current.textPrimary,
             )
         }
         Text(
             text = MatchSummaryReport.subtitle(summary),
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.8f),
+            color = LocalAppTheme.current.textPrimary.copy(alpha = 0.85f),
         )
         Text(
-            text = "Total  ${formatDuration(summary.totalDurationMillis)}",
+            text = Strings.format(
+                StringKey.TOTAL_DURATION,
+                formatDuration(summary.totalDurationMillis),
+            ),
             style = MaterialTheme.typography.titleLarge,
-            color = OutlineWarm,
+            color = LocalAppTheme.current.textSecondary,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -266,9 +267,9 @@ private fun MatchSummaryContent(
         if (summary.gameMode.isPointScoring) {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "INNINGS",
+                text = Strings.get(StringKey.INNINGS_SECTION),
                 style = MaterialTheme.typography.titleLarge,
-                color = ScoreWhite.copy(alpha = 0.75f),
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -282,18 +283,18 @@ private fun MatchSummaryContent(
         } else {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "RACKS",
+                text = Strings.get(StringKey.RACKS_SECTION),
                 style = MaterialTheme.typography.titleLarge,
-                color = ScoreWhite.copy(alpha = 0.75f),
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(6.dp))
 
             if (summary.racks.isEmpty()) {
                 Text(
-                    text = "No rack timings recorded",
+                    text = Strings.get(StringKey.NO_RACK_TIMINGS),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = ScoreWhite.copy(alpha = 0.6f),
+                    color = LocalAppTheme.current.textSecondary,
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
@@ -306,7 +307,7 @@ private fun MatchSummaryContent(
                             index = rack.index,
                             winnerName = rack.winnerName,
                             durationLabel = formatDuration(rack.durationMillis),
-                            endLabel = rackEndLabel(rack.endType),
+                            endLabel = MatchSummaryReport.rackEndLabel(rack.endType),
                         )
                     }
                 }
@@ -321,7 +322,11 @@ private fun MatchSummaryContent(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             TexturedActionButton(
-                label = if (sharing) "SHARING…" else "SHARE",
+                label = if (sharing) {
+                    Strings.get(StringKey.SHARING)
+                } else {
+                    Strings.get(StringKey.SHARE)
+                },
                 base = felt.accent,
                 light = felt.accentLight,
                 dark = felt.accentDark,
@@ -345,7 +350,11 @@ private fun MatchSummaryContent(
                 height = 52.dp,
             )
             TexturedActionButton(
-                label = if (saving) "SAVING…" else "SAVE",
+                label = if (saving) {
+                    Strings.get(StringKey.SAVING)
+                } else {
+                    Strings.get(StringKey.SAVE)
+                },
                 base = felt.accent,
                 light = felt.accentLight,
                 dark = felt.accentDark,
@@ -362,9 +371,9 @@ private fun MatchSummaryContent(
         Spacer(modifier = Modifier.height(10.dp))
         TexturedActionButton(
             label = actionLabel,
-            base = if (actionUsesFelt) felt.accent else ButtonRunOut,
-            light = if (actionUsesFelt) felt.accentLight else ButtonRunOutLight,
-            dark = if (actionUsesFelt) felt.accentDark else ButtonRunOutDark,
+            base = if (actionUsesFelt) felt.accent else LocalAppTheme.current.actions.runOut.base,
+            light = if (actionUsesFelt) felt.accentLight else LocalAppTheme.current.actions.runOut.light,
+            dark = if (actionUsesFelt) felt.accentDark else LocalAppTheme.current.actions.runOut.dark,
             enabled = true,
             onClick = onAction,
             modifier = Modifier.widthIn(min = 240.dp),
@@ -395,7 +404,7 @@ private fun PlayerSummaryColumn(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.06f))
-            .border(1.dp, OutlineWarm.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+            .border(1.dp, LocalAppTheme.current.rim.copy(alpha = 0.55f), RoundedCornerShape(16.dp))
             .padding(horizontal = 14.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -414,25 +423,25 @@ private fun PlayerSummaryColumn(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "HR $highRun",
+                    text = Strings.format(StringKey.STAT_HR, highRun),
                     style = MaterialTheme.typography.labelLarge,
-                    color = ButtonRunOutLight,
+                    color = LocalAppTheme.current.actions.runOut.light,
                     maxLines = 1,
                     softWrap = false,
                 )
                 Text(
-                    text = "avg ${"%.2f".format(average)}",
+                    text = Strings.format(StringKey.STAT_AVG, "%.2f".format(average)),
                     style = MaterialTheme.typography.labelLarge,
-                    color = ButtonRunOutLight,
+                    color = LocalAppTheme.current.actions.runOut.light,
                     maxLines = 1,
                     softWrap = false,
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Inn $innings",
+                text = Strings.format(StringKey.STAT_INN, innings),
                 style = MaterialTheme.typography.labelLarge,
-                color = ScoreWhite.copy(alpha = 0.85f),
+                color = LocalAppTheme.current.textPrimary.copy(alpha = 0.85f),
             )
             Spacer(modifier = Modifier.height(6.dp))
             Row(
@@ -477,28 +486,28 @@ private fun PlayerSummaryColumn(
                         Text(
                             text = "G $goldenBreaks",
                             style = MaterialTheme.typography.labelLarge,
-                            color = ButtonGoldenLight,
+                            color = LocalAppTheme.current.actions.golden.light,
                         )
                     }
                     if (gameMode.supportsEightBallLoss) {
                         Text(
-                            text = "Early 8 $eightBallLosses",
+                            text = Strings.format(StringKey.STAT_EARLY_8, eightBallLosses),
                             style = MaterialTheme.typography.labelLarge,
-                            color = ButtonFoulLight,
+                            color = LocalAppTheme.current.actions.foul.light,
                         )
                     }
                     if (gameMode.supportsDryBreak) {
                         Text(
                             text = "D $dryBreaks",
                             style = MaterialTheme.typography.labelLarge,
-                            color = ButtonDryLight,
+                            color = LocalAppTheme.current.actions.dry.light,
                         )
                     }
                     if (gameMode.supportsPushOut) {
                         Text(
                             text = "PO $pushOuts",
                             style = MaterialTheme.typography.labelLarge,
-                            color = ButtonDryLight,
+                            color = LocalAppTheme.current.actions.dry.light,
                         )
                     }
                 }
@@ -522,9 +531,9 @@ private fun FourteenOneInningsTable(
     val rows = MatchSummaryReport.pairedInningRows(innings1, innings2)
     if (rows.isEmpty()) {
         Text(
-            text = "No innings recorded",
+            text = Strings.get(StringKey.NO_INNINGS_RECORDED),
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.6f),
+            color = LocalAppTheme.current.textSecondary,
             modifier = Modifier.fillMaxWidth(),
         )
         return
@@ -545,7 +554,7 @@ private fun FourteenOneInningsTable(
             Text(
                 text = player1Name,
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(3f),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
@@ -553,7 +562,7 @@ private fun FourteenOneInningsTable(
             Text(
                 text = player2Name,
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(3f),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
@@ -568,48 +577,48 @@ private fun FourteenOneInningsTable(
             Text(
                 text = "#",
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.width(indexWidth),
             )
             Text(
-                text = "End",
+                text = Strings.get(StringKey.COL_END),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.width(endWidth),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Pts",
+                text = Strings.get(StringKey.COL_PTS),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Tot",
+                text = Strings.get(StringKey.COL_TOT),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Tot",
+                text = Strings.get(StringKey.COL_TOT),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Pts",
+                text = Strings.get(StringKey.COL_PTS),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "End",
+                text = Strings.get(StringKey.COL_END),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.width(endWidth),
                 textAlign = TextAlign.Center,
             )
@@ -626,13 +635,13 @@ private fun FourteenOneInningsTable(
                 Text(
                     text = "#${row.index}",
                     style = MaterialTheme.typography.labelLarge,
-                    color = OutlineWarm,
+                    color = LocalAppTheme.current.textSecondary,
                     modifier = Modifier.width(indexWidth),
                 )
                 Text(
                     text = row.player1?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
                     style = MaterialTheme.typography.labelLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
+                    color = LocalAppTheme.current.textSecondary,
                     modifier = Modifier.width(endWidth),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -646,14 +655,14 @@ private fun FourteenOneInningsTable(
                 Text(
                     text = row.total1?.toString() ?: "—",
                     style = MaterialTheme.typography.titleMedium,
-                    color = ButtonDryLight,
+                    color = LocalAppTheme.current.actions.dry.light,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                 )
                 Text(
                     text = row.total2?.toString() ?: "—",
                     style = MaterialTheme.typography.titleMedium,
-                    color = ButtonDryLight,
+                    color = LocalAppTheme.current.actions.dry.light,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                 )
@@ -666,7 +675,7 @@ private fun FourteenOneInningsTable(
                 Text(
                     text = row.player2?.let { MatchSummaryReport.inningEndLabel(it.endType) } ?: "—",
                     style = MaterialTheme.typography.labelLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
+                    color = LocalAppTheme.current.textSecondary,
                     modifier = Modifier.width(endWidth),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -684,9 +693,9 @@ private fun SoloFourteenOneInningsTable(
     val rows = MatchSummaryReport.soloInningRows(innings)
     if (rows.isEmpty()) {
         Text(
-            text = "No innings recorded",
+            text = Strings.get(StringKey.NO_INNINGS_RECORDED),
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.6f),
+            color = LocalAppTheme.current.textSecondary,
             modifier = Modifier.fillMaxWidth(),
         )
         return
@@ -700,7 +709,7 @@ private fun SoloFourteenOneInningsTable(
         Text(
             text = playerName,
             style = MaterialTheme.typography.labelLarge,
-            color = OutlineWarm,
+            color = LocalAppTheme.current.textSecondary,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp, vertical = 2.dp),
@@ -716,27 +725,27 @@ private fun SoloFourteenOneInningsTable(
             Text(
                 text = "#",
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.width(indexWidth),
             )
             Text(
-                text = "End",
+                text = Strings.get(StringKey.COL_END),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.width(endWidth),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Pts",
+                text = Strings.get(StringKey.COL_PTS),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Tot",
+                text = Strings.get(StringKey.COL_TOT),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = LocalAppTheme.current.textSecondary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
@@ -753,13 +762,13 @@ private fun SoloFourteenOneInningsTable(
                 Text(
                     text = "#${row.inning.index}",
                     style = MaterialTheme.typography.labelLarge,
-                    color = OutlineWarm,
+                    color = LocalAppTheme.current.textSecondary,
                     modifier = Modifier.width(indexWidth),
                 )
                 Text(
                     text = MatchSummaryReport.inningEndLabel(row.inning.endType),
                     style = MaterialTheme.typography.labelLarge,
-                    color = ScoreWhite.copy(alpha = 0.55f),
+                    color = LocalAppTheme.current.textSecondary,
                     modifier = Modifier.width(endWidth),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -773,7 +782,7 @@ private fun SoloFourteenOneInningsTable(
                 Text(
                     text = row.total.toString(),
                     style = MaterialTheme.typography.titleMedium,
-                    color = ButtonDryLight,
+                    color = LocalAppTheme.current.actions.dry.light,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                 )
@@ -800,7 +809,7 @@ private fun RackDurationRow(
         Text(
             text = "#$index",
             style = MaterialTheme.typography.labelLarge,
-            color = OutlineWarm,
+            color = LocalAppTheme.current.textSecondary,
             modifier = Modifier.width(40.dp),
         )
         Text(
@@ -811,7 +820,7 @@ private fun RackDurationRow(
         Text(
             text = endLabel,
             style = MaterialTheme.typography.bodyLarge,
-            color = ScoreWhite.copy(alpha = 0.65f),
+            color = LocalAppTheme.current.textSecondary,
             modifier = Modifier.padding(end = 12.dp),
         )
         Text(
@@ -821,32 +830,9 @@ private fun RackDurationRow(
     }
 }
 
-private fun rackEndLabel(type: MatchEventType): String =
-    when (type) {
-        MatchEventType.PLUS_ONE -> "+1"
-        MatchEventType.RUN_OUT -> "Run out"
-        MatchEventType.GOLDEN_BREAK -> "Golden"
-        MatchEventType.EIGHT_BALL_LOSS -> "Early 8"
-        MatchEventType.THREE_FOULS_LOSS -> "3 fouls"
-        MatchEventType.FOUL,
-        MatchEventType.FOULS_CLEARED,
-        MatchEventType.DRY_BREAK,
-        MatchEventType.POINTS,
-        MatchEventType.PASS,
-        MatchEventType.BREAK_FOUL,
-        MatchEventType.ACCEPT_ILLEGAL_OPEN,
-        MatchEventType.THREE_FOUL_PENALTY,
-        MatchEventType.PUSH_OUT,
-        MatchEventType.PUSH_OUT_CLEAN,
-        MatchEventType.PUSH_OUT_FOUL,
-        MatchEventType.PUSH_OUT_TAKE,
-        MatchEventType.PUSH_OUT_RETURN,
-        -> ""
-    }
-
 private const val SCRIM_ALPHA = 0.55f
 private const val MODAL_WIDTH_FRACTION = 0.92f
 private const val MODAL_HEIGHT_FRACTION = 0.92f
 private const val PANEL_TOP_ALPHA = 0.97f
-private const val PANEL_BORDER_ALPHA = 0.55f
+private const val PANEL_BORDER_ALPHA = 0.78f
 private const val WINNER_FONT_SP = 48

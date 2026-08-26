@@ -1,47 +1,55 @@
-"""Build Play 512 + adaptive-safe launcher assets from icon C."""
+"""Build Play-aligned launcher mipmaps + adaptive FG from ic_launcher_play_512.png."""
 
 from pathlib import Path
 
 from PIL import Image
 
-SRC = Path(__file__).with_name("racktrack-icon-c-rack.png")
+SRC = Path(__file__).with_name("ic_launcher_play_512.png")
 OUT = Path(__file__).parent
 RES = Path(__file__).resolve().parents[1] / "app" / "src" / "main" / "res"
 
-FELT = (15, 74, 36, 255)  # #0F4A24 Forest
-# Center safe zone for adaptive masks / Play iconography (~18% margin each side).
+# Blue glossy background (AppThemeMode.BLUE_GLOSSY)
+BG = (16, 26, 40, 255)  # #101A28
 SAFE = 0.66
-# Trim baked-in rounded-card margins from the generated source.
-SOURCE_TRIM = 0.06
 
 
-def prepare_source(src: Image.Image) -> Image.Image:
-    w, h = src.size
-    trim = int(min(w, h) * SOURCE_TRIM)
-    return src.crop((trim, trim, w - trim, h - trim))
-
-
-def make_icon(src: Image.Image, size: int, safe: float = SAFE) -> Image.Image:
-    canvas = Image.new("RGBA", (size, size), FELT)
-    content = int(round(size * safe))
+def make_layer(src: Image.Image, size: int, *, transparent_pad: bool) -> Image.Image:
+    """Scale artwork into the adaptive safe zone; pad with BG or transparency."""
+    canvas = Image.new(
+        "RGBA",
+        (size, size),
+        (0, 0, 0, 0) if transparent_pad else BG,
+    )
+    content = int(round(size * SAFE))
     if content % 2 != size % 2:
         content -= 1
     scaled = src.resize((content, content), Image.Resampling.LANCZOS)
+    if scaled.mode != "RGBA":
+        scaled = scaled.convert("RGBA")
     off = (size - content) // 2
     canvas.alpha_composite(scaled, (off, off))
-    return canvas.convert("RGB")
+    return canvas
 
 
 def main() -> None:
-    src = prepare_source(Image.open(SRC).convert("RGBA"))
+    src = Image.open(SRC).convert("RGBA")
 
-    make_icon(src, 512).save(OUT / "ic_launcher_play_512.png", "PNG", optimize=True)
-    make_icon(src, 1024).save(OUT / "ic_launcher_adaptive_fg_1024.png", "PNG", optimize=True)
-
+    # Legacy / Play listing master stays as-is; rebuild in-app layers only.
     drawable = RES / "drawable"
     drawable.mkdir(parents=True, exist_ok=True)
-    # 108dp @ xxxhdpi = 432px adaptive foreground layer
-    make_icon(src, 432).save(drawable / "ic_launcher_foreground.png", "PNG", optimize=True)
+
+    # Adaptive FG @ xxxhdpi 108dp = 432px (safe-zone artwork).
+    make_layer(src, 432, transparent_pad=False).save(
+        drawable / "ic_launcher_foreground.png",
+        "PNG",
+        optimize=True,
+    )
+    # Splash animated icon (same art for cold start).
+    make_layer(src, 288, transparent_pad=False).save(
+        drawable / "ic_splash_brand.png",
+        "PNG",
+        optimize=True,
+    )
 
     densities = {
         "mipmap-mdpi": 48,
@@ -53,11 +61,18 @@ def main() -> None:
     for folder, size in densities.items():
         d = RES / folder
         d.mkdir(parents=True, exist_ok=True)
-        img = make_icon(src, size)
+        img = make_layer(src, size, transparent_pad=False).convert("RGB")
         img.save(d / "ic_launcher.png", "PNG", optimize=True)
         img.save(d / "ic_launcher_round.png", "PNG", optimize=True)
 
-    print(f"Wrote Play 512 + mipmaps + foreground (safe={SAFE}, trim={SOURCE_TRIM})")
+    # Keep a 1024 adaptive FG master next to Play assets for future re-exports.
+    make_layer(src, 1024, transparent_pad=False).convert("RGB").save(
+        OUT / "ic_launcher_adaptive_fg_1024.png",
+        "PNG",
+        optimize=True,
+    )
+
+    print(f"Wrote mipmaps + foreground + splash from {SRC.name} (safe={SAFE}, bg=#101A28)")
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ versionCode = major*100000 + minor*1000 + patch*10 + smoke
 | `1.2.10` | 0 | `102100` |
 | `1.2.99` | 0 | `102990` |
 | `1.3.0` | 0 | `103000` |
+| `2.0.0` | 0 | `200000` |
 
 Soft caps: patch ≤ 99, minor ≤ 99, smoke ≤ 9. Play only cares that each upload’s
 `versionCode` is **strictly greater** than the previous one.

@@ -18,6 +18,10 @@ complexity:
     allowedComplexity: 25
   TooManyFunctions:
     active: false
+  LargeClass:
+    active: true
+    # Match / 14.1 engines are intentionally cohesive rule objects.
+    excludes: ['**/domain/**Engine.kt']
 
 style:
   MagicNumber:
@@ -36,6 +40,10 @@ style:
       - '**/presentation/component/FeltNoise.kt'
       - '**/test/**'
       - '**/androidTest/**'
+      - '**/commonTest/**'
+      - '**/jvmTest/**'
+      - '**/androidHostTest/**'
+      - '**/androidDeviceTest/**'
   WildcardImport:
     active: true
   MaxLineLength:

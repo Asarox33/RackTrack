@@ -38,14 +38,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.appearance.LocalFeltPalette
 import com.racktrack.data.StoredMatch
 import com.racktrack.domain.MatchSummaryReport
-import com.racktrack.domain.model.GameMode
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.formatDuration
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.AppChromeBackground
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.viewmodel.HistoryUiState
 import java.text.DateFormat
 import java.util.Date
@@ -62,10 +62,10 @@ fun HistoryScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     var pendingDelete by remember { mutableStateOf<StoredMatch?>(null) }
 
-    FeltBackground(modifier = modifier) {
+    AppChromeBackground(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -73,14 +73,14 @@ fun HistoryScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
         ) {
             Text(
-                text = "HISTORY",
+                text = Strings.get(StringKey.HISTORY_TITLE),
                 style = MaterialTheme.typography.headlineLarge,
-                color = ScoreWhite,
+                color = chrome.textPrimary,
             )
             Text(
-                text = modeLabel(state.gameMode),
+                text = MatchSummaryReport.modeLabel(state.gameMode),
                 style = MaterialTheme.typography.titleLarge,
-                color = OutlineWarm,
+                color = chrome.textSecondary,
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(
@@ -88,14 +88,14 @@ fun HistoryScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 HistoryFilterField(
-                    label = "Player 1",
+                    label = Strings.get(StringKey.PLAYER_1),
                     value = state.playerFilter1,
                     onValueChange = onPlayerFilter1Change,
                     imeAction = ImeAction.Next,
                     modifier = Modifier.weight(1f),
                 )
                 HistoryFilterField(
-                    label = "Player 2",
+                    label = Strings.get(StringKey.PLAYER_2),
                     value = state.playerFilter2,
                     onValueChange = onPlayerFilter2Change,
                     imeAction = ImeAction.Done,
@@ -103,9 +103,12 @@ fun HistoryScreen(
                 )
             }
             Text(
-                text = "Showing ${modeLabel(state.gameMode)} only · name filters match either seat.",
+                text = Strings.format(
+                    StringKey.HISTORY_FILTER_HINT,
+                    MatchSummaryReport.modeLabel(state.gameMode),
+                ),
                 style = MaterialTheme.typography.labelLarge,
-                color = ScoreWhite.copy(alpha = 0.55f),
+                color = chrome.textSecondary.copy(alpha = 0.9f),
                 modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
             )
 
@@ -117,9 +120,12 @@ fun HistoryScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "No ${modeLabel(state.gameMode)} matches yet",
+                        text = Strings.format(
+                            StringKey.HISTORY_EMPTY,
+                            MatchSummaryReport.modeLabel(state.gameMode),
+                        ),
                         style = MaterialTheme.typography.titleLarge,
-                        color = ScoreWhite.copy(alpha = 0.65f),
+                        color = chrome.textSecondary,
                     )
                 }
             } else {
@@ -141,16 +147,17 @@ fun HistoryScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
             TexturedActionButton(
-                label = "BACK",
-                base = felt.accent,
-                light = felt.accentLight,
-                dark = felt.accentDark,
+                label = Strings.get(StringKey.BACK),
+                base = chrome.accent,
+                light = chrome.accentLight,
+                dark = chrome.accentDark,
                 enabled = true,
                 onClick = onBack,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .widthIn(min = 200.dp),
                 height = 52.dp,
+                useFeltGrain = false,
             )
         }
 
@@ -177,27 +184,33 @@ private fun DeleteHistoryConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(if (summary.solo) "Delete training?" else "Delete match?")
+            Text(
+                if (summary.solo) {
+                    Strings.get(StringKey.DELETE_TRAINING_Q)
+                } else {
+                    Strings.get(StringKey.DELETE_MATCH_Q)
+                },
+            )
         },
         text = {
             Text(
                 if (summary.solo) {
                     "${MatchSummaryReport.opponentsLabel(summary)}  ·  ${summary.score1}\n" +
-                        "This cannot be undone."
+                        Strings.get(StringKey.DELETE_CANNOT_UNDO)
                 } else {
                     "${summary.player1Name}  ${summary.score1} – ${summary.score2}  ${summary.player2Name}\n" +
-                        "This cannot be undone."
+                        Strings.get(StringKey.DELETE_CANNOT_UNDO)
                 },
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("DELETE", color = DeleteCrossRed)
+                Text(Strings.get(StringKey.DELETE), color = DeleteCrossRed)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("CANCEL")
+                Text(Strings.get(StringKey.CANCEL))
             }
         },
     )
@@ -209,8 +222,8 @@ fun HistoryDetailScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val felt = LocalFeltPalette.current
-    FeltBackground(modifier = modifier) {
+    val chrome = LocalAppChrome.current
+    AppChromeBackground(modifier = modifier) {
         if (match == null) {
             Box(
                 modifier = Modifier
@@ -219,21 +232,26 @@ fun HistoryDetailScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 TexturedActionButton(
-                    label = "BACK",
-                    base = felt.accent,
-                    light = felt.accentLight,
-                    dark = felt.accentDark,
+                    label = Strings.get(StringKey.BACK),
+                    base = chrome.accent,
+                    light = chrome.accentLight,
+                    dark = chrome.accentDark,
                     enabled = true,
                     onClick = onBack,
                     modifier = Modifier.widthIn(min = 200.dp),
                     height = 52.dp,
-                )
+                useFeltGrain = false,
+            )
             }
         } else {
             MatchSummaryScaffold(
-                title = if (match.summary.solo) "TRAINING STATS" else "MATCH STATS",
+                title = if (match.summary.solo) {
+                    Strings.get(StringKey.TRAINING_STATS)
+                } else {
+                    Strings.get(StringKey.MATCH_STATS)
+                },
                 summary = match.summary,
-                actionLabel = "BACK",
+                actionLabel = Strings.get(StringKey.BACK),
                 onAction = onBack,
                 modifier = Modifier.fillMaxSize(),
                 scrim = false,
@@ -251,6 +269,7 @@ private fun HistoryFilterField(
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
 ) {
+    val chrome = LocalAppChrome.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -258,13 +277,13 @@ private fun HistoryFilterField(
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = imeAction),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = ScoreWhite,
-            unfocusedTextColor = ScoreWhite,
-            focusedBorderColor = OutlineWarm,
-            unfocusedBorderColor = OutlineWarm.copy(alpha = 0.55f),
-            focusedLabelColor = OutlineWarm,
-            unfocusedLabelColor = ScoreWhite.copy(alpha = 0.65f),
-            cursorColor = OutlineWarm,
+            focusedTextColor = chrome.textPrimary,
+            unfocusedTextColor = chrome.textPrimary,
+            focusedBorderColor = chrome.rim,
+            unfocusedBorderColor = chrome.rim.copy(alpha = 0.45f),
+            focusedLabelColor = chrome.textSecondary,
+            unfocusedLabelColor = chrome.textSecondary.copy(alpha = 0.85f),
+            cursorColor = chrome.accent,
         ),
         modifier = modifier,
     )
@@ -276,14 +295,14 @@ private fun HistoryMatchRow(
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val felt = LocalFeltPalette.current
+    val chrome = LocalAppChrome.current
     val summary = match.summary
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(felt.dark.copy(alpha = 0.72f))
-            .border(1.dp, OutlineWarm.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+            .background(chrome.surfaceDeep.copy(alpha = 0.72f))
+            .border(1.dp, chrome.rim.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
             .padding(start = 16.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -294,9 +313,9 @@ private fun HistoryMatchRow(
                 .padding(top = 2.dp, bottom = 2.dp, end = 8.dp),
         ) {
             Text(
-                text = modeLabel(summary.gameMode),
+                text = MatchSummaryReport.modeLabel(summary.gameMode),
                 style = MaterialTheme.typography.labelLarge,
-                color = OutlineWarm,
+                color = chrome.textSecondary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -306,7 +325,7 @@ private fun HistoryMatchRow(
                     "${summary.player1Name}  ${summary.score1}  –  ${summary.score2}  ${summary.player2Name}"
                 },
                 style = MaterialTheme.typography.titleLarge,
-                color = ScoreWhite,
+                color = chrome.textPrimary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -319,12 +338,11 @@ private fun HistoryMatchRow(
                     append(formatDuration(summary.totalDurationMillis))
                     if (summary.winnerName.isNotEmpty()) {
                         append("  ·  ")
-                        append(summary.winnerName)
-                        append(" wins")
+                        append(Strings.format(StringKey.WINS_SUFFIX, summary.winnerName))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = ScoreWhite.copy(alpha = 0.7f),
+                color = chrome.textSecondary,
             )
         }
         Text(
@@ -340,10 +358,4 @@ private fun HistoryMatchRow(
     }
 }
 
-private fun modeLabel(mode: GameMode): String =
-    when (mode) {
-        GameMode.EIGHT_BALL -> "8-BALL"
-        GameMode.NINE_BALL -> "9-BALL"
-        GameMode.TEN_BALL -> "10-BALL"
-        GameMode.FOURTEEN_ONE -> "14/1"
-    }
+

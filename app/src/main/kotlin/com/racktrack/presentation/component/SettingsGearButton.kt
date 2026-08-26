@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -29,6 +29,9 @@ fun SettingsGearButton(
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
 ) {
+    val theme = LocalAppTheme.current
+    val fill = theme.textPrimary.copy(alpha = if (theme.isDark) FILL_ALPHA_DARK else FILL_ALPHA_LIGHT)
+    val shadow = theme.textPrimary.copy(alpha = SHADOW_ALPHA)
     Box(
         modifier = modifier
             .size(size)
@@ -51,9 +54,9 @@ fun SettingsGearButton(
             )
 
             translate(left = 0f, top = this.size.minDimension * SHADOW_Y) {
-                drawPath(path = path, color = ScoreWhite.copy(alpha = SHADOW_ALPHA))
+                drawPath(path = path, color = shadow)
             }
-            drawPath(path = path, color = ScoreWhite.copy(alpha = FILL_ALPHA))
+            drawPath(path = path, color = fill)
         }
     }
 }
@@ -99,6 +102,7 @@ private const val TEETH = 8
 /** Fraction of tooth sector occupied at the tip / at the root. */
 private const val TIP_SPAN = 0.36f
 private const val ROOT_SPAN = 0.72f
-private const val FILL_ALPHA = 0.95f
-private const val SHADOW_ALPHA = 0.20f
+private const val FILL_ALPHA_DARK = 0.92f
+private const val FILL_ALPHA_LIGHT = 0.88f
+private const val SHADOW_ALPHA = 0.18f
 private const val SHADOW_Y = 0.035f

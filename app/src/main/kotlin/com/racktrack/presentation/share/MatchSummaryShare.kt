@@ -19,7 +19,7 @@ object MatchSummaryShare {
         context: Context,
         summary: MatchSummary,
         title: String = MatchSummaryReport.sessionSummaryTitle(summary),
-        accentArgb: Int = 0xFF1B9A4A.toInt(),
+        accentArgb: Int = 0xFF2A8FB0.toInt(),
     ) {
         val file = writePdfFile(context, summary, title, accentArgb)
         val uri = FileProvider.getUriForFile(
@@ -51,7 +51,7 @@ object MatchSummaryShare {
         summary: MatchSummary,
         destination: Uri,
         title: String = MatchSummaryReport.sessionSummaryTitle(summary),
-        accentArgb: Int = 0xFF1B9A4A.toInt(),
+        accentArgb: Int = 0xFF2A8FB0.toInt(),
     ) {
         val file = writePdfFile(context, summary, title, accentArgb)
         withContext(Dispatchers.IO) {

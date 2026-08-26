@@ -6,6 +6,37 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 2.0.0 — 2026-08-26
+
+### Features
+
+- **Design System v1** — one visual world with three themes: Blue glossy, Warm light, Dark
+  teal (filigree + board HUD stat strip).
+- **Brand** — stylized R + RackTrack wordmark; Play icon, feature graphic, remove-ads IAP
+  art; in-app launcher mipmaps + cold-start splash (Blue glossy).
+- **KMP shared module** — pure domain lives in `:shared` (android + jvm); Compose UI stays
+  on Android.
+- **i18n** — UI / summary / PDF / prose dialogs in **en** (default) + **fr / de / es / it /
+  nl / pt**; unknown system locales fall back to English. Settings **Language** swipe
+  picker (Twemoji flags + endonyms; System follows the device). Board action chips stay
+  English abbreviations.
+- **About** — dedicated screen from Setup info control (not during live match); credits
+  fonts (SIL OFL) and Twemoji flags (CC BY 4.0).
+- **Multi-ruleset packs** — Settings choose **FFB** (default) / WPA / APA / BCA·CSI /
+  **Matchroom (9)**. Scoreboard deltas only (APA: no push-out / no 3-foul rack loss + **8OB**;
+  BCA/CSI 14/1: illegal open −2 only). Matchroom applies to **9-ball only**; other modes
+  stamp FFB. Official-rules link follows the selected pack.
+- **Per-mode match defaults** — Settings list rows (iOS/Android style): **8-Ball /
+  9-Ball / 10-Ball / 14/1** with current summary, tap to edit that mode only (race +
+  break, or distance + innings). Shipped race lengths **5 / 7 / 7**. Setup applies the
+  selected mode’s defaults; legacy single race / break prefs migrate until edited.
+  Remove-ads + Restore sit on one row.
+
+### Notes
+
+- Developed on **`rc/2.0.0`**. Do **not** merge to `main` / ship Play production as 2.0 until
+  **1.2.x** production gate is complete. `versionCode` **200000** (formula smoke 0).
+
 ## 1.2.2 — 2026-08-21
 
 ### Improvements

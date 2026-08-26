@@ -51,7 +51,7 @@
             android:exported="true"
             android:screenOrientation="fullSensor"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:theme="@style/Theme.RackTrack">
+            android:theme="@style/Theme.RackTrack.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

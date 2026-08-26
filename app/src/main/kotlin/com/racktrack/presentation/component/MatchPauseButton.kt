@@ -19,8 +19,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.racktrack.presentation.theme.OutlineWarm
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 
 /** Top-bar pause / resume control (club break — not shot clock or FFB timeout). */
 @Composable
@@ -31,6 +30,7 @@ fun MatchPauseButton(
     size: Dp = 40.dp,
     solo: Boolean = false,
 ) {
+    val theme = LocalAppTheme.current
     val timing = if (solo) "training timing" else "match timing"
     val label = if (paused) "Resume $timing" else "Pause $timing"
     Box(
@@ -46,8 +46,8 @@ fun MatchPauseButton(
         contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.size(size * DRAW_FRACTION)) {
-            val fill = if (paused) OutlineWarm else ScoreWhite.copy(alpha = FILL_ALPHA)
-            val shadow = ScoreWhite.copy(alpha = SHADOW_ALPHA)
+            val fill = if (paused) theme.textSecondary else theme.textPrimary.copy(alpha = FILL_ALPHA)
+            val shadow = theme.textPrimary.copy(alpha = SHADOW_ALPHA)
             val w = this.size.width
             val h = this.size.height
             if (paused) {

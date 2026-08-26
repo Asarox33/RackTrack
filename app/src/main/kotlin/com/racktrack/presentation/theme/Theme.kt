@@ -1,8 +1,9 @@
 package com.racktrack.presentation.theme
 
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
@@ -12,30 +13,35 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.racktrack.R
-import com.racktrack.appearance.FeltTone
 import com.racktrack.appearance.LocalFeltPalette
+import com.racktrack.i18n.StringProvider
+import com.racktrack.i18n.Strings
+import com.racktrack.presentation.i18n.LocalStrings
 
-val ScoreWhite = Color(0xFFF2F5F0)
-val ButtonPlus = Color(0xFF1E3A4C)
-val ButtonPlusLight = Color(0xFF2A5168)
-val ButtonPlusDark = Color(0xFF152A38)
-val ButtonRunOut = Color(0xFF1B7A45)
-val ButtonRunOutLight = Color(0xFF259655)
-val ButtonRunOutDark = Color(0xFF135C33)
-val ButtonFoul = Color(0xFFB86A22)
-val ButtonFoulLight = Color(0xFFD07F35)
-val ButtonFoulDark = Color(0xFF8F5018)
-val ButtonGolden = Color(0xFF9A7B2F)
-val ButtonGoldenLight = Color(0xFFB8943A)
-val ButtonGoldenDark = Color(0xFF735C22)
-val ButtonDry = Color(0xFF3A4F5C)
-val ButtonDryLight = Color(0xFF4C6676)
-val ButtonDryDark = Color(0xFF2A3A45)
-val OutlineWarm = Color(0xFFD8E0D4)
-val CueBallHighlight = Color(0xFFFFFFFF)
-val CueBallMid = Color(0xFFE8E8E8)
-val CueBallShadow = Color(0xFFC8C8C8)
-val CueBallDeep = Color(0xFF9A9A9A)
+/** Fallback only — prefer [LocalAppTheme] text/outline for UI copy. Soft off-white. */
+val ScoreWhite = Color(0xFFE4EAEF)
+/** Fallback aliases (Blue glossy) — prefer [LocalAppTheme].actions in UI. */
+private val FallbackActions = AppThemeMode.BLUE_GLOSSY.palette.actions
+val ButtonPlus = FallbackActions.plus.base
+val ButtonPlusLight = FallbackActions.plus.light
+val ButtonPlusDark = FallbackActions.plus.dark
+val ButtonRunOut = FallbackActions.runOut.base
+val ButtonRunOutLight = FallbackActions.runOut.light
+val ButtonRunOutDark = FallbackActions.runOut.dark
+val ButtonFoul = FallbackActions.foul.base
+val ButtonFoulLight = FallbackActions.foul.light
+val ButtonFoulDark = FallbackActions.foul.dark
+val ButtonGolden = FallbackActions.golden.base
+val ButtonGoldenLight = FallbackActions.golden.light
+val ButtonGoldenDark = FallbackActions.golden.dark
+val ButtonDry = FallbackActions.dry.base
+val ButtonDryLight = FallbackActions.dry.light
+val ButtonDryDark = FallbackActions.dry.dark
+val OutlineWarm = Color(0xFFA8B4C0)
+val CueBallHighlight = Color(0xFFECEFF2)
+val CueBallMid = Color(0xFFD8DCE0)
+val CueBallShadow = Color(0xFFB8BEC4)
+val CueBallDeep = Color(0xFF8E949A)
 val CueTipLight = Color(0xFFFF6B5A)
 val CueTipMid = Color(0xFFD62828)
 val CueTipDark = Color(0xFF8B1515)
@@ -57,64 +63,90 @@ private val RackTrackTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 104.sp,
         letterSpacing = 2.sp,
-        color = ScoreWhite,
     ),
     headlineLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.Bold,
         fontSize = 34.sp,
         letterSpacing = 1.sp,
-        color = ScoreWhite,
     ),
     titleLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         letterSpacing = 1.5.sp,
-        color = ScoreWhite,
     ),
     labelLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.Bold,
         fontSize = 17.sp,
         letterSpacing = 1.2.sp,
-        color = ScoreWhite,
     ),
     bodyLarge = TextStyle(
         fontFamily = Outfit,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         letterSpacing = 0.6.sp,
-        color = ScoreWhite,
     ),
 )
 
+private fun Typography.withContentColor(color: Color): Typography =
+    copy(
+        displayLarge = displayLarge.copy(color = color),
+        headlineLarge = headlineLarge.copy(color = color),
+        titleLarge = titleLarge.copy(color = color),
+        labelLarge = labelLarge.copy(color = color),
+        bodyLarge = bodyLarge.copy(color = color),
+        bodyMedium = bodyMedium.copy(color = color),
+        labelMedium = labelMedium.copy(color = color),
+    )
+
 @Composable
 fun RackTrackTheme(
-    feltTone: FeltTone = FeltTone.FOREST,
+    themeMode: AppThemeMode = AppThemeMode.BLUE_GLOSSY,
     hapticsEnabled: Boolean = true,
+    strings: StringProvider = Strings.provider,
     content: @Composable () -> Unit,
 ) {
-    val felt = feltTone.palette
-    val colors = darkColorScheme(
-        primary = felt.accent,
-        onPrimary = ScoreWhite,
-        secondary = felt.light,
-        onSecondary = ScoreWhite,
-        background = felt.base,
-        onBackground = ScoreWhite,
-        surface = felt.dark,
-        onSurface = ScoreWhite,
-        error = ButtonFoul,
-        onError = ScoreWhite,
-    )
+    val theme = themeMode.palette
+    val colors = if (theme.isDark) {
+        darkColorScheme(
+            primary = theme.accent,
+            onPrimary = theme.onAccent,
+            secondary = theme.surfaceElevated,
+            onSecondary = theme.textPrimary,
+            background = theme.background,
+            onBackground = theme.textPrimary,
+            surface = theme.surface,
+            onSurface = theme.textPrimary,
+            error = ButtonFoul,
+            onError = ScoreWhite,
+            outline = theme.outline,
+        )
+    } else {
+        lightColorScheme(
+            primary = theme.accent,
+            onPrimary = theme.onAccent,
+            secondary = theme.surfaceDeep,
+            onSecondary = theme.textPrimary,
+            background = theme.background,
+            onBackground = theme.textPrimary,
+            surface = theme.surface,
+            onSurface = theme.textPrimary,
+            error = ButtonFoul,
+            onError = ScoreWhite,
+            outline = theme.outline,
+        )
+    }
     CompositionLocalProvider(
-        LocalFeltPalette provides felt,
+        LocalAppTheme provides theme,
+        LocalFeltPalette provides theme.asFeltPalette(),
         LocalHapticsEnabled provides hapticsEnabled,
+        LocalStrings provides strings,
     ) {
         MaterialTheme(
             colorScheme = colors,
-            typography = RackTrackTypography,
+            typography = RackTrackTypography.withContentColor(theme.textPrimary),
             content = content,
         )
     }

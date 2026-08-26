@@ -24,3 +24,7 @@ racktrack-play-ci*.json
 keystore.BACKUP.local.txt
 
 *.p12
+
+# Local PDF text extracts (scratch)
+resources/_extract_*.txt
+

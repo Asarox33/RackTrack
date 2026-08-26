@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.presentation.theme.OutlineWarm
+import com.racktrack.presentation.theme.LocalAppTheme
 
 /**
  * Bottom fade + chevron when [scrollState] can still scroll down.
@@ -34,6 +34,7 @@ fun BoxScope.ScrollMoreHint(
     modifier: Modifier = Modifier,
     fadeColor: Color,
 ) {
+    val theme = LocalAppTheme.current
     val canScrollDown by remember {
         derivedStateOf {
             scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
@@ -63,7 +64,7 @@ fun BoxScope.ScrollMoreHint(
             Text(
                 text = "▼",
                 style = MaterialTheme.typography.titleLarge.copy(fontSize = CHEVRON_SP.sp),
-                color = OutlineWarm.copy(alpha = 0.95f),
+                color = theme.textSecondary.copy(alpha = 0.95f),
                 modifier = Modifier.padding(bottom = 4.dp),
             )
         }

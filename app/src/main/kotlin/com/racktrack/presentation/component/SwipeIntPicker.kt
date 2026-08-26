@@ -30,7 +30,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 private const val SWIPE_STEP_DP = 48f
 private const val VALUE_SP_DEFAULT = 64f
@@ -145,6 +147,7 @@ private fun NeighborStrip(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val theme = LocalAppTheme.current
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -181,7 +184,7 @@ private fun NeighborStrip(
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontSize = (valueSp.value * scale).sp,
                         ),
-                        color = ScoreWhite.copy(alpha = alpha),
+                        color = theme.textPrimary.copy(alpha = alpha),
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                     )
@@ -197,6 +200,7 @@ private fun ChevronTap(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val theme = LocalAppTheme.current
     Box(
         modifier = Modifier
             .widthIn(min = 44.dp)
@@ -212,7 +216,7 @@ private fun ChevronTap(
         Text(
             text = label,
             style = MaterialTheme.typography.displayLarge.copy(fontSize = CHEVRON_SP.sp),
-            color = ScoreWhite.copy(alpha = if (enabled) 0.9f else 0.28f),
+            color = theme.textPrimary.copy(alpha = if (enabled) 0.85f else 0.28f),
         )
     }
 }

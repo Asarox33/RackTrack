@@ -1,10 +1,6 @@
 <fr-FR>
-RackTrack 1.2.2
-
-Tableau des reprises 14/1 plus lisible : scores cumulés au centre (récap + PDF), y compris en solo.
+RackTrack 2.0.0 — train 2.0 (rc). DS + marque, KMP, i18n, packs règles (FFB défaut), défauts par mode (liste › détail), pubs sur une ligne. Pas encore Play prod 1.2.
 </fr-FR>
 <en-US>
-RackTrack 1.2.2
-
-Clearer 14/1 innings table: cumulative totals centered (summary + PDF), including solo training.
+RackTrack 2.0.0 — 2.0 train (rc). DS + brand, KMP, i18n, ruleset packs (FFB default), per-mode defaults (list › detail), ads on one row. Not 1.2 Play prod yet.
 </en-US>

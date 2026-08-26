@@ -34,9 +34,13 @@ These are enforced rules for anyone (human or agent) writing code in this repo.
 - **ktlint** + **detekt** must pass (local + CI).
 - **Gradle Version Catalog** — no scattered inline versions for catalogued deps.
 - **CI**: ktlint, detekt, unit tests + domain JaCoCo on every push/PR to `main`.
-  PRs get a coverage comment (`madrapps/jacoco-report`); HTML is also a workflow artifact.
-  Local report: `./gradlew :app:domainCoverage`.
-
+  PRs get a **Domain coverage** comment (legend + gates) from
+  `.github/scripts/domain-coverage-pr.py`. HTML report is a workflow artifact.
+  Local: `./gradlew :app:domainCoverage`.
+  **Gates (blocking):**
+  - Gradle: overall + each domain class ≥ **80% line** (`domainCoverageVerify`)
+  - PR: overall + aggregate changed lines + **each** changed domain file’s
+    changed-line coverage ≥ **80% instruction** (a 🔴 row fails CI)
 ## 5. Git commit conventions
 
 Format: `type(scope): short imperative description`

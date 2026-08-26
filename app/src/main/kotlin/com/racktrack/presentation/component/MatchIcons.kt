@@ -41,9 +41,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.domain.model.GameMode
-import com.racktrack.presentation.theme.ButtonFoul
-import com.racktrack.presentation.theme.ButtonFoulLight
-import com.racktrack.presentation.theme.ButtonRunOutLight
 import com.racktrack.presentation.theme.CueBallDeep
 import com.racktrack.presentation.theme.CueBallHighlight
 import com.racktrack.presentation.theme.CueBallMid
@@ -51,7 +48,7 @@ import com.racktrack.presentation.theme.CueBallShadow
 import com.racktrack.presentation.theme.CueTipDark
 import com.racktrack.presentation.theme.CueTipLight
 import com.racktrack.presentation.theme.CueTipMid
-import com.racktrack.presentation.theme.ScoreWhite
+import com.racktrack.presentation.theme.LocalAppTheme
 
 /**
  * Polished training-style cue ball (white sphere + red tip) for the break side.
@@ -149,7 +146,7 @@ fun CueBallBreakIndicator(
         clipPath(ballClip) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color.White.copy(alpha = SPECULAR_ALPHA), Color.Transparent),
+                    colors = listOf(CueBallHighlight.copy(alpha = SPECULAR_ALPHA), Color.Transparent),
                     center = specularCenter,
                     radius = ballRadius * SPECULAR_RADIUS_FACTOR,
                 ),
@@ -185,7 +182,7 @@ fun PlayerStatIcons(
         StatIconChip(
             countLabel = runOuts.toString(),
             emphasized = runOuts > 0,
-            accent = ButtonRunOutLight,
+            accent = LocalAppTheme.current.actions.runOut.light,
             countSp = countSp,
         ) {
             RunOutIcon(
@@ -202,7 +199,7 @@ fun PlayerStatIcons(
                     consecutiveFouls.toString()
                 },
                 emphasized = consecutiveFouls > 0,
-                accent = ButtonFoulLight,
+                accent = LocalAppTheme.current.actions.foul.light,
                 countSp = countSp,
                 clearable = foulClearable,
                 onClick = if (foulClearable) {
@@ -216,9 +213,9 @@ fun PlayerStatIcons(
             ) {
                 FoulIcon(
                     tint = when {
-                        consecutiveFouls >= FOUL_WARN_THRESHOLD -> ButtonFoulLight
-                        consecutiveFouls > 0 -> ButtonFoul
-                        else -> ScoreWhite.copy(alpha = MUTED_ICON_ALPHA)
+                        consecutiveFouls >= FOUL_WARN_THRESHOLD -> LocalAppTheme.current.actions.foul.light
+                        consecutiveFouls > 0 -> LocalAppTheme.current.actions.foul.base
+                        else -> LocalAppTheme.current.textPrimary.copy(alpha = MUTED_ICON_ALPHA)
                     },
                     size = safeIconSize,
                 )
@@ -227,7 +224,7 @@ fun PlayerStatIcons(
                 Text(
                     text = "TAP TO CLEAR",
                     style = MaterialTheme.typography.labelLarge.copy(fontSize = clearHintSp),
-                    color = ButtonFoulLight.copy(alpha = 0.95f),
+                    color = LocalAppTheme.current.actions.foul.light.copy(alpha = 0.95f),
                 )
             }
         }
@@ -278,7 +275,7 @@ private fun StatIconChip(
         Text(
             text = countLabel,
             style = MaterialTheme.typography.titleLarge.copy(fontSize = countSp),
-            color = if (emphasized) accent else ScoreWhite.copy(alpha = MUTED_LABEL_ALPHA),
+            color = if (emphasized) accent else LocalAppTheme.current.textPrimary.copy(alpha = MUTED_LABEL_ALPHA),
         )
     }
 }
@@ -293,11 +290,21 @@ fun RunOutIcon(
     muted: Boolean = false,
     size: Dp = StatIconSize,
 ) {
+    val theme = LocalAppTheme.current
     val alpha = if (muted) MUTED_ICON_ALPHA else 1f
+    val shell = theme.ballFill
+    val stroke = theme.iconStroke
     Canvas(modifier = modifier.size(size)) {
         val ballCenter = Offset(this.size.width * RUNOUT_BALL_CX, this.size.height * RUNOUT_BALL_CY)
         val ballRadius = this.size.minDimension * RUNOUT_BALL_RADIUS_FACTOR
-        drawModeBall(gameMode = gameMode, center = ballCenter, radius = ballRadius, alpha = alpha)
+        drawModeBall(
+            gameMode = gameMode,
+            center = ballCenter,
+            radius = ballRadius,
+            alpha = alpha,
+            shell = shell,
+            stroke = stroke,
+        )
         drawCheckBadge(
             center = Offset(
                 ballCenter.x + ballRadius * RUNOUT_BADGE_OFFSET,
@@ -305,6 +312,8 @@ fun RunOutIcon(
             ),
             radius = ballRadius * RUNOUT_BADGE_RADIUS_FACTOR,
             alpha = alpha,
+            shell = shell,
+            stroke = stroke,
         )
     }
 }
@@ -314,12 +323,14 @@ private fun DrawScope.drawModeBall(
     center: Offset,
     radius: Float,
     alpha: Float,
+    shell: Color,
+    stroke: Color,
 ) {
     when (gameMode) {
         GameMode.EIGHT_BALL -> {
             drawCircle(color = BallEightBlack.copy(alpha = alpha), radius = radius, center = center)
             drawCircle(
-                color = ScoreWhite.copy(alpha = alpha),
+                color = shell.copy(alpha = alpha),
                 radius = radius * NUMBER_DISK_FACTOR,
                 center = center,
             )
@@ -329,6 +340,12 @@ private fun DrawScope.drawModeBall(
                 textSizePx = radius * NUMBER_TEXT_FACTOR,
                 color = BallEightBlack.copy(alpha = alpha),
             )
+            drawCircle(
+                color = stroke.copy(alpha = alpha * BALL_STROKE_ALPHA),
+                radius = radius,
+                center = center,
+                style = Stroke(width = radius * MODE_BALL_STROKE),
+            )
         }
         GameMode.NINE_BALL -> drawStripedBall(
             stripe = BallNineYellow.copy(alpha = alpha),
@@ -336,6 +353,8 @@ private fun DrawScope.drawModeBall(
             center = center,
             radius = radius,
             alpha = alpha,
+            shell = shell,
+            stroke = stroke,
         )
         GameMode.TEN_BALL -> drawStripedBall(
             stripe = BallTenBlue.copy(alpha = alpha),
@@ -343,9 +362,18 @@ private fun DrawScope.drawModeBall(
             center = center,
             radius = radius,
             alpha = alpha,
+            shell = shell,
+            stroke = stroke,
         )
-        GameMode.FOURTEEN_ONE ->
-            drawCircle(color = ScoreWhite.copy(alpha = alpha), radius = radius, center = center)
+        GameMode.FOURTEEN_ONE -> {
+            drawCircle(color = shell.copy(alpha = alpha), radius = radius, center = center)
+            drawCircle(
+                color = stroke.copy(alpha = alpha * BALL_STROKE_ALPHA),
+                radius = radius,
+                center = center,
+                style = Stroke(width = radius * MODE_BALL_STROKE),
+            )
+        }
     }
 }
 
@@ -355,8 +383,10 @@ private fun DrawScope.drawStripedBall(
     center: Offset,
     radius: Float,
     alpha: Float,
+    shell: Color,
+    stroke: Color,
 ) {
-    drawCircle(color = ScoreWhite.copy(alpha = alpha), radius = radius, center = center)
+    drawCircle(color = shell.copy(alpha = alpha), radius = radius, center = center)
     val clip = Path().apply {
         addOval(Rect(center = center, radius = radius))
     }
@@ -368,7 +398,7 @@ private fun DrawScope.drawStripedBall(
         )
     }
     drawCircle(
-        color = ScoreWhite.copy(alpha = alpha),
+        color = shell.copy(alpha = alpha),
         radius = radius * NUMBER_DISK_FACTOR,
         center = center,
     )
@@ -377,6 +407,12 @@ private fun DrawScope.drawStripedBall(
         center = center,
         textSizePx = radius * if (number.length > 1) NUMBER_TEXT_FACTOR_WIDE else NUMBER_TEXT_FACTOR,
         color = Color.Black.copy(alpha = alpha),
+    )
+    drawCircle(
+        color = stroke.copy(alpha = alpha * BALL_STROKE_ALPHA),
+        radius = radius,
+        center = center,
+        style = Stroke(width = radius * MODE_BALL_STROKE),
     )
 }
 
@@ -402,9 +438,21 @@ private fun DrawScope.drawBallNumber(
     drawContext.canvas.nativeCanvas.drawText(text, center.x, y, paint)
 }
 
-private fun DrawScope.drawCheckBadge(center: Offset, radius: Float, alpha: Float) {
-    drawCircle(color = ScoreWhite.copy(alpha = alpha), radius = radius * BADGE_RIM_FACTOR, center = center)
+private fun DrawScope.drawCheckBadge(
+    center: Offset,
+    radius: Float,
+    alpha: Float,
+    shell: Color,
+    stroke: Color,
+) {
+    drawCircle(color = shell.copy(alpha = alpha), radius = radius * BADGE_RIM_FACTOR, center = center)
     drawCircle(color = CheckBadgeGreen.copy(alpha = alpha), radius = radius, center = center)
+    drawCircle(
+        color = stroke.copy(alpha = alpha * BALL_STROKE_ALPHA),
+        radius = radius * BADGE_RIM_FACTOR,
+        center = center,
+        style = Stroke(width = radius * MODE_BALL_STROKE * 0.7f),
+    )
     val check = Path().apply {
         moveTo(center.x - radius * CHECK_X1, center.y + radius * CHECK_Y1)
         lineTo(center.x - radius * CHECK_X2, center.y + radius * CHECK_Y2)
@@ -412,7 +460,7 @@ private fun DrawScope.drawCheckBadge(center: Offset, radius: Float, alpha: Float
     }
     drawPath(
         path = check,
-        color = ScoreWhite.copy(alpha = alpha),
+        color = shell.copy(alpha = alpha),
         style = Stroke(
             width = radius * CHECK_STROKE,
             cap = StrokeCap.Round,
@@ -427,38 +475,39 @@ private fun DrawScope.drawCheckBadge(center: Offset, radius: Float, alpha: Float
 @Composable
 fun FoulIcon(
     modifier: Modifier = Modifier,
-    tint: Color = ButtonFoulLight,
+    tint: Color = LocalAppTheme.current.actions.foul.light,
     size: Dp = StatIconSize,
 ) {
+    val theme = LocalAppTheme.current
+    val shell = theme.ballFill
+    val stroke = theme.iconStroke
     Canvas(modifier = modifier.size(size)) {
         val min = this.size.minDimension
         val center = Offset(this.size.width / HALF, this.size.height / HALF)
         val ballRadius = min * FOUL_BALL_RADIUS
         val ringRadius = min * FOUL_RING_RADIUS
-        val stroke = min * FOUL_SLASH_STROKE
+        val strokeW = min * FOUL_SLASH_STROKE
 
-        // Soft white cue ball (same family as run-out mode balls).
-        drawCircle(color = ScoreWhite.copy(alpha = FOUL_BALL_FILL_ALPHA), radius = ballRadius, center = center)
+        drawCircle(color = shell.copy(alpha = FOUL_BALL_FILL_ALPHA), radius = ballRadius, center = center)
         drawCircle(
-            color = tint.copy(alpha = FOUL_BALL_RIM_ALPHA),
+            color = stroke.copy(alpha = FOUL_BALL_RIM_ALPHA),
             radius = ballRadius,
             center = center,
             style = Stroke(width = min * FOUL_BALL_RIM_STROKE, cap = StrokeCap.Round),
         )
 
-        // Prohibition ring + diagonal slash.
         drawCircle(
             color = tint,
             radius = ringRadius,
             center = center,
-            style = Stroke(width = stroke, cap = StrokeCap.Round),
+            style = Stroke(width = strokeW, cap = StrokeCap.Round),
         )
         val slash = ballRadius * FOUL_SLASH_REACH
         drawLine(
             color = tint,
             start = Offset(center.x - slash, center.y + slash),
             end = Offset(center.x + slash, center.y - slash),
-            strokeWidth = stroke,
+            strokeWidth = strokeW,
             cap = StrokeCap.Round,
         )
     }
@@ -523,6 +572,8 @@ private const val TIP_OFFSET_Y = 0.34f
 private const val TIP_RADIUS_FACTOR = 0.24f
 private const val MUTED_ICON_ALPHA = 0.72f
 private const val MUTED_LABEL_ALPHA = 0.78f
+private const val MODE_BALL_STROKE = 0.085f
+private const val BALL_STROKE_ALPHA = 0.90f
 private const val FOUL_WARN_THRESHOLD = 2
 private val FOUL_CHIP_CORNER = 12.dp
 private val BallEightBlack = Color(0xFF1C1C1C)

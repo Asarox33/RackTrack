@@ -1,0 +1,13 @@
+Twemoji graphics
+Copyright 2019 Twitter, Inc and other contributors
+https://github.com/twitter/twemoji
+
+Code licensed under the MIT License:
+http://opensource.org/licenses/MIT
+
+Graphics licensed under CC-BY 4.0:
+https://creativecommons.org/licenses/by/4.0/
+
+Attribution (CC BY 4.0): Twemoji by Twitter / X Corp.
+RackTrack embeds selected Twemoji PNG glyphs for language picker flags
+(and the system/globe glyph) under drawable resources.

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#0F4A24</color>
+    <!-- Blue glossy DS background (matches AppThemeMode.BLUE_GLOSSY). -->
+    <color name="ic_launcher_background">#101A28</color>
+    <color name="splash_background">#101A28</color>
 </resources>
