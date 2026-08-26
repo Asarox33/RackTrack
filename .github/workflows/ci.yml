@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # Need full history so coverage can diff PR base…head for changed lines.
+          fetch-depth: 0
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -34,45 +37,17 @@ jobs:
       - name: Unit tests + domain coverage
         run: ./gradlew :app:domainCoverage
 
-      - name: Coverage report on PR
-        if: github.event_name == 'pull_request'
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.8.0
-        with:
-          paths: ${{ github.workspace }}/shared/build/reports/jacoco/domainCoverage/domainCoverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Domain coverage
-          update-comment: true
-          # Madrapps uses instruction coverage (not line %). Domain overall ~85%.
-          # Per-file emoji uses min-coverage-changed-files (was 0 → everything looked green).
-          min-coverage-overall: 80
-          min-coverage-changed-files: 80
-          pass-emoji: ':green_circle:'
-          fail-emoji: ':red_circle:'
-
-      # madrapps only comments; it does not fail the job on its own.
-      - name: Fail if PR coverage below 80%
+      - name: Domain coverage PR comment + gates
         if: github.event_name == 'pull_request'
         env:
-          OVERALL: ${{ steps.jacoco.outputs.coverage-overall }}
-          CHANGED: ${{ steps.jacoco.outputs.coverage-changed-files }}
-        run: |
-          python3 <<'PY'
-          import os
-          import sys
-          overall = float(os.environ.get("OVERALL") or "0")
-          changed = float(os.environ.get("CHANGED") or "0")
-          print(f"coverage-overall={overall}")
-          print(f"coverage-changed-files={changed}")
-          failed = False
-          if overall < 80.0:
-              print(f"::error::Overall domain coverage {overall}% < 80%")
-              failed = True
-          if changed < 80.0:
-              print(f"::error::Changed-files domain coverage {changed}% < 80%")
-              failed = True
-          sys.exit(1 if failed else 0)
-          PY
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 .github/scripts/domain-coverage-pr.py
+
       - name: Coverage summary
         if: always() && hashFiles('shared/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
         run: |
@@ -93,11 +68,12 @@ jobs:
           pct = (100.0 * covered / total) if total else 0.0
           summary = os.environ.get("GITHUB_STEP_SUMMARY")
           body = (
-              "## Domain coverage\n\n"
+              "## Domain coverage (line)\n\n"
               f"- **Line coverage:** {pct:.1f}% ({covered}/{total})\n"
-              f"- HTML report uploaded as CI artifact `domain-coverage`\n"
-              f"- Local: `./gradlew :app:domainCoverage` → "
-              "`shared/build/reports/jacoco/domainCoverage/html/index.html`\n"
+              f"- HTML report: artifact `domain-coverage`\n"
+              f"- Local: `./gradlew :app:domainCoverage`\n"
+              f"- PR decoration + instruction gates: "
+              "`.github/scripts/domain-coverage-pr.py`\n"
           )
           print(body)
           if summary:

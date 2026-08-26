@@ -6,6 +6,7 @@ import com.racktrack.domain.model.MatchEvent
 import com.racktrack.domain.model.MatchEventType
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PushOutPhase
+import com.racktrack.domain.model.RulesetPack
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -260,6 +261,20 @@ class PushOutEngineTest {
         assertEquals(PushOutPhase.ANNOUNCED, undoneFoul.pushOutPhase)
         assertEquals(match.player2.id, undoneFoul.currentShooterId)
 
+        // player1 foul undo (covers foul1 decrement branch)
+        match = announced(fresh())
+        match = PushOutEngine.resolveFoul(match, match.player1.id, now())
+        assertEquals(1, match.foul1)
+        val undoneP1Foul =
+            PushOutEngine.undo(
+                match,
+                match.history.last(),
+                match.history.dropLast(1),
+            )!!
+        assertEquals(0, undoneP1Foul.foul1)
+        assertEquals(PushOutPhase.ANNOUNCED, undoneP1Foul.pushOutPhase)
+        assertEquals(match.player1.id, undoneP1Foul.currentShooterId)
+
         assertNull(
             PushOutEngine.undo(
                 match,
@@ -297,5 +312,56 @@ class PushOutEngineTest {
         assertTrue(
             MatchSummaryReport.playerStatLines(summary, 1).any { it == "Push outs 1" },
         )
+    }
+
+    @Test
+    fun `apa pack disables announce and phaseFromHistory`() {
+        val match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 5,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = clock,
+                gameMode = GameMode.NINE_BALL,
+                rulesetPack = RulesetPack.APA,
+            )
+        assertEquals(PushOutPhase.NONE, match.pushOutPhase)
+        assertFalse(PushOutEngine.canAnnounce(match.copy(pushOutPhase = PushOutPhase.AVAILABLE), match.player1.id))
+        assertEquals(
+            PushOutPhase.NONE,
+            PushOutEngine.phaseFromHistory(
+                match.copy(pushOutPhase = PushOutPhase.AVAILABLE),
+                emptyList(),
+            ),
+        )
+    }
+
+    @Test
+    fun `apa pack third push-out foul does not award three-foul rack`() {
+        var match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 5,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = clock,
+                gameMode = GameMode.NINE_BALL,
+                rulesetPack = RulesetPack.APA,
+            ).copy(pushOutPhase = PushOutPhase.ANNOUNCED, foul1 = 2)
+        match = PushOutEngine.resolveFoul(match, match.player1.id, now())
+        assertEquals(3, match.foul1)
+        assertEquals(0, match.score2)
+        assertEquals(MatchEventType.PUSH_OUT_FOUL, match.history.last().type)
+        assertEquals(PushOutPhase.NONE, match.pushOutPhase)
+    }
+
+    @Test
+    fun `ffb third push-out foul awards three-foul rack loss`() {
+        var match =
+            fresh().copy(pushOutPhase = PushOutPhase.ANNOUNCED, foul1 = 2)
+        match = PushOutEngine.resolveFoul(match, match.player1.id, now())
+        assertEquals(1, match.score2)
+        assertEquals(MatchEventType.THREE_FOULS_LOSS, match.history.last().type)
     }
 }
