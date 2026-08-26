@@ -44,9 +44,35 @@ jobs:
           title: Domain coverage
           update-comment: true
           # Madrapps uses instruction coverage (not line %). Domain overall ~85%.
+          # Per-file emoji uses min-coverage-changed-files (was 0 → everything looked green).
           min-coverage-overall: 80
-          min-coverage-changed-files: 0
+          min-coverage-changed-files: 80
+          pass-emoji: ':green_circle:'
+          fail-emoji: ':red_circle:'
 
+      # madrapps only comments; it does not fail the job on its own.
+      - name: Fail if PR coverage below 80%
+        if: github.event_name == 'pull_request'
+        env:
+          OVERALL: ${{ steps.jacoco.outputs.coverage-overall }}
+          CHANGED: ${{ steps.jacoco.outputs.coverage-changed-files }}
+        run: |
+          python3 <<'PY'
+          import os
+          import sys
+          overall = float(os.environ.get("OVERALL") or "0")
+          changed = float(os.environ.get("CHANGED") or "0")
+          print(f"coverage-overall={overall}")
+          print(f"coverage-changed-files={changed}")
+          failed = False
+          if overall < 80.0:
+              print(f"::error::Overall domain coverage {overall}% < 80%")
+              failed = True
+          if changed < 80.0:
+              print(f"::error::Changed-files domain coverage {changed}% < 80%")
+              failed = True
+          sys.exit(1 if failed else 0)
+          PY
       - name: Coverage summary
         if: always() && hashFiles('shared/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
         run: |

@@ -75,6 +75,55 @@ tasks.register<JacocoReport>("domainCoverage") {
     )
 }
 
+/**
+ * Fail the build when domain LINE coverage is under 80% overall or per class.
+ * (Matches the PR comment thresholds; madrapps alone does not fail the job.)
+ */
+tasks.register<JacocoCoverageVerification>("domainCoverageVerify") {
+    group = "verification"
+    description = "Enforce ≥80% domain line coverage (overall + each class)"
+    dependsOn("domainCoverage")
+
+    val kotlinClasses =
+        layout.buildDirectory.dir("classes/kotlin/jvm/main")
+    classDirectories.setFrom(
+        files(
+            fileTree(kotlinClasses) {
+                include("**/domain/**")
+                exclude("**/*\$*")
+            },
+        ),
+    )
+    sourceDirectories.setFrom(files("src/commonMain/kotlin"))
+    executionData.setFrom(
+        fileTree(layout.buildDirectory) {
+            include("jacoco/jvmTest.exec", "jacoco/*.exec")
+        },
+    )
+
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+        rule {
+            element = "CLASS"
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.named("domainCoverage") {
+    finalizedBy("domainCoverageVerify")
+}
+
 ktlint {
     android.set(false)
     ignoreFailures.set(false)

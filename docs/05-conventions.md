@@ -36,7 +36,8 @@ These are enforced rules for anyone (human or agent) writing code in this repo.
 - **CI**: ktlint, detekt, unit tests + domain JaCoCo on every push/PR to `main`.
   PRs get a coverage comment (`madrapps/jacoco-report`); HTML is also a workflow artifact.
   Local report: `./gradlew :app:domainCoverage`.
-
+  **Gate:** overall + each domain class ≥ **80%** line coverage (`domainCoverageVerify`);
+  PR comment also fails the job if overall or changed-files coverage &lt; 80%.
 ## 5. Git commit conventions
 
 Format: `type(scope): short imperative description`

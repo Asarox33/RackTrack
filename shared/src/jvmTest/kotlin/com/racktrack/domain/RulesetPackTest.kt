@@ -46,6 +46,46 @@ class RulesetPackTest {
         )
 
     @Test
+    fun `shortLabel covers every pack`() {
+        assertEquals("FFB", RulesetPack.FFB.shortLabel)
+        assertEquals("WPA", RulesetPack.WPA.shortLabel)
+        assertEquals("APA", RulesetPack.APA.shortLabel)
+        assertEquals("BCA/CSI", RulesetPack.BCA_CSI.shortLabel)
+        assertEquals("Matchroom (9)", RulesetPack.MATCHROOM.shortLabel)
+    }
+
+    @Test
+    fun `officialRulesUrl is pack-specific and non-blank`() {
+        for (pack in RulesetPack.entries) {
+            val url = pack.officialRulesUrl()
+            assertTrue(url.startsWith("https://"), pack.name)
+            assertTrue(url.length > 20, pack.name)
+        }
+        assertTrue(RulesetPack.FFB.officialRulesUrl().contains("ffbillard"))
+        assertTrue(RulesetPack.WPA.officialRulesUrl().contains("wpapool"))
+        assertTrue(RulesetPack.APA.officialRulesUrl().contains("poolplayers"))
+        assertTrue(RulesetPack.BCA_CSI.officialRulesUrl().contains("playcsipool"))
+        assertTrue(RulesetPack.MATCHROOM.officialRulesUrl().contains("matchroompool"))
+    }
+
+    @Test
+    fun `non race modes never allow push-out or three-foul`() {
+        for (pack in RulesetPack.entries) {
+            assertFalse(pack.allowsPushOut(GameMode.EIGHT_BALL), pack.name)
+            assertFalse(pack.allowsPushOut(GameMode.FOURTEEN_ONE), pack.name)
+            assertFalse(pack.allowsThreeFoulRackLoss(GameMode.EIGHT_BALL), pack.name)
+            assertFalse(pack.allowsThreeFoulRackLoss(GameMode.FOURTEEN_ONE), pack.name)
+        }
+    }
+
+    @Test
+    fun `openingIllegalPlusClassicStacks is race-mode false`() {
+        for (pack in RulesetPack.entries) {
+            assertFalse(pack.openingIllegalPlusClassicStacks(GameMode.NINE_BALL), pack.name)
+        }
+    }
+
+    @Test
     fun `matchroom forMode keeps 9-ball and falls back to ffb elsewhere`() {
         assertEquals(RulesetPack.MATCHROOM, RulesetPack.MATCHROOM.forMode(GameMode.NINE_BALL))
         assertEquals(RulesetPack.FFB, RulesetPack.MATCHROOM.forMode(GameMode.EIGHT_BALL))
