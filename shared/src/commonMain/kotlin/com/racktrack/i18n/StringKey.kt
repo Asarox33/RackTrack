@@ -35,16 +35,21 @@ enum class StringKey {
     DEFAULT_INNINGS_14_1,
     DEFAULT_BREAK_RULE,
     SECTION_MATCH_DEFAULTS,
+
     /** Short help under Match defaults list. */
     MATCH_DEFAULTS_HINT,
+
     /** Title of the per-mode editor, `{0}` = mode label. */
     MODE_DEFAULTS_TITLE,
+
     /** Race mode row subtitle: race length + break rule. `{0}` race, `{1}` break. */
     MATCH_DEFAULTS_SUMMARY_RACE,
+
     /** 14/1 row subtitle: `{0}` distance, `{1}` innings (or ∞). */
     MATCH_DEFAULTS_SUMMARY_14_1,
     SECTION_RULES,
     SECTION_RULESET,
+
     /** Default FFB; Matchroom = 9-ball only. */
     RULESET_HINT,
     RULES_OFFICIAL_LINK,

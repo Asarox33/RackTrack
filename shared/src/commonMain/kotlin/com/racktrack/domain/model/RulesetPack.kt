@@ -37,36 +37,33 @@ enum class RulesetPack {
      * Pack stamped on a live match.
      * Matchroom is a 9-ball overlay; any other mode uses [FFB] (app default).
      */
-    fun forMode(mode: GameMode): RulesetPack =
-        if (this == MATCHROOM && mode != GameMode.NINE_BALL) FFB else this
+    fun forMode(mode: GameMode): RulesetPack {
+        return if (this == MATCHROOM && mode != GameMode.NINE_BALL) FFB else this
+    }
 
     /**
      * 9/10 push-out after a non-foul break.
      * APA handicapped league: off. Masters-style APA is out of pack scope.
      */
-    fun allowsPushOut(mode: GameMode): Boolean =
-        mode.supportsPushOut && this != APA
+    fun allowsPushOut(mode: GameMode): Boolean = mode.supportsPushOut && this != APA
 
     /**
      * 9/10 three consecutive fouls → lose rack.
      * APA league: off.
      */
-    fun allowsThreeFoulRackLoss(mode: GameMode): Boolean =
-        mode.supportsThreeFoulRackLoss && this != APA
+    fun allowsThreeFoulRackLoss(mode: GameMode): Boolean = mode.supportsThreeFoulRackLoss && this != APA
 
     /**
      * APA 8-ball: pocketing the 8 on the break wins the rack (scratch → use EARLY 8 loss).
      * FFB/WPA/CSI: spot / re-rack (operator; no dedicated win tap).
      */
-    fun eightOnBreakAwardsRack(mode: GameMode): Boolean =
-        mode == GameMode.EIGHT_BALL && this == APA
+    fun eightOnBreakAwardsRack(mode: GameMode): Boolean = mode == GameMode.EIGHT_BALL && this == APA
 
     /**
      * 14/1: illegal open + classic foul on the same open stacks to −3 (FFB 1.6.03(g)).
      * BCA/CSI: open violation only (−2); no extra −1 stack.
      */
-    fun openingIllegalPlusClassicStacks(mode: GameMode): Boolean =
-        mode.isPointScoring && this != BCA_CSI
+    fun openingIllegalPlusClassicStacks(mode: GameMode): Boolean = mode.isPointScoring && this != BCA_CSI
 
     fun officialRulesUrl(): String =
         when (this) {
