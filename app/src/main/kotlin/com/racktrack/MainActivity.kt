@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.racktrack.data.UserSettings
 import com.racktrack.i18n.LocaleCatalogs
 import com.racktrack.i18n.Strings
 import com.racktrack.monetization.MonetizationFacade
@@ -115,97 +116,114 @@ private fun RackTrackRoot(
         hapticsEnabled = settings.hapticsEnabled,
         strings = stringProvider,
     ) {
-        val screen by viewModel.screen.collectAsStateWithLifecycle()
-        val setup by viewModel.setup.collectAsStateWithLifecycle()
-        val history by viewModel.history.collectAsStateWithLifecycle()
-        val selectedHistory by viewModel.selectedHistoryMatch.collectAsStateWithLifecycle()
+        RackTrackNav(
+            activity = activity,
+            viewModel = viewModel,
+            monetization = monetization,
+            settings = settings,
+            adsRemoved = adsRemoved,
+        )
+    }
+}
 
-        when (val current = screen) {
-            AppScreen.Setup -> {
-                LaunchedEffect(Unit) {
-                    monetization.onSetupVisible()
-                }
-                SetupScreen(
-                    state = setup,
-                    onPlayer1Change = viewModel::updatePlayer1Name,
-                    onPlayer2Change = viewModel::updatePlayer2Name,
-                    onGameModeChange = viewModel::updateGameMode,
-                    onSoloTrainingChange = viewModel::setSoloTraining,
-                    onRacksChange = viewModel::updateRacksToWin,
-                    onPointsChange = viewModel::updatePointsToWin,
-                    onInningsChange = viewModel::updateInningsLimit,
-                    onBreakerChange = viewModel::setPlayer1BreaksFirst,
-                    onBreakRuleChange = viewModel::setBreakRule,
-                    onStart = {
-                        monetization.runAfterAdOpportunity(activity) {
-                            viewModel.startMatch()
-                        }
-                    },
-                    onOpenHistory = viewModel::openHistory,
-                    onOpenSettings = viewModel::openSettings,
-                    onOpenAbout = viewModel::openAbout,
-                )
+@Composable
+private fun RackTrackNav(
+    activity: MainActivity,
+    viewModel: MatchViewModel,
+    monetization: MonetizationFacade,
+    settings: UserSettings,
+    adsRemoved: Boolean,
+) {
+    val screen by viewModel.screen.collectAsStateWithLifecycle()
+    val setup by viewModel.setup.collectAsStateWithLifecycle()
+    val history by viewModel.history.collectAsStateWithLifecycle()
+    val selectedHistory by viewModel.selectedHistoryMatch.collectAsStateWithLifecycle()
+
+    when (val current = screen) {
+        AppScreen.Setup -> {
+            LaunchedEffect(Unit) {
+                monetization.onSetupVisible()
             }
-            is AppScreen.MatchBoard -> {
-                val matchPaused by viewModel.matchPaused.collectAsStateWithLifecycle()
-                MatchBoardScreen(
-                    match = current.match,
-                    onPlusOne = viewModel::plusOne,
-                    onRunOut = viewModel::runOut,
-                    onGoldenBreak = viewModel::goldenBreak,
-                    onEightOnBreak = viewModel::eightOnBreak,
-                    onDryBreak = viewModel::dryBreak,
-                    onEightBallLoss = viewModel::eightBallLoss,
-                    onAddPoints = viewModel::addPoints,
-                    onPassWithRemaining = viewModel::passWithRemaining,
-                    onBreakFoul = viewModel::breakFoul,
-                    onAcceptIllegalOpen = viewModel::acceptIllegalOpen,
-                    onAnnouncePushOut = viewModel::announcePushOut,
-                    onResolvePushOutClean = viewModel::resolvePushOutClean,
-                    onResolvePushOutFoul = viewModel::resolvePushOutFoul,
-                    onTakePushOut = viewModel::takePushOut,
-                    onReturnPushOut = viewModel::returnPushOut,
-                    onFoul = viewModel::foul,
-                    onFoulWithRemaining = viewModel::foulWithRemaining,
-                    onClearFouls = viewModel::clearFouls,
-                    onUndo = viewModel::undo,
-                    onNewMatch = viewModel::newMatch,
-                    onOpenSettings = viewModel::openSettings,
-                    matchPaused = matchPaused,
-                    onTogglePause = viewModel::toggleMatchPause,
-                )
-            }
-            AppScreen.History -> HistoryScreen(
-                state = history,
-                onPlayerFilter1Change = viewModel::setHistoryPlayerFilter1,
-                onPlayerFilter2Change = viewModel::setHistoryPlayerFilter2,
-                onOpenMatch = viewModel::openHistoryDetail,
-                onDeleteMatch = viewModel::deleteHistoryMatch,
-                onBack = viewModel::closeHistory,
-            )
-            is AppScreen.HistoryDetail -> HistoryDetailScreen(
-                match = selectedHistory,
-                onBack = viewModel::closeHistoryDetail,
-            )
-            AppScreen.Settings -> SettingsScreen(
-                settings = settings,
-                adsRemoved = adsRemoved,
-                onRemoveAds = { monetization.launchRemoveAdsPurchase(activity) },
-                onRestorePurchases = { monetization.restorePurchases() },
-                onThemeSelected = viewModel::setThemeMode,
-                onAppLanguageSelected = viewModel::setAppLanguage,
-                onRulesetPackSelected = viewModel::setRulesetPack,
-                onKeepScreenOnChange = viewModel::setKeepScreenOn,
-                onHapticsChange = viewModel::setHapticsEnabled,
-                onDefaultRacksChange = viewModel::setDefaultRacksFor,
-                onDefaultBreakRuleChange = viewModel::setDefaultBreakFor,
-                onDefaultPointsChange = viewModel::setDefaultPointsToWin,
-                onDefaultInningsChange = viewModel::setDefaultInningsLimit,
-                onBack = viewModel::closeSettings,
-            )
-            AppScreen.About -> AboutScreen(
-                onBack = viewModel::closeAbout,
+            SetupScreen(
+                state = setup,
+                onPlayer1Change = viewModel::updatePlayer1Name,
+                onPlayer2Change = viewModel::updatePlayer2Name,
+                onGameModeChange = viewModel::updateGameMode,
+                onSoloTrainingChange = viewModel::setSoloTraining,
+                onRacksChange = viewModel::updateRacksToWin,
+                onPointsChange = viewModel::updatePointsToWin,
+                onInningsChange = viewModel::updateInningsLimit,
+                onBreakerChange = viewModel::setPlayer1BreaksFirst,
+                onBreakRuleChange = viewModel::setBreakRule,
+                onStart = {
+                    monetization.runAfterAdOpportunity(activity) {
+                        viewModel.startMatch()
+                    }
+                },
+                onOpenHistory = viewModel::openHistory,
+                onOpenSettings = viewModel::openSettings,
+                onOpenAbout = viewModel::openAbout,
             )
         }
+        is AppScreen.MatchBoard -> {
+            val matchPaused by viewModel.matchPaused.collectAsStateWithLifecycle()
+            MatchBoardScreen(
+                match = current.match,
+                onPlusOne = viewModel::plusOne,
+                onRunOut = viewModel::runOut,
+                onGoldenBreak = viewModel::goldenBreak,
+                onEightOnBreak = viewModel::eightOnBreak,
+                onDryBreak = viewModel::dryBreak,
+                onEightBallLoss = viewModel::eightBallLoss,
+                onAddPoints = viewModel::addPoints,
+                onPassWithRemaining = viewModel::passWithRemaining,
+                onBreakFoul = viewModel::breakFoul,
+                onAcceptIllegalOpen = viewModel::acceptIllegalOpen,
+                onAnnouncePushOut = viewModel::announcePushOut,
+                onResolvePushOutClean = viewModel::resolvePushOutClean,
+                onResolvePushOutFoul = viewModel::resolvePushOutFoul,
+                onTakePushOut = viewModel::takePushOut,
+                onReturnPushOut = viewModel::returnPushOut,
+                onFoul = viewModel::foul,
+                onFoulWithRemaining = viewModel::foulWithRemaining,
+                onClearFouls = viewModel::clearFouls,
+                onUndo = viewModel::undo,
+                onNewMatch = viewModel::newMatch,
+                onOpenSettings = viewModel::openSettings,
+                matchPaused = matchPaused,
+                onTogglePause = viewModel::toggleMatchPause,
+            )
+        }
+        AppScreen.History -> HistoryScreen(
+            state = history,
+            onPlayerFilter1Change = viewModel::setHistoryPlayerFilter1,
+            onPlayerFilter2Change = viewModel::setHistoryPlayerFilter2,
+            onOpenMatch = viewModel::openHistoryDetail,
+            onDeleteMatch = viewModel::deleteHistoryMatch,
+            onBack = viewModel::closeHistory,
+        )
+        is AppScreen.HistoryDetail -> HistoryDetailScreen(
+            match = selectedHistory,
+            onBack = viewModel::closeHistoryDetail,
+        )
+        AppScreen.Settings -> SettingsScreen(
+            settings = settings,
+            adsRemoved = adsRemoved,
+            onRemoveAds = { monetization.launchRemoveAdsPurchase(activity) },
+            onRestorePurchases = { monetization.restorePurchases() },
+            onThemeSelected = viewModel::setThemeMode,
+            onAppLanguageSelected = viewModel::setAppLanguage,
+            onRulesetPackSelected = viewModel::setRulesetPack,
+            onKeepScreenOnChange = viewModel::setKeepScreenOn,
+            onHapticsChange = viewModel::setHapticsEnabled,
+            onDefaultRacksChange = viewModel::setDefaultRacksFor,
+            onDefaultBreakRuleChange = viewModel::setDefaultBreakFor,
+            onDefaultPointsChange = viewModel::setDefaultPointsToWin,
+            onDefaultInningsChange = viewModel::setDefaultInningsLimit,
+            onBack = viewModel::closeSettings,
+        )
+        AppScreen.About -> AboutScreen(
+            onBack = viewModel::closeAbout,
+        )
     }
 }
