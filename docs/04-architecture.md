@@ -67,7 +67,7 @@ The UI is a split scoreboard on Android. Completed matches are snapshotted as
 `MatchSummary` for history replay and PDF share. Locale catalogs live in `:shared`
 (`LocaleCatalogs` + `AppLanguage` + `Strings`); Compose reads them via `LocalStrings` /
 `Strings.get`. Settings can override the system language. Compose Multiplatform UI /
-iOS targets come later.
+iOS targets are train **3.0.0** (not on Android 2.x path).
 
 ## 4. Data flow (example: race +1)
 

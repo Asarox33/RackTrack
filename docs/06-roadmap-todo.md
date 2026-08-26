@@ -3,7 +3,8 @@
 Overall status: ✅ **1.2.2** on GitHub · 🟨 **1.2.x** Play gate (Internal CI live · Closed
 live · **12×14 clock from 2026-08-20** · Console §E ✅ · prod blocked on clock) ·
 🟨 **2.0.0** on **`rc/2.0.0`** (`versionName` **2.0.0** / `versionCode` **200000**; merge
-after 1.2 prod) · ⬜ **Maybe 3.x+** (camera/AI parked)
+after 1.2 prod) · ⬜ **3.0.0** (CMP UI + iOS — not opened) · ⬜ **Maybe 4.x+** (camera/AI
+parked)
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
@@ -145,22 +146,21 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
    wordmark (Blue glossy); Play icon 512 / feature graphic / IAP no-ads in `assets/`;
    adaptive launcher + splash wired. **Play screenshots deferred** to 2.0 store publish.
 3. ✅ **KMP shared scaffold (2026-08-26)** — `:shared` (android + jvm) holds domain +
-   string-key skeleton; Compose UI stays on `:app`. iOS target deferred.
+   i18n catalogs; Compose UI stays on `:app`. **CMP / iOS → train 3.0.0** (not 2.0).
 4. ✅ **i18n (2026-08-26)** — en default + fr/de/es/it/nl/pt catalogs; system locale
    by default + Settings **Language** swipe (flags / endonyms); unknown locales → EN;
    Setup / Settings / History / summary / PDF / prose dialogs extracted. Board jargon
    chips stay English. **About** moved to Setup info control (not on live board).
 5. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
-   scoreboard-relevant deltas only.
+   scoreboard-relevant deltas only. **← next on 2.0**
 6. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
 7. ⬜ Other game families (e.g. English 8-Ball) — only after American multi-ruleset base.
 8. ⬜ Optional later: Play In-App Updates flexible; Crashlytics if Play vitals insufficient.
 
 ### Detail (same items)
 
-- 🟨 **KMP + Compose Multiplatform** — ✅ **scaffold (2026-08-26):** `:shared` holds
-  domain + `i18n` catalogs (android + jvm). Remaining: CMP UI where practical;
-  **iOS target** later (Mac).
+- ✅ **KMP `:shared` foundation (2026-08-26)** — domain + `i18n` catalogs (android + jvm).
+  Compose stays on `:app` through **2.x**. Remaining CMP UI / iOS target → **3.0.0**.
 - ✅ **i18n (localization) (2026-08-26)** — English default; also **fr, de, es, it, nl, pt**:
   - Setup / Settings / History / match summary / PDF / prose dialogs +
     `MatchSummaryReport` labels via `:shared` `StringKey` / locale catalogs
@@ -168,7 +168,6 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
     Settings **Language** swipe (`AppLanguage` + Twemoji flags, CC BY 4.0)
   - **About** screen from Setup (info glyph, top-start); live board keeps pause + gear only
   - Short board jargon chips (**+1 / PASS / FOUL / RUN OUT / GOLDEN / …**) stay English
-  - CMP resources / iOS sharing deferred with CMP UI train
 - ⬜ **Multi-ruleset** — FFB today; later selectable packs (WPA / Matchroom / APA / BCA & CSI)
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
@@ -198,8 +197,20 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ⬜ Optional later (not planned): Play In-App Updates flexible nudge; Firebase Crashlytics
   if Play Console volume is not enough — **not** for 1.2 gate
 
-## Maybe 3.x+ (parked — not on 1.x / 2.0 path)
+## 3.0.0 — iOS + Compose Multiplatform (not opened)
 
+Branch / version not cut yet. **Prerequisite:** ship Android **2.0.0** (or enough of
+`:shared` + product trains) so CMP migrates a stable UI. Mac + Xcode required.
+
+- ⬜ **Compose Multiplatform UI** — move practical screens from `:app` Compose into shared
+  CMP where it pays off; keep Android-only bits (AdMob / Play Billing / UMP) in `:app`
+- ⬜ **iOS target** on `:shared` (+ iOS app shell)
+- ⬜ **App Store monetization parity** — same Remove Ads concept; StoreKit (see `09`)
+- ⬜ CMP string / image resources sharing (Twemoji / brand) as needed for iOS
+
+## Maybe 4.x+ (parked — not on 1.x / 2.0 / 3.0 path)
+
+Re-homed from **Maybe 3.x+** when owner locked **3.0.0 = iOS/CMP** (2026-08-26).
 Only reopen with an explicit owner decision. Not a near-term train.
 
 - ⬜ **Camera / AI ball detection** — prerequisite for automatic shot scoring; also unlocks
@@ -208,7 +219,7 @@ Only reopen with an explicit owner decision. Not a near-term train.
 ## Explicitly dropped
 - ~~Deeper FFB shot-by-shot mode (call/pocket)~~ — useless without camera auto-detection
   (push-out scoreboard tree for 9/10 is **in product** — see progress notes)
-  · camera/AI itself parked under **Maybe 3.x+**, not 1.x/2.0
+  · camera/AI itself parked under **Maybe 4.x+**, not 1.x/2.0/3.0
 - ~~Screenshot / UI golden tests~~ — no high-value client journeys to lock
 - ~~PNG share of match summary~~ — PDF only
 - ~~Remote / distant live multiplayer scoring~~ — one device scores the match; not a product fit
@@ -218,6 +229,10 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-26: Owner — **CMP UI + iOS → train 3.0.0** (not on Android 2.0 critical path).
+  KMP `:shared` scaffold stays in 2.x; Compose remains on `:app` through 2.x.
+  Camera/AI re-homed **Maybe 3.x+ → Maybe 4.x+**. Docs: `00`, `01`, `04`, `06`, `AGENTS`.
+  Next on `rc/2.0.0`: **multi-ruleset**.
 - 2026-08-26: **i18n** — `:shared` catalogs en/fr/de/es/it/nl/pt + `LocaleCatalogs` /
   `format`; system locale by default + Settings Language swipe (Twemoji flags);
   unknown locales → EN; About via Setup info control; board jargon chips remain English.
@@ -225,7 +240,7 @@ Only reopen with an explicit owner decision. Not a near-term train.
   **200000** + CHANGELOG + Play notes (still merge-after-1.2-prod).
 - 2026-08-26: **KMP scaffold** — `:shared` (android+jvm) with domain + `StringKey` /
   `EnStrings`; Setup uses shared strings; JaCoCo via `:shared:domainCoverage`
-  (`:app:domainCoverage` delegates). iOS / CMP UI deferred.
+  (`:app:domainCoverage` delegates). iOS / CMP UI → **3.0.0** (owner lock same day).
 - 2026-08-26: Brand masters in `assets/` (Play icon 512, feature graphic, IAP no-ads);
   launcher mipmaps + adaptive FG + SplashScreen (Blue glossy `#101A28`); PDF wordmark
   Rack/Track split. Play screenshots deferred to 2.0 listing publish.
@@ -242,19 +257,21 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - 2026-08-22: **2.0 DS step 1 started** on `rc/2.0.0` — `AppChrome` then evolved to
   full `AppThemeMode` (see above).
 - 2026-08-22: Owner — branch **`rc/2.0.0`** opened from `main` @ 1.2.2 while Closed 12×14
-  runs. Build order: DS → brand → KMP/CMP → i18n → multi-ruleset → accounts.
-  Merge to `main` only after Play production + train ready. Hotfixes 1.2 stay on `main`.
+  runs. Build order (updated 2026-08-26): DS → brand → KMP scaffold → i18n →
+  multi-ruleset → accounts; **CMP/iOS = 3.0**. Merge to `main` only after Play production
+  + train ready. Hotfixes 1.2 stay on `main`.
 - 2026-08-22: Doc — removed empty **Later on 1.x**; CI Play Internal ✅ re-homed under
-  **1.2.0** Play gate (accounts → 2.x, camera → Maybe 3.x+).
+  **1.2.0** Play gate (accounts → 2.x, camera → Maybe 3.x+ then **4.x+** in 2026-08-26).
 - 2026-08-22: Owner — Accounts / find players + shared post-match stats → **2.x** train
   (removed from 1.x optional); still never remote live scoring.
 - 2026-08-22: Owner — Camera / AI ball detection **off 1.x backlog**; parked under
-  **Maybe 3.x+** (not on 2.0 path). Product out-of-scope in `01` / `03` unchanged.
+  **Maybe 3.x+** (later **Maybe 4.x+** when 3.0 = iOS). Product out-of-scope in `01` /
+  `03` unchanged.
 - 2026-08-22: Art direction locked with owner — **Blue Night + Cyan**; APP (no felt) vs
   GAME (felt on board only). Design System + icon/brand in **2.x**; no UI rewrite on 1.2 gate.
 - 2026-08-20: Owner — icon/brand feedback noted; **defer unified visual redesign to 2.x.y**
-  (with CMP). Keep current Play assets for 1.2 prod. No Firebase; Play crash/ANR enough.
-  No in-app update overlay for now (overkill).
+  (CMP no longer implied for 2.x). Keep current Play assets for 1.2 prod. No Firebase;
+  Play crash/ANR enough. No in-app update overlay for now (overkill).
 - 2026-08-20: Play Console §E declarations all ✅ (owner). CI **Play Internal** smoke
   published **102015** `completed`. Warning fixed: action input `tracks` (not deprecated
   `track`). Remaining gate: hold Closed **12×14** → promote Production.
@@ -291,6 +308,7 @@ Only reopen with an explicit owner decision. Not a near-term train.
   AGENTS / `.cursor/rules` anti-drift.
 - 2026-08-15: Restore **V2 / `rc/2.0.0`** backlog on roadmap: **i18n** (en + fr/de/es/it/nl/pt),
   multi-ruleset, KMP/CMP (was planned 2026-08-10, dropped from doc during 1.x churn).
+  **2026-08-26:** CMP/iOS split out to **3.0.0**; KMP `:shared` stays on 2.x.
 - 2026-08-15: Spec [`docs/09-monetization.md`](09-monetization.md) — interstitial-only,
   Start gate, 5‑min cooldown, never block start, Remove Ads **4,99 €** one-time + Restore;
   first Play end-user release = **1.2.0**.

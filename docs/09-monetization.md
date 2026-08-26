@@ -151,7 +151,7 @@ Preload the next interstitial in the background after a show (or on setup appear
 ### 6.1 Platforms
 
 - **1.2.0 (Android):** Google Play Billing Library.
-- **Later (iOS / KMP):** same product concept, App Store non-consumable; shared
+- **Later (iOS / 3.0.0):** same product concept, App Store non-consumable; shared
   “ads removed” preference / entitlement abstraction.
 
 Purchases must be **restorable** after reinstall / new device (Play + App Store restore
@@ -256,7 +256,7 @@ START MATCH / START TRAINING → board immediately
 - No show attempt.
 - No cooldown bookkeeping required for that tap.
 - Entitlement must survive reinstall / new device via **Restore purchases** + store
-  re-query on cold start (Play Billing; later App Store for iOS).
+  re-query on cold start (Play Billing; later App Store for iOS / **3.0.0**).
 
 Settings: **Remove ads** (buy / owned) + **Restore purchases** talk only to
 `RemoveAdsStore`, which notifies the gate / ad manager (e.g. clear loaded ad, stop preload).

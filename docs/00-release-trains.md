@@ -1,6 +1,6 @@
 # Locked release trains — RackTrack
 
-**Status:** locked 2026-08-15 (owner answers applied) · keep in sync when trains change.  
+**Status:** locked 2026-08-15 · **CMP/iOS → 3.0** owner lock 2026-08-26 · keep in sync when trains change.  
 **Agents:** read this **before** inventing version numbers or dropping backlog items.
 Canonical backlog detail: [`06-roadmap-todo.md`](06-roadmap-todo.md).
 
@@ -13,8 +13,9 @@ Canonical backlog detail: [`06-roadmap-todo.md`](06-roadmap-todo.md).
 | **1.0.x – 1.1.1** | GitHub notes + sideload / **internal** smoke | Table product; **1.1.0** solo/PDF/Golden; **1.1.1** OFL font notices |
 | **1.2.0** | **First open / production Play** for strangers | Monetization (`09-monetization.md`) + upload keystore + privacy/Data safety for ads + R8 mapping + native debug symbols |
 | **1.2.x** | Play hotfixes after launch | Crash / store-review fixes only (no new optional feature trains planned) |
-| **2.0.0** on `rc/2.0.0` | Merge to `main` only when ready | i18n, multi-ruleset, KMP/CMP/iOS, **one-world DS + 3 themes** (Blue glossy / Warm light / Dark teal; DS v1 frozen 2026-08-25), **accounts / shared stats** (never live remote scoring) |
-| **3.x+** (maybe) | Not scheduled | Camera / AI ball detection — only if owner reopens (`06` Maybe 3.x+) |
+| **2.0.0** on `rc/2.0.0` | Merge to `main` only when ready | Android product train: i18n, multi-ruleset, **KMP `:shared` foundation** (android+jvm; domain + catalogs), **one-world DS + 3 themes** (Blue glossy / Warm light / Dark teal; DS v1 frozen 2026-08-25), **accounts / shared stats** (never live remote scoring). **Not** CMP UI / iOS |
+| **3.0.0** | Not opened yet | **iOS** + **Compose Multiplatform** UI share (Mac/Xcode); App Store monetization parity. Builds on `:shared` from 2.x |
+| **4.x+** (maybe) | Not scheduled | Camera / AI ball detection — only if owner reopens (`06` Maybe 4.x+) |
 
 ```text
 main (1.x patchable)
@@ -26,6 +27,7 @@ main (1.x patchable)
        │
        └── branch **rc/2.0.0** ✅ opened 2026-08-22 (work while 12×14 runs)
                  → merge to `main` only when ready as **2.0.0** (after Play production)
+                 → **3.0.0** later: CMP UI + iOS (not opened)
 ```
 
 ---
@@ -40,7 +42,9 @@ main (1.x patchable)
 2. **`rc/2.0.0` may open while Closed 12×14 runs** (owner 2026-08-22) so design / KMP /
    i18n can start off `main`. **Do not merge `rc/2.0.0` → `main` until Play production
    1.2.x is live** (and the train is ready). Keep 1.2 hotfixes on `main` only.
-3. **FFB player timeouts (art. 1.2.16) are out of product** — too close to per-action
+3. **CMP UI + iOS are train 3.0.0** (owner 2026-08-26) — not on the Android **2.0.0**
+   critical path. Keep Compose on `:app` through 2.x; open 3.0 when ready for Mac/iOS.
+4. **FFB player timeouts (art. 1.2.16) are out of product** — too close to per-action
    match officiating; club **pause** (duration freeze) remains. See Explicitly dropped.
 
 ---
@@ -49,6 +53,7 @@ main (1.x patchable)
 
 1. **Do not** publish an **ad-free** open/production Play build, then add ads later.
 2. **Do not** put i18n / multi-ruleset / KMP on the **1.2.0** Play launch critical path.
+   **Do not** put CMP UI / iOS on the **2.0.0** Android critical path (train **3.0.0**).
 3. **Do not** silently delete backlog lines from `06-roadmap-todo.md` when editing it —
    move to ✅ / Explicitly dropped / another train with a progress note.
 4. Pool **domain** never imports AdMob / Billing / UMP (`09-monetization.md` §9).

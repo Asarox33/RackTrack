@@ -79,7 +79,10 @@ Accounts + cloud history sync are **not in v1**; they may appear later only for
 identity / find-players / shared post-match stats — not for remote play.
 
 **Later (2.0 / `rc/2.0.0`, see roadmap):** **i18n** (en default + fr/de/es/it/nl/pt),
-multi-ruleset packs, KMP/CMP / iOS — UI language ≠ rule authority.
+multi-ruleset packs, KMP `:shared` foundation, accounts / shared stats — UI language ≠
+rule authority.
+
+**Later (3.0):** Compose Multiplatform UI + **iOS** (see `00-release-trains.md`).
 
 ## 8. Constraints
 
