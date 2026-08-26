@@ -150,16 +150,17 @@ class FourteenOneEngineTest {
 
     @Test
     fun `p2 starts 30-innings race without tie ends at 30-30 not 30-31`() {
-        var match = Match.start(
-            player1Name = "Alex",
-            player2Name = "Sam",
-            racksToWin = 1,
-            initialBreakerIsPlayer1 = false,
-            startedAtMillis = clock,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 500,
-            inningsLimit = 30,
-        )
+        var match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 1,
+                initialBreakerIsPlayer1 = false,
+                startedAtMillis = clock,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 500,
+                inningsLimit = 30,
+            )
         // Alternate empty visits; p2 is always one ahead until the final catch-up.
         repeat(29) {
             assertEquals(match.player2.id, match.currentShooterId)

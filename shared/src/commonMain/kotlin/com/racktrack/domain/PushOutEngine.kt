@@ -9,13 +9,20 @@ import com.racktrack.domain.model.PushOutPhase
 
 /** 9/10-ball push-out decision tree (FFB) for the race scoreboard. */
 object PushOutEngine {
-    fun canAnnounce(match: Match, playerId: PlayerId): Boolean =
+    fun canAnnounce(
+        match: Match,
+        playerId: PlayerId,
+    ): Boolean =
         match.status != MatchStatus.COMPLETED &&
             match.gameMode.supportsPushOut &&
             match.pushOutPhase == PushOutPhase.AVAILABLE &&
             playerId == match.currentShooterId
 
-    fun announce(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+    fun announce(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
         if (!canAnnounce(match, playerId)) return match
         return match.copy(
             pushOutPhase = PushOutPhase.ANNOUNCED,
@@ -23,7 +30,11 @@ object PushOutEngine {
         )
     }
 
-    fun resolveClean(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+    fun resolveClean(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
         if (match.status == MatchStatus.COMPLETED) return match
         if (match.pushOutPhase != PushOutPhase.ANNOUNCED) return match
         if (playerId != match.currentShooterId) return match
@@ -37,7 +48,11 @@ object PushOutEngine {
      * Foul on the push-out shot — opponent gets the table (BIH anywhere).
      * Counts toward consecutive fouls / three-foul rack loss.
      */
-    fun resolveFoul(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+    fun resolveFoul(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
         if (match.status == MatchStatus.COMPLETED) return match
         if (match.pushOutPhase != PushOutPhase.ANNOUNCED) return match
         if (playerId != match.currentShooterId) return match
@@ -68,7 +83,10 @@ object PushOutEngine {
         )
     }
 
-    fun take(match: Match, nowMillis: Long): Match {
+    fun take(
+        match: Match,
+        nowMillis: Long,
+    ): Match {
         if (match.status == MatchStatus.COMPLETED) return match
         if (match.pushOutPhase != PushOutPhase.AWAITING_CHOICE) return match
         val announcer = announcerId(match) ?: return match
@@ -80,7 +98,10 @@ object PushOutEngine {
         )
     }
 
-    fun giveBack(match: Match, nowMillis: Long): Match {
+    fun giveBack(
+        match: Match,
+        nowMillis: Long,
+    ): Match {
         if (match.status == MatchStatus.COMPLETED) return match
         if (match.pushOutPhase != PushOutPhase.AWAITING_CHOICE) return match
         val announcer = announcerId(match) ?: return match
@@ -92,10 +113,15 @@ object PushOutEngine {
         )
     }
 
-    fun phaseAfterRack(supportsPushOut: Boolean, completed: Boolean): PushOutPhase =
-        if (!completed && supportsPushOut) PushOutPhase.AVAILABLE else PushOutPhase.NONE
+    fun phaseAfterRack(
+        supportsPushOut: Boolean,
+        completed: Boolean,
+    ): PushOutPhase = if (!completed && supportsPushOut) PushOutPhase.AVAILABLE else PushOutPhase.NONE
 
-    fun phaseFromHistory(match: Match, history: List<MatchEvent>): PushOutPhase {
+    fun phaseFromHistory(
+        match: Match,
+        history: List<MatchEvent>,
+    ): PushOutPhase {
         if (!match.gameMode.supportsPushOut) return PushOutPhase.NONE
         var phase = PushOutPhase.AVAILABLE
         for (event in history) {
@@ -120,21 +146,28 @@ object PushOutEngine {
         return phase
     }
 
-    fun undo(match: Match, last: MatchEvent, withoutLast: List<MatchEvent>): Match? =
+    fun undo(
+        match: Match,
+        last: MatchEvent,
+        withoutLast: List<MatchEvent>,
+    ): Match? =
         when (last.type) {
-            MatchEventType.PUSH_OUT -> match.copy(
-                pushOutPhase = PushOutPhase.AVAILABLE,
-                history = withoutLast,
-            )
-            MatchEventType.PUSH_OUT_CLEAN -> match.copy(
-                pushOutPhase = PushOutPhase.ANNOUNCED,
-                history = withoutLast,
-            )
+            MatchEventType.PUSH_OUT ->
+                match.copy(
+                    pushOutPhase = PushOutPhase.AVAILABLE,
+                    history = withoutLast,
+                )
+            MatchEventType.PUSH_OUT_CLEAN ->
+                match.copy(
+                    pushOutPhase = PushOutPhase.ANNOUNCED,
+                    history = withoutLast,
+                )
             MatchEventType.PUSH_OUT_FOUL -> {
-                val revertedFouls = when (last.playerId) {
-                    match.player1.id -> match.copy(foul1 = (match.foul1 - 1).coerceAtLeast(0))
-                    else -> match.copy(foul2 = (match.foul2 - 1).coerceAtLeast(0))
-                }
+                val revertedFouls =
+                    when (last.playerId) {
+                        match.player1.id -> match.copy(foul1 = (match.foul1 - 1).coerceAtLeast(0))
+                        else -> match.copy(foul2 = (match.foul2 - 1).coerceAtLeast(0))
+                    }
                 revertedFouls.copy(
                     pushOutPhase = PushOutPhase.ANNOUNCED,
                     currentShooterId = last.playerId,

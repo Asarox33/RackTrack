@@ -565,7 +565,6 @@ private fun PlayerPanel(
             Spacer(modifier = Modifier.height(metrics.nameToScoreGap))
 
             RaceScoreCluster(
-                match = match,
                 score = score,
                 fouls = fouls,
                 runOuts = runOuts,
@@ -608,7 +607,6 @@ private fun PlayerPanel(
 
 @Composable
 private fun RaceScoreCluster(
-    match: Match,
     score: Int,
     fouls: Int,
     runOuts: Int,

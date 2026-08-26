@@ -15,10 +15,11 @@ class PauseSpanTest {
 
     @Test
     fun `pausedMillisBetween sums spans`() {
-        val spans = listOf(
-            PauseSpan(100L, 150L),
-            PauseSpan(180L, 220L),
-        )
+        val spans =
+            listOf(
+                PauseSpan(100L, 150L),
+                PauseSpan(180L, 220L),
+            )
         assertEquals(90L, spans.pausedMillisBetween(0L, 300L))
         assertEquals(40L, spans.pausedMillisBetween(180L, 300L))
     }

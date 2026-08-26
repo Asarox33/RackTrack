@@ -39,7 +39,7 @@ jobs:
         id: jacoco
         uses: madrapps/jacoco-report@v1.8.0
         with:
-          paths: ${{ github.workspace }}/app/build/reports/jacoco/domainCoverage/domainCoverage.xml
+          paths: ${{ github.workspace }}/shared/build/reports/jacoco/domainCoverage/domainCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Domain coverage
           update-comment: true
@@ -48,14 +48,14 @@ jobs:
           min-coverage-changed-files: 0
 
       - name: Coverage summary
-        if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
+        if: always() && hashFiles('shared/build/reports/jacoco/domainCoverage/domainCoverage.xml') != ''
         run: |
           python3 <<'PY'
           import os
           import xml.etree.ElementTree as ET
           from pathlib import Path
 
-          xml_path = Path("app/build/reports/jacoco/domainCoverage/domainCoverage.xml")
+          xml_path = Path("shared/build/reports/jacoco/domainCoverage/domainCoverage.xml")
           root = ET.parse(xml_path).getroot()
           counters = {c.get("type"): c for c in root.findall("counter")}
           line = counters.get("LINE")
@@ -71,7 +71,7 @@ jobs:
               f"- **Line coverage:** {pct:.1f}% ({covered}/{total})\n"
               f"- HTML report uploaded as CI artifact `domain-coverage`\n"
               f"- Local: `./gradlew :app:domainCoverage` → "
-              "`app/build/reports/jacoco/domainCoverage/html/index.html`\n"
+              "`shared/build/reports/jacoco/domainCoverage/html/index.html`\n"
           )
           print(body)
           if summary:
@@ -80,9 +80,9 @@ jobs:
           PY
 
       - name: Upload coverage HTML
-        if: always() && hashFiles('app/build/reports/jacoco/domainCoverage/html/**') != ''
+        if: always() && hashFiles('shared/build/reports/jacoco/domainCoverage/html/**') != ''
         uses: actions/upload-artifact@v7
         with:
           name: domain-coverage
-          path: app/build/reports/jacoco/domainCoverage/html
+          path: shared/build/reports/jacoco/domainCoverage/html
           if-no-files-found: ignore

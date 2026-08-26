@@ -2,7 +2,8 @@
 
 Overall status: ✅ **1.2.2** on GitHub · 🟨 **1.2.x** Play gate (Internal CI live · Closed
 live · **12×14 clock from 2026-08-20** · Console §E ✅ · prod blocked on clock) ·
-🟨 **2.0** on **`rc/2.0.0`** (opened; merge after prod) · ⬜ **Maybe 3.x+** (camera/AI parked)
+🟨 **2.0.0** on **`rc/2.0.0`** (`versionName` **2.0.0** / `versionCode` **200000**; merge
+after 1.2 prod) · ⬜ **Maybe 3.x+** (camera/AI parked)
 
 **Locked trains (read first):** [`docs/00-release-trains.md`](00-release-trains.md)
 
@@ -143,8 +144,8 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 2. ✅ **Brand assets (in-app + Play masters, 2026-08-26)** — stylized **R** + RackTrack
    wordmark (Blue glossy); Play icon 512 / feature graphic / IAP no-ads in `assets/`;
    adaptive launcher + splash wired. **Play screenshots deferred** to 2.0 store publish.
-3. ⬜ **KMP + Compose Multiplatform scaffold** — shared domain (+ UI where practical);
-   unlock shared string catalogs for Android (+ iOS later).
+3. ✅ **KMP shared scaffold (2026-08-26)** — `:shared` (android + jvm) holds domain +
+   string-key skeleton; Compose UI stays on `:app`. iOS target deferred.
 4. ⬜ **i18n** — en default + fr/de/es/it/nl/pt (extract UI / summary / PDF with CMP).
 5. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
    scoreboard-relevant deltas only.
@@ -154,10 +155,13 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 
 ### Detail (same items)
 
+- 🟨 **KMP + Compose Multiplatform** — ✅ **scaffold (2026-08-26):** `:shared` holds
+  domain + `i18n` string-key skeleton (android + jvm). Remaining: CMP UI where practical;
+  **iOS target** later (Mac). Next train = extract UI strings into shared catalogs.
 - ⬜ **i18n (localization)** — English default; also **fr, de, es, it, nl, pt**:
   - Extract all user-facing UI copy (today mostly hardcoded English in Compose) +
-    summary / PDF strings
-  - Fallback: **English** (`values/` or CMP resources); system locale; optional Settings
+    summary / PDF strings into `:shared` `StringKey` / catalogs
+  - Fallback: **English** (`EnStrings` today); system locale; optional Settings
     override later if needed
   - Short board jargon (**PASS / FOUL / RUN OUT**) may stay English where natural;
     Settings / About / modals fully translated
@@ -165,7 +169,6 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
 - ⬜ **Multi-ruleset** — FFB today; later selectable packs (WPA / Matchroom / APA / BCA & CSI)
   for scoreboard-relevant deltas only (not shot-by-shot referee). Pair with i18n but keep
   concepts separate.
-- ⬜ **KMP + Compose Multiplatform** — share domain (+ UI where practical); iOS target
 - ✅ **Brand / visual identity + Design System** — **2.x** (not a 1.2 Play gate):
   - **Locked v1 (2026-08-25, owner freeze):** first DS pass frozen for iteration baseline.
     **one visual world** + **B/C/D DNA** (keep B filigree+détourage, C warm light,
@@ -212,6 +215,11 @@ Only reopen with an explicit owner decision. Not a near-term train.
 - ~~Publish ad-free to Play production, then add ads in a later update~~ — trust / messaging risk
 ## Progress notes
 
+- 2026-08-26: **`rc/2.0.0` version bump** — `versionName` **2.0.0** / `versionCode`
+  **200000** + CHANGELOG + Play notes (still merge-after-1.2-prod).
+- 2026-08-26: **KMP scaffold** — `:shared` (android+jvm) with domain + `StringKey` /
+  `EnStrings`; Setup uses shared strings; JaCoCo via `:shared:domainCoverage`
+  (`:app:domainCoverage` delegates). iOS / CMP UI deferred.
 - 2026-08-26: Brand masters in `assets/` (Play icon 512, feature graphic, IAP no-ads);
   launcher mipmaps + adaptive FG + SplashScreen (Blue glossy `#101A28`); PDF wordmark
   Rack/Track split. Play screenshots deferred to 2.0 listing publish.

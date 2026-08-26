@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package com.racktrack.presentation.component
 
 import androidx.compose.foundation.Canvas

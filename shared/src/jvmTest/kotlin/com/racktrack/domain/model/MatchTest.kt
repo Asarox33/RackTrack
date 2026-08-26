@@ -9,15 +9,16 @@ import org.junit.jupiter.api.Test
 class MatchTest {
     @Test
     fun `start race with winner break stores opening breaker and rule`() {
-        val match = Match.start(
-            player1Name = "  ",
-            player2Name = "",
-            racksToWin = 5,
-            initialBreakerIsPlayer1 = false,
-            startedAtMillis = 10L,
-            gameMode = GameMode.NINE_BALL,
-            breakRule = BreakRule.WINNER,
-        )
+        val match =
+            Match.start(
+                player1Name = "  ",
+                player2Name = "",
+                racksToWin = 5,
+                initialBreakerIsPlayer1 = false,
+                startedAtMillis = 10L,
+                gameMode = GameMode.NINE_BALL,
+                breakRule = BreakRule.WINNER,
+            )
 
         assertEquals("Player 1", match.player1.name)
         assertEquals("Player 2", match.player2.name)
@@ -30,17 +31,18 @@ class MatchTest {
 
     @Test
     fun `start fourteen-one forces alternate break and awaiting opening break`() {
-        val match = Match.start(
-            player1Name = "Alex",
-            player2Name = "Sam",
-            racksToWin = 9,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 20L,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 100,
-            inningsLimit = 30,
-            breakRule = BreakRule.WINNER,
-        )
+        val match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 9,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 20L,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 100,
+                inningsLimit = 30,
+                breakRule = BreakRule.WINNER,
+            )
 
         assertEquals(BreakRule.ALTERNATE, match.breakRule)
         assertEquals(1, match.racksToWin)
@@ -53,25 +55,27 @@ class MatchTest {
 
     @Test
     fun `winner is null while in progress`() {
-        val match = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 3,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val match =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 3,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         assertNull(match.winner)
     }
 
     @Test
     fun `race winner follows racks when completed`() {
-        val base = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 2,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val base =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 2,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         assertEquals(base.player1, base.copy(score1 = 2, status = MatchStatus.COMPLETED).winner)
         assertEquals(base.player2, base.copy(score2 = 2, status = MatchStatus.COMPLETED).winner)
         assertNull(base.copy(score1 = 1, score2 = 1, status = MatchStatus.COMPLETED).winner)
@@ -79,15 +83,16 @@ class MatchTest {
 
     @Test
     fun `fourteen-one winner follows points when completed`() {
-        val base = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 1,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 50,
-        )
+        val base =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 1,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 50,
+            )
         assertEquals(base.player1, base.copy(score1 = 50, score2 = 10, status = MatchStatus.COMPLETED).winner)
         assertEquals(base.player2, base.copy(score1 = 10, score2 = 50, status = MatchStatus.COMPLETED).winner)
         assertNull(base.copy(score1 = 40, score2 = 40, status = MatchStatus.COMPLETED).winner)
@@ -95,13 +100,14 @@ class MatchTest {
 
     @Test
     fun `foulsFor and otherPlayerId reject unknown players`() {
-        val match = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 3,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val match =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 3,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         val unknown = PlayerId("x")
 
         assertEquals(0, match.foulsFor(match.player1.id))
@@ -114,13 +120,14 @@ class MatchTest {
 
     @Test
     fun `init rejects invalid opening breaker`() {
-        val match = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 3,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val match =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 3,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         assertThrows(IllegalArgumentException::class.java) {
             match.copy(openingBreakerId = PlayerId("nope"))
         }
@@ -128,16 +135,17 @@ class MatchTest {
 
     @Test
     fun `init rejects invalid fourteen-one constraints`() {
-        val base = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 1,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 50,
-            inningsLimit = 10,
-        )
+        val base =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 1,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 50,
+                inningsLimit = 10,
+            )
         assertThrows(IllegalArgumentException::class.java) { base.copy(pointsToWin = 0) }
         assertThrows(IllegalArgumentException::class.java) { base.copy(inningsLimitBase = 0) }
         assertThrows(IllegalArgumentException::class.java) { base.copy(inningsLimit = 0) }
@@ -147,25 +155,27 @@ class MatchTest {
 
     @Test
     fun `init rejects non-positive race length`() {
-        val match = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 3,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val match =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 3,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         assertThrows(IllegalArgumentException::class.java) { match.copy(racksToWin = 0) }
     }
 
     @Test
     fun `init rejects breaker or shooter outside the match`() {
-        val match = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 3,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val match =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 3,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         assertThrows(IllegalArgumentException::class.java) {
             match.copy(currentBreakerId = PlayerId("nope"))
         }
@@ -176,13 +186,14 @@ class MatchTest {
 
     @Test
     fun `init rejects duplicate players`() {
-        val match = Match.start(
-            player1Name = "A",
-            player2Name = "B",
-            racksToWin = 3,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-        )
+        val match =
+            Match.start(
+                player1Name = "A",
+                player2Name = "B",
+                racksToWin = 3,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+            )
         assertThrows(IllegalArgumentException::class.java) {
             match.copy(player2 = match.player1)
         }
@@ -190,17 +201,18 @@ class MatchTest {
 
     @Test
     fun `solo start uses placeholder player2 and forces player1 starter`() {
-        val match = Match.start(
-            player1Name = "Alex",
-            player2Name = "Sam",
-            racksToWin = 1,
-            initialBreakerIsPlayer1 = false,
-            startedAtMillis = 1L,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 100,
-            inningsLimit = 20,
-            solo = true,
-        )
+        val match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 1,
+                initialBreakerIsPlayer1 = false,
+                startedAtMillis = 1L,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 100,
+                inningsLimit = 20,
+                solo = true,
+            )
         assertTrue(match.solo)
         assertEquals("Alex", match.player1.name)
         assertEquals(Match.SOLO_PLAYER2_NAME, match.player2.name)
@@ -210,16 +222,17 @@ class MatchTest {
 
     @Test
     fun `solo completed match winner is always player1`() {
-        val base = Match.start(
-            player1Name = "Alex",
-            player2Name = "Sam",
-            racksToWin = 1,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = 1L,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 50,
-            solo = true,
-        )
+        val base =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 1,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = 1L,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 50,
+                solo = true,
+            )
         assertEquals(
             base.player1,
             base.copy(score1 = 12, score2 = 0, status = MatchStatus.COMPLETED).winner,

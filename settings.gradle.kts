@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "RackTrack"
 include(":app")
+include(":shared")

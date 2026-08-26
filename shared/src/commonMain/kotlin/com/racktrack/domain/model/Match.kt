@@ -102,30 +102,34 @@ data class Match(
     }
 
     val winner: Player?
-        get() = when {
-            status != MatchStatus.COMPLETED -> null
-            gameMode.isPointScoring -> when {
-                solo -> player1
-                score1 > score2 -> player1
-                score2 > score1 -> player2
+        get() =
+            when {
+                status != MatchStatus.COMPLETED -> null
+                gameMode.isPointScoring ->
+                    when {
+                        solo -> player1
+                        score1 > score2 -> player1
+                        score2 > score1 -> player2
+                        else -> null
+                    }
+                score1 >= racksToWin -> player1
+                score2 >= racksToWin -> player2
                 else -> null
             }
-            score1 >= racksToWin -> player1
-            score2 >= racksToWin -> player2
-            else -> null
+
+    fun foulsFor(playerId: PlayerId): Int =
+        when (playerId) {
+            player1.id -> foul1
+            player2.id -> foul2
+            else -> error("Unknown player: $playerId")
         }
 
-    fun foulsFor(playerId: PlayerId): Int = when (playerId) {
-        player1.id -> foul1
-        player2.id -> foul2
-        else -> error("Unknown player: $playerId")
-    }
-
-    fun otherPlayerId(playerId: PlayerId): PlayerId = when (playerId) {
-        player1.id -> player2.id
-        player2.id -> player1.id
-        else -> error("Unknown player: $playerId")
-    }
+    fun otherPlayerId(playerId: PlayerId): PlayerId =
+        when (playerId) {
+            player1.id -> player2.id
+            player2.id -> player1.id
+            else -> error("Unknown player: $playerId")
+        }
 
     companion object {
         /** Placeholder [player2] name for 14/1 solo training matches. */
@@ -147,11 +151,12 @@ data class Match(
             val p1 = Player(PlayerId("p1"), player1Name.trim().ifEmpty { "Player 1" })
             val p2Name = if (solo) SOLO_PLAYER2_NAME else player2Name
             val p2 = Player(PlayerId("p2"), p2Name.trim().ifEmpty { "Player 2" })
-            val starter = when {
-                solo -> p1.id
-                initialBreakerIsPlayer1 -> p1.id
-                else -> p2.id
-            }
+            val starter =
+                when {
+                    solo -> p1.id
+                    initialBreakerIsPlayer1 -> p1.id
+                    else -> p2.id
+                }
             return Match(
                 player1 = p1,
                 player2 = p2,
@@ -166,11 +171,12 @@ data class Match(
                 currentBreakerId = starter,
                 currentShooterId = starter,
                 awaitingOpeningBreak = gameMode.isPointScoring,
-                pushOutPhase = if (gameMode.supportsPushOut) {
-                    PushOutPhase.AVAILABLE
-                } else {
-                    PushOutPhase.NONE
-                },
+                pushOutPhase =
+                    if (gameMode.supportsPushOut) {
+                        PushOutPhase.AVAILABLE
+                    } else {
+                        PushOutPhase.NONE
+                    },
                 startedAtMillis = startedAtMillis,
                 solo = solo,
             )

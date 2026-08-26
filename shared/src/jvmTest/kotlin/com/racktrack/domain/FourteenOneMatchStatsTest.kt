@@ -111,17 +111,18 @@ class FourteenOneMatchStatsTest {
 
     @Test
     fun `solo summarize zeros side-2 and copies solo flag`() {
-        var match = Match.start(
-            player1Name = "Alex",
-            player2Name = "Sam",
-            racksToWin = 1,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = clock,
-            gameMode = GameMode.FOURTEEN_ONE,
-            pointsToWin = 20,
-            inningsLimit = 30,
-            solo = true,
-        )
+        var match =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 1,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = clock,
+                gameMode = GameMode.FOURTEEN_ONE,
+                pointsToWin = 20,
+                inningsLimit = 30,
+                solo = true,
+            )
         match = FourteenOneEngine.addPoints(match, match.player1.id, 14, now())
         match = FourteenOneEngine.pass(match, match.player1.id, now())
         match = FourteenOneEngine.addPoints(match, match.player1.id, 6, now())

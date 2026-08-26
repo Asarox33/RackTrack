@@ -13,7 +13,10 @@ data class PauseSpan(
     }
 
     /** Overlap of this span with [[from], [to]] in millis. */
-    fun overlap(from: Long, to: Long): Long {
+    fun overlap(
+        from: Long,
+        to: Long,
+    ): Long {
         if (to <= from) return 0L
         val start = maxOf(from, startMillis)
         val end = minOf(to, endMillis)
@@ -21,5 +24,7 @@ data class PauseSpan(
     }
 }
 
-fun List<PauseSpan>.pausedMillisBetween(from: Long, to: Long): Long =
-    sumOf { it.overlap(from, to) }
+fun List<PauseSpan>.pausedMillisBetween(
+    from: Long,
+    to: Long,
+): Long = sumOf { it.overlap(from, to) }

@@ -1,10 +1,6 @@
 <fr-FR>
-RackTrack 1.2.2
-
-Tableau des reprises 14/1 plus lisible : scores cumulés au centre (récap + PDF), y compris en solo.
+RackTrack 2.0.0 — train 2.0 (rc). Design System (Blue glossy / Warm light / Dark teal), nouvelle identité visuelle, module partagé KMP (domain + i18n à venir). Pas encore pour le Play production 1.2.
 </fr-FR>
 <en-US>
-RackTrack 1.2.2
-
-Clearer 14/1 innings table: cumulative totals centered (summary + PDF), including solo training.
+RackTrack 2.0.0 — 2.0 train (rc). Design System (Blue glossy / Warm light / Dark teal), new brand assets, KMP shared module (domain + upcoming i18n). Not the 1.2 Play production gate yet.
 </en-US>

@@ -118,11 +118,12 @@ class MatchEngineTest {
     @Test
     fun `given two consecutive fouls, when a third foul is recorded, then opponent wins the rack`() {
         val match = freshMatch()
-        val twice = MatchEngine.recordFoul(
-            MatchEngine.recordFoul(match, match.player1.id, now()),
-            match.player1.id,
-            now(),
-        )
+        val twice =
+            MatchEngine.recordFoul(
+                MatchEngine.recordFoul(match, match.player1.id, now()),
+                match.player1.id,
+                now(),
+            )
 
         val next = MatchEngine.recordFoul(twice, match.player1.id, now())
 
@@ -138,15 +139,16 @@ class MatchEngineTest {
     @Test
     fun `given fouls by both players, consecutive counters stay independent`() {
         val match = freshMatch()
-        val after = MatchEngine.recordFoul(
+        val after =
             MatchEngine.recordFoul(
-                MatchEngine.recordFoul(match, match.player1.id, now()),
-                match.player2.id,
+                MatchEngine.recordFoul(
+                    MatchEngine.recordFoul(match, match.player1.id, now()),
+                    match.player2.id,
+                    now(),
+                ),
+                match.player1.id,
                 now(),
-            ),
-            match.player1.id,
-            now(),
-        )
+            )
 
         assertEquals(2, after.foul1)
         assertEquals(1, after.foul2)
@@ -157,11 +159,12 @@ class MatchEngineTest {
     @Test
     fun `given consecutive fouls, when a rack is awarded, then foul counters reset`() {
         val start = freshMatch()
-        val fouled = MatchEngine.recordFoul(
-            MatchEngine.recordFoul(start, start.player1.id, now()),
-            start.player1.id,
-            now(),
-        )
+        val fouled =
+            MatchEngine.recordFoul(
+                MatchEngine.recordFoul(start, start.player1.id, now()),
+                start.player1.id,
+                now(),
+            )
 
         val next = MatchEngine.recordPlusOne(fouled, start.player1.id, now())
 
@@ -226,13 +229,14 @@ class MatchEngineTest {
 
     @Test
     fun `given completed race, summarize exposes fouls run-outs and rack durations`() {
-        val start = Match.start(
-            player1Name = "Alex",
-            player2Name = "Sam",
-            racksToWin = 2,
-            initialBreakerIsPlayer1 = true,
-            startedAtMillis = clock,
-        )
+        val start =
+            Match.start(
+                player1Name = "Alex",
+                player2Name = "Sam",
+                racksToWin = 2,
+                initialBreakerIsPlayer1 = true,
+                startedAtMillis = clock,
+            )
         var match = MatchEngine.recordRunOut(start, start.player1.id, now())
         match = MatchEngine.recordFoul(match, start.player2.id, now())
         match = MatchEngine.recordPlusOne(match, start.player2.id, now())
@@ -454,7 +458,10 @@ class MatchEngineTest {
 
     @Test
     fun `given player2 has the break, when run out golden dry and early 8, then player2 counters update`() {
-        fun start(mode: GameMode, player1Breaks: Boolean): Match =
+        fun start(
+            mode: GameMode,
+            player1Breaks: Boolean,
+        ): Match =
             Match.start(
                 player1Name = "Alex",
                 player2Name = "Sam",
@@ -521,11 +528,12 @@ class MatchEngineTest {
     @Test
     fun `given two fouls on 10-ball, when clearConsecutiveFouls, then counter resets and undo restores`() {
         val match = freshMatch(GameMode.TEN_BALL)
-        val fouled = MatchEngine.recordFoul(
-            MatchEngine.recordFoul(match, match.player1.id, now()),
-            match.player1.id,
-            now(),
-        )
+        val fouled =
+            MatchEngine.recordFoul(
+                MatchEngine.recordFoul(match, match.player1.id, now()),
+                match.player1.id,
+                now(),
+            )
         assertEquals(2, fouled.foul1)
 
         val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
@@ -578,11 +586,12 @@ class MatchEngineTest {
     @Test
     fun `given foul then clear, match total fouls still counts the foul events`() {
         val match = freshMatch(GameMode.NINE_BALL)
-        val fouled = MatchEngine.recordFoul(
-            MatchEngine.recordFoul(match, match.player1.id, now()),
-            match.player1.id,
-            now(),
-        )
+        val fouled =
+            MatchEngine.recordFoul(
+                MatchEngine.recordFoul(match, match.player1.id, now()),
+                match.player1.id,
+                now(),
+            )
         val cleared = MatchEngine.clearConsecutiveFouls(fouled, match.player1.id, now())
         val stats = MatchStats.summarize(cleared)
         assertEquals(2, stats.totalFouls1)

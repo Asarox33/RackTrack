@@ -33,19 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
+import com.racktrack.i18n.StringKey
+import com.racktrack.i18n.Strings
 import com.racktrack.presentation.MatchFormatOptions
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
 import com.racktrack.presentation.theme.AppChromeBackground
-import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.AppChromeTheme
+import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.theme.RackTrackTheme
-import com.racktrack.presentation.theme.AppChromeBackground
-import com.racktrack.presentation.theme.LocalAppChrome
-import com.racktrack.presentation.theme.AppChromeBackground
-import com.racktrack.presentation.theme.LocalAppChrome
 import com.racktrack.presentation.viewmodel.SetupUiState
 
 @Composable
@@ -143,9 +141,9 @@ private fun LandscapeSetup(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("RackTrack", style = MaterialTheme.typography.headlineLarge)
+            Text(Strings.get(StringKey.APP_NAME), style = MaterialTheme.typography.headlineLarge)
             Text(
-                text = "American pool",
+                text = Strings.get(StringKey.SETUP_TAGLINE),
                 style = MaterialTheme.typography.bodyLarge,
                 color = chrome.textSecondary,
             )
@@ -252,9 +250,9 @@ private fun PortraitSetup(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("RackTrack", style = MaterialTheme.typography.headlineLarge)
+            Text(Strings.get(StringKey.APP_NAME), style = MaterialTheme.typography.headlineLarge)
             Text(
-                text = "American pool",
+                text = Strings.get(StringKey.SETUP_TAGLINE),
                 style = MaterialTheme.typography.bodyLarge,
                 color = chrome.textSecondary,
             )

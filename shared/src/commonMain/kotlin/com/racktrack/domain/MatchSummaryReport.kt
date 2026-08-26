@@ -2,6 +2,10 @@ package com.racktrack.domain
 
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.MatchEventType
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 data class PairedInningRow(
     val index: Int,
@@ -28,15 +32,12 @@ object MatchSummaryReport {
         }
 
     /** End-of-session modal / PDF hero title. */
-    fun sessionOverTitle(summary: MatchSummary): String =
-        if (summary.solo) "TRAINING OVER" else "MATCH OVER"
+    fun sessionOverTitle(summary: MatchSummary): String = if (summary.solo) "TRAINING OVER" else "MATCH OVER"
 
     /** Default PDF / text report title. */
-    fun sessionSummaryTitle(summary: MatchSummary): String =
-        if (summary.solo) "TRAINING SUMMARY" else "MATCH SUMMARY"
+    fun sessionSummaryTitle(summary: MatchSummary): String = if (summary.solo) "TRAINING SUMMARY" else "MATCH SUMMARY"
 
-    fun shareChooserLabel(summary: MatchSummary): String =
-        if (summary.solo) "Share training" else "Share match"
+    fun shareChooserLabel(summary: MatchSummary): String = if (summary.solo) "Share training" else "Share match"
 
     fun opponentsLabel(summary: MatchSummary): String =
         if (summary.solo) {
@@ -48,14 +49,16 @@ object MatchSummaryReport {
     fun subtitle(summary: MatchSummary): String =
         if (summary.gameMode.isPointScoring) {
             if (summary.solo) {
-                val innings = summary.inningsLimit?.let {
-                    "${summary.innings1} inn · lim $it"
-                } ?: "${summary.innings1} inn"
+                val innings =
+                    summary.inningsLimit?.let {
+                        "${summary.innings1} inn · lim $it"
+                    } ?: "${summary.innings1} inn"
                 "14/1 solo  ·  ${summary.score1}  ·  ${summary.pointsToWin} pts  ·  $innings"
             } else {
-                val innings = summary.inningsLimit?.let {
-                    "${summary.innings1}/${summary.innings2} inn · lim $it"
-                } ?: "${summary.innings1}/${summary.innings2} inn"
+                val innings =
+                    summary.inningsLimit?.let {
+                        "${summary.innings1}/${summary.innings2} inn · lim $it"
+                    } ?: "${summary.innings1}/${summary.innings2} inn"
                 "14/1  ·  ${summary.score1} – ${summary.score2}  ·  ${summary.pointsToWin} pts  ·  $innings"
             }
         } else {
@@ -69,9 +72,9 @@ object MatchSummaryReport {
         val minutes = (totalSeconds % 3600L) / 60L
         val seconds = totalSeconds % 60L
         return if (hours > 0L) {
-            "%d:%02d:%02d".format(hours, minutes, seconds)
+            "$hours:${pad2(minutes)}:${pad2(seconds)}"
         } else {
-            "%d:%02d".format(minutes, seconds)
+            "$minutes:${pad2(seconds)}"
         }
     }
 
@@ -106,10 +109,11 @@ object MatchSummaryReport {
     ): List<PairedInningRow> {
         val byIndex1 = innings1.associateBy { it.index }
         val byIndex2 = innings2.associateBy { it.index }
-        val maxIndex = maxOf(
-            byIndex1.keys.maxOrNull() ?: 0,
-            byIndex2.keys.maxOrNull() ?: 0,
-        )
+        val maxIndex =
+            maxOf(
+                byIndex1.keys.maxOrNull() ?: 0,
+                byIndex2.keys.maxOrNull() ?: 0,
+            )
         if (maxIndex <= 0) return emptyList()
         var run1 = 0
         var run2 = 0
@@ -145,7 +149,10 @@ object MatchSummaryReport {
         }
     }
 
-    fun playerStatLines(summary: MatchSummary, side: Int): List<String> {
+    fun playerStatLines(
+        summary: MatchSummary,
+        side: Int,
+    ): List<String> {
         val fouls = if (side == 1) summary.totalFouls1 else summary.totalFouls2
         val runOuts = if (side == 1) summary.runOuts1 else summary.runOuts2
         val golden = if (side == 1) summary.goldenBreaks1 else summary.goldenBreaks2
@@ -158,7 +165,7 @@ object MatchSummaryReport {
         return if (summary.gameMode.isPointScoring) {
             listOf(
                 "HR $highRun",
-                "avg ${"%.2f".format(average)}",
+                "avg ${formatAverage(average)}",
                 "Inn $innings",
                 "Fouls $fouls",
             )
@@ -175,12 +182,13 @@ object MatchSummaryReport {
     }
 
     fun fileStem(summary: MatchSummary): String {
-        val mode = when (summary.gameMode) {
-            GameMode.EIGHT_BALL -> "8ball"
-            GameMode.NINE_BALL -> "9ball"
-            GameMode.TEN_BALL -> "10ball"
-            GameMode.FOURTEEN_ONE -> "14-1"
-        }
+        val mode =
+            when (summary.gameMode) {
+                GameMode.EIGHT_BALL -> "8ball"
+                GameMode.NINE_BALL -> "9ball"
+                GameMode.TEN_BALL -> "10ball"
+                GameMode.FOURTEEN_ONE -> "14-1"
+            }
         val p1 = sanitize(summary.player1Name)
         val startStamp = fileStartStamp(summary.startedAtMillis)
         return if (summary.solo) {
@@ -193,15 +201,38 @@ object MatchSummaryReport {
 
     /** `yyyyMMdd_HHmm` from match start, for filenames. */
     fun fileStartStamp(startedAtMillis: Long): String {
-        val cal = java.util.Calendar.getInstance().apply { timeInMillis = startedAtMillis }
-        return "%04d%02d%02d_%02d%02d".format(
-            cal.get(java.util.Calendar.YEAR),
-            cal.get(java.util.Calendar.MONTH) + 1,
-            cal.get(java.util.Calendar.DAY_OF_MONTH),
-            cal.get(java.util.Calendar.HOUR_OF_DAY),
-            cal.get(java.util.Calendar.MINUTE),
-        )
+        val local =
+            Instant
+                .fromEpochMilliseconds(startedAtMillis)
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+        return buildString {
+            append(pad4(local.year))
+            append(pad2(local.month.number))
+            append(pad2(local.day))
+            append('_')
+            append(pad2(local.hour))
+            append(pad2(local.minute))
+        }
     }
+
+    private fun pad2(value: Int): String = value.toString().padStart(PAD2, '0')
+
+    private fun pad2(value: Long): String = value.toString().padStart(PAD2, '0')
+
+    private fun pad4(value: Int): String = value.toString().padStart(PAD4, '0')
+
+    /** Two decimal places without JVM String.format. */
+    private fun formatAverage(value: Double): String {
+        val scaled = kotlin.math.round(value * AVERAGE_SCALE).toLong()
+        val whole = scaled / AVERAGE_SCALE_LONG
+        val frac = kotlin.math.abs(scaled % AVERAGE_SCALE_LONG)
+        return "$whole.${pad2(frac)}"
+    }
+
+    private const val PAD2 = 2
+    private const val PAD4 = 4
+    private const val AVERAGE_SCALE = 100.0
+    private const val AVERAGE_SCALE_LONG = 100L
 
     /** Compact text form kept for unit tests / debugging. */
     fun lines(

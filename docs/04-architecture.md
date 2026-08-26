@@ -3,30 +3,24 @@
 ## 1. Stack
 
 - **Language**: Kotlin (null-safety and idioms — see `docs/05-conventions.md`)
-- **UI**: Jetpack Compose, Material 3
+- **Modules**: `:app` (Android UI / data / monetization) + `:shared` (KMP `commonMain`
+  domain + i18n string-key skeleton; targets **android** + **jvm**)
+- **UI**: Jetpack Compose, Material 3 (Android `:app` only for now — no CMP UI yet)
 - **Local settings**: SharedPreferences (`data/AppPreferences`)
 - **Match history**: JSON file under app files (`data/JsonMatchHistoryStore`) — no Room/KSP
 - **Share**: styled PDF via `PdfDocument` + `FileProvider` (`presentation/share/`)
 - **DI**: none (thin `AndroidViewModel` + constructor stores) — no Hilt unless explicitly requested
 - **Concurrency**: Kotlin Coroutines + Flow
-- **Build**: Gradle Version Catalogs (`libs.versions.toml`)
-- **Tests**: JUnit 5 on `domain/` + pure `data/` helpers (JVM)
+- **Build**: Gradle Version Catalogs (`libs.versions.toml`); AGP 9
+  `com.android.kotlin.multiplatform.library` on `:shared`
+- **Tests**: JUnit 5 on `:shared` JVM (`jvmTest`) + pure `data/` helpers in `:app`
 - **Static analysis**: ktlint + detekt (CI)
 - **No backend.**
 
 ## 2. Package layout
 
 ```
-app/src/main/kotlin/com/racktrack/
-├── MainActivity.kt
-├── appearance/            # FeltTone / FeltPalette / LocalFeltPalette (shared UI + prefs)
-├── presentation/
-│   ├── screen/            # Setup, boards, Summary, History, SettingsScreen, FeltBackground
-│   ├── share/             # MatchSummaryPdfWriter + MatchSummaryShare
-│   ├── component/         # BoardMetrics, SwipeIntPicker, icons, textured controls, haptics
-│   ├── theme/             # Typography, action colors, RackTrackTheme
-│   ├── viewmodel/         # MatchViewModel + MatchCoordinator
-│   └── MatchFormatOptions.kt
+shared/src/commonMain/kotlin/com/racktrack/
 ├── domain/
 │   ├── model/             # Match, Player, GameMode, events, status, PushOutPhase
 │   ├── MatchEngine.kt
@@ -34,6 +28,19 @@ app/src/main/kotlin/com/racktrack/
 │   ├── FourteenOneEngine.kt
 │   ├── MatchStats.kt      # MatchSummary DTO + summarize()
 │   └── MatchSummaryReport.kt  # shared labels / filename stem for PDF
+└── i18n/                  # StringKey + EnStrings + Strings provider (i18n train next)
+
+app/src/main/kotlin/com/racktrack/
+├── MainActivity.kt
+├── appearance/            # FeltTone / FeltPalette (UI + prefs)
+├── presentation/
+│   ├── screen/            # Setup, boards, Summary, History, SettingsScreen
+│   ├── share/             # MatchSummaryPdfWriter + MatchSummaryShare
+│   ├── component/         # BoardMetrics, SwipeIntPicker, icons, textured controls, haptics
+│   ├── theme/             # Typography, AppThemeMode, RackTrackTheme
+│   ├── viewmodel/         # MatchViewModel + MatchCoordinator
+│   └── MatchFormatOptions.kt
+├── monetization/          # AdMob / Billing / UMP (Android-only)
 └── data/
     ├── AppPreferences.kt
     ├── UserSettings.kt
@@ -46,15 +53,18 @@ app/src/main/kotlin/com/racktrack/
 ```
 
 ### Dependency rule
-`presentation` → `domain`  
+`:app` → `:shared`  
+`presentation` → `domain` (via shared)  
 `presentation` → `data` / `appearance` (thin wiring)  
 `data` → `appearance` (persist felt tone) + `domain` (MatchSummary) — **not** → `presentation`  
-`domain` **never** depends on `data`, `presentation`, `appearance`, or Android.
+`domain` / `i18n` in `:shared` **never** depend on `data`, `presentation`, `appearance`, or Android APIs.
 
 ## 3. Why this shape
 
-Pool scoring rules stay in pure engines so JVM unit tests stay fast. The UI is a split
-scoreboard. Completed matches are snapshotted as `MatchSummary` for history replay and PDF share.
+Pool scoring rules stay in pure engines so JVM unit tests stay fast (`:shared:jvmTest`).
+The UI is a split scoreboard on Android. Completed matches are snapshotted as
+`MatchSummary` for history replay and PDF share. KMP unlocks shared catalogs for the
+i18n train; Compose Multiplatform UI / iOS targets come later.
 
 ## 4. Data flow (example: race +1)
 

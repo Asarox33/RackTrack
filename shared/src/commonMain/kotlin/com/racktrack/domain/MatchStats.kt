@@ -121,15 +121,21 @@ object MatchStats {
         )
     }
 
-    private fun playingDuration(from: Long, to: Long, pauses: List<PauseSpan>): Long =
-        ((to - from) - pauses.pausedMillisBetween(from, to)).coerceAtLeast(0L)
+    private fun playingDuration(
+        from: Long,
+        to: Long,
+        pauses: List<PauseSpan>,
+    ): Long = ((to - from) - pauses.pausedMillisBetween(from, to)).coerceAtLeast(0L)
 
     /**
      * Net points per visit for [playerId], in order (pocketed + FOUL/BREAK/−15).
      * A visit ends on PASS / FOUL / ACCEPT_ILLEGAL_OPEN; an open visit at match end is kept.
      * BREAK_FOUL (−2) stays in the open visit until accept or another visit end.
      */
-    fun inningScores(history: List<MatchEvent>, playerId: PlayerId): List<InningStat> {
+    fun inningScores(
+        history: List<MatchEvent>,
+        playerId: PlayerId,
+    ): List<InningStat> {
         val result = mutableListOf<InningStat>()
         var points = 0
         var open = false
@@ -141,11 +147,12 @@ object MatchStats {
                     open = true
                 }
                 MatchEventType.PASS -> {
-                    result += InningStat(
-                        index = result.size + 1,
-                        points = points,
-                        endType = MatchEventType.PASS,
-                    )
+                    result +=
+                        InningStat(
+                            index = result.size + 1,
+                            points = points,
+                            endType = MatchEventType.PASS,
+                        )
                     points = 0
                     open = false
                 }
@@ -159,11 +166,12 @@ object MatchStats {
                     if (event.type == MatchEventType.FOUL) {
                         points += event.value
                     }
-                    result += InningStat(
-                        index = result.size + 1,
-                        points = points,
-                        endType = event.type,
-                    )
+                    result +=
+                        InningStat(
+                            index = result.size + 1,
+                            points = points,
+                            endType = event.type,
+                        )
                     points = 0
                     open = false
                 }
@@ -178,16 +186,20 @@ object MatchStats {
             }
         }
         if (open) {
-            result += InningStat(
-                index = result.size + 1,
-                points = points,
-                endType = null,
-            )
+            result +=
+                InningStat(
+                    index = result.size + 1,
+                    points = points,
+                    endType = null,
+                )
         }
         return result
     }
 
-    private fun totalFouls(history: List<MatchEvent>, playerId: PlayerId): Int =
+    private fun totalFouls(
+        history: List<MatchEvent>,
+        playerId: PlayerId,
+    ): Int =
         history.count { event ->
             when (event.type) {
                 MatchEventType.FOUL,
@@ -199,18 +211,21 @@ object MatchStats {
             }
         }
 
-    private fun totalPushOuts(history: List<MatchEvent>, playerId: PlayerId): Int =
-        history.count { it.type == MatchEventType.PUSH_OUT && it.playerId == playerId }
+    private fun totalPushOuts(
+        history: List<MatchEvent>,
+        playerId: PlayerId,
+    ): Int = history.count { it.type == MatchEventType.PUSH_OUT && it.playerId == playerId }
 
     private fun rackStats(match: Match): List<RackStat> {
         val ending = match.history.filter { it.type.isRackEnding() }
         var segmentStart = match.startedAtMillis
         return ending.mapIndexed { index, event ->
             val winnerId = rackWinnerId(match, event)
-            val winnerName = when (winnerId) {
-                match.player1.id -> match.player1.name
-                else -> match.player2.name
-            }
+            val winnerName =
+                when (winnerId) {
+                    match.player1.id -> match.player1.name
+                    else -> match.player2.name
+                }
             val duration = playingDuration(segmentStart, event.atMillis, match.pauseSpans)
             segmentStart = event.atMillis
             RackStat(
@@ -222,10 +237,15 @@ object MatchStats {
         }
     }
 
-    private fun average(points: Int, innings: Int): Double =
-        if (innings <= 0) 0.0 else points.toDouble() / innings.toDouble()
+    private fun average(
+        points: Int,
+        innings: Int,
+    ): Double = if (innings <= 0) 0.0 else points.toDouble() / innings.toDouble()
 
-    private fun rackWinnerId(match: Match, event: MatchEvent): PlayerId =
+    private fun rackWinnerId(
+        match: Match,
+        event: MatchEvent,
+    ): PlayerId =
         when (event.type) {
             MatchEventType.PLUS_ONE,
             MatchEventType.RUN_OUT,

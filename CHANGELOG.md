@@ -6,6 +6,22 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 2.0.0 — 2026-08-26
+
+### Features
+
+- **Design System v1** — one visual world with three themes: Blue glossy, Warm light, Dark
+  teal (filigree + board HUD stat strip).
+- **Brand** — stylized R + RackTrack wordmark; Play icon, feature graphic, remove-ads IAP
+  art; in-app launcher mipmaps + cold-start splash (Blue glossy).
+- **KMP shared module** — pure domain (+ string-key skeleton for upcoming i18n) lives in
+  `:shared` (android + jvm); Compose UI stays on Android.
+
+### Notes
+
+- Developed on **`rc/2.0.0`**. Do **not** merge to `main` / ship Play production as 2.0 until
+  **1.2.x** production gate is complete. `versionCode` **200000** (formula smoke 0).
+
 ## 1.2.2 — 2026-08-21
 
 ### Improvements

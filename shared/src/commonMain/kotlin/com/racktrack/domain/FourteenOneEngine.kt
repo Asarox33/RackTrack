@@ -12,6 +12,7 @@ import com.racktrack.domain.model.PlayerId
  */
 object FourteenOneEngine {
     const val CONSECUTIVE_FOULS_TO_PENALTY = 3
+
     /** Stable table count after continuous re-rack (never 0 or keyball-only). */
     const val MIN_OBJECT_BALLS_REMAINING = 2
     private const val CLASSIC_FOUL_PENALTY = -1
@@ -19,46 +20,60 @@ object FourteenOneEngine {
     private const val THREE_FOUL_EXTRA_PENALTY = -15
     private const val OVERTIME_INNINGS = 5
 
-    fun addPoints(match: Match, playerId: PlayerId, points: Int, nowMillis: Long): Match {
+    fun addPoints(
+        match: Match,
+        playerId: PlayerId,
+        points: Int,
+        nowMillis: Long,
+    ): Match {
         if (!isActiveFourteenOne(match) || points <= 0) return match
         if (playerId != match.currentShooterId) return match
 
         val nextScore1 = if (playerId == match.player1.id) match.score1 + points else match.score1
         val nextScore2 = if (playerId == match.player2.id) match.score2 + points else match.score2
-        val withPoints = match.copy(
-            score1 = nextScore1,
-            score2 = nextScore2,
-            currentRun = match.currentRun + points,
-            foul1 = if (playerId == match.player1.id) 0 else match.foul1,
-            foul2 = if (playerId == match.player2.id) 0 else match.foul2,
-            objectBallsOnTable = reduceObjectBalls(match.objectBallsOnTable, points),
-            awaitingOpeningBreak = false,
-            history = match.history + MatchEvent(
-                MatchEventType.POINTS,
-                playerId,
-                nowMillis,
-                value = points,
-            ),
-        )
+        val withPoints =
+            match.copy(
+                score1 = nextScore1,
+                score2 = nextScore2,
+                currentRun = match.currentRun + points,
+                foul1 = if (playerId == match.player1.id) 0 else match.foul1,
+                foul2 = if (playerId == match.player2.id) 0 else match.foul2,
+                objectBallsOnTable = reduceObjectBalls(match.objectBallsOnTable, points),
+                awaitingOpeningBreak = false,
+                history =
+                    match.history +
+                        MatchEvent(
+                            MatchEventType.POINTS,
+                            playerId,
+                            nowMillis,
+                            value = points,
+                        ),
+            )
         return finishIfDistanceReached(withPoints)
     }
 
-    fun pass(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+    fun pass(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
         if (!isActiveFourteenOne(match)) return match
         if (playerId != match.currentShooterId) return match
 
         // Legal end of turn resets consecutive fouls (FFB 1.6.07).
-        val afterRun = commitCurrentRun(match, playerId).copy(
-            foul1 = if (playerId == match.player1.id) 0 else match.foul1,
-            foul2 = if (playerId == match.player2.id) 0 else match.foul2,
-        )
-        val ended = endInning(
-            match = afterRun,
-            playerId = playerId,
-            nextShooterId = nextShooterAfterVisit(match, playerId),
-            awaitingOpeningBreak = false,
-            historyEvent = MatchEvent(MatchEventType.PASS, playerId, nowMillis),
-        )
+        val afterRun =
+            commitCurrentRun(match, playerId).copy(
+                foul1 = if (playerId == match.player1.id) 0 else match.foul1,
+                foul2 = if (playerId == match.player2.id) 0 else match.foul2,
+            )
+        val ended =
+            endInning(
+                match = afterRun,
+                playerId = playerId,
+                nextShooterId = nextShooterAfterVisit(match, playerId),
+                awaitingOpeningBreak = false,
+                historyEvent = MatchEvent(MatchEventType.PASS, playerId, nowMillis),
+            )
         return resolveInningsLimit(ended)
     }
 
@@ -66,52 +81,64 @@ object FourteenOneEngine {
      * Classic foul: −1, consecutive foul++, end inning, hand to opponent
      * (unless 3rd consecutive → extra −15 and fouler must re-break).
      */
-    fun foul(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+    fun foul(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
         if (!isActiveFourteenOne(match)) return match
         if (playerId != match.currentShooterId) return match
 
         val afterRun = commitCurrentRun(match, playerId)
         val nextFoul = afterRun.foulsFor(playerId) + 1
         val scored = applyScoreDelta(afterRun, playerId, CLASSIC_FOUL_PENALTY)
-        val withFoulEvent = scored.copy(
-            foul1 = if (playerId == match.player1.id) nextFoul else afterRun.foul1,
-            foul2 = if (playerId == match.player2.id) nextFoul else afterRun.foul2,
-            history = scored.history + MatchEvent(
-                MatchEventType.FOUL,
-                playerId,
-                nowMillis,
-                value = CLASSIC_FOUL_PENALTY,
-            ),
-        )
+        val withFoulEvent =
+            scored.copy(
+                foul1 = if (playerId == match.player1.id) nextFoul else afterRun.foul1,
+                foul2 = if (playerId == match.player2.id) nextFoul else afterRun.foul2,
+                history =
+                    scored.history +
+                        MatchEvent(
+                            MatchEventType.FOUL,
+                            playerId,
+                            nowMillis,
+                            value = CLASSIC_FOUL_PENALTY,
+                        ),
+            )
 
         return if (nextFoul >= CONSECUTIVE_FOULS_TO_PENALTY) {
-            val withExtra = applyScoreDelta(withFoulEvent, playerId, THREE_FOUL_EXTRA_PENALTY)
-                .copy(
-                    foul1 = if (playerId == match.player1.id) 0 else withFoulEvent.foul1,
-                    foul2 = if (playerId == match.player2.id) 0 else withFoulEvent.foul2,
-                    history = withFoulEvent.history + MatchEvent(
-                        MatchEventType.THREE_FOUL_PENALTY,
-                        playerId,
-                        nowMillis,
-                        value = THREE_FOUL_EXTRA_PENALTY,
-                    ),
+            val withExtra =
+                applyScoreDelta(withFoulEvent, playerId, THREE_FOUL_EXTRA_PENALTY)
+                    .copy(
+                        foul1 = if (playerId == match.player1.id) 0 else withFoulEvent.foul1,
+                        foul2 = if (playerId == match.player2.id) 0 else withFoulEvent.foul2,
+                        history =
+                            withFoulEvent.history +
+                                MatchEvent(
+                                    MatchEventType.THREE_FOUL_PENALTY,
+                                    playerId,
+                                    nowMillis,
+                                    value = THREE_FOUL_EXTRA_PENALTY,
+                                ),
+                    )
+            val ended =
+                endInning(
+                    match = withExtra,
+                    playerId = playerId,
+                    nextShooterId = playerId,
+                    awaitingOpeningBreak = true,
+                    historyEvent = null,
                 )
-            val ended = endInning(
-                match = withExtra,
-                playerId = playerId,
-                nextShooterId = playerId,
-                awaitingOpeningBreak = true,
-                historyEvent = null,
-            )
             resolveInningsLimit(ended)
         } else {
-            val ended = endInning(
-                match = withFoulEvent,
-                playerId = playerId,
-                nextShooterId = nextShooterAfterVisit(match, playerId),
-                awaitingOpeningBreak = false,
-                historyEvent = null,
-            )
+            val ended =
+                endInning(
+                    match = withFoulEvent,
+                    playerId = playerId,
+                    nextShooterId = nextShooterAfterVisit(match, playerId),
+                    awaitingOpeningBreak = false,
+                    historyEvent = null,
+                )
             resolveInningsLimit(ended)
         }
     }
@@ -150,15 +177,19 @@ object FourteenOneEngine {
      * allowing at most one continuous re-rack in between.
      * Longer runs must use mid-visit clear-rack taps (+(n−1)).
      */
-    fun pointsFromTableToRemaining(currentOnTable: Int, remaining: Int): Int {
+    fun pointsFromTableToRemaining(
+        currentOnTable: Int,
+        remaining: Int,
+    ): Int {
         require(remaining in MIN_OBJECT_BALLS_REMAINING..Match.OBJECT_BALLS_FULL_RACK) {
             "remaining must be $MIN_OBJECT_BALLS_REMAINING..${Match.OBJECT_BALLS_FULL_RACK}"
         }
-        val current = if (currentOnTable <= 1) {
-            Match.OBJECT_BALLS_FULL_RACK
-        } else {
-            currentOnTable.coerceAtMost(Match.OBJECT_BALLS_FULL_RACK)
-        }
+        val current =
+            if (currentOnTable <= 1) {
+                Match.OBJECT_BALLS_FULL_RACK
+            } else {
+                currentOnTable.coerceAtMost(Match.OBJECT_BALLS_FULL_RACK)
+            }
         return when {
             remaining == current -> 0
             remaining < current -> current - remaining
@@ -183,7 +214,11 @@ object FourteenOneEngine {
     }
 
     /** Illegal opening break (FFB 1.6.03): −2; stay on open until ACCEPT or legal play. */
-    fun breakFoul(match: Match, playerId: PlayerId, nowMillis: Long): Match {
+    fun breakFoul(
+        match: Match,
+        playerId: PlayerId,
+        nowMillis: Long,
+    ): Match {
         if (!isActiveFourteenOne(match)) return match
         if (playerId != match.currentShooterId) return match
         if (!match.awaitingOpeningBreak) return match
@@ -197,12 +232,14 @@ object FourteenOneEngine {
                 awaitingOpeningBreak = true,
                 currentShooterId = playerId,
                 currentBreakerId = playerId,
-                history = scored.history + MatchEvent(
-                    MatchEventType.BREAK_FOUL,
-                    playerId,
-                    nowMillis,
-                    value = BREAK_FOUL_PENALTY,
-                ),
+                history =
+                    scored.history +
+                        MatchEvent(
+                            MatchEventType.BREAK_FOUL,
+                            playerId,
+                            nowMillis,
+                            value = BREAK_FOUL_PENALTY,
+                        ),
             ),
         )
     }
@@ -211,7 +248,10 @@ object FourteenOneEngine {
      * Opponent accepts the table after an illegal opening break.
      * Ends the breaker’s visit; [MatchEvent.playerId] is the fouler.
      */
-    fun acceptIllegalOpen(match: Match, nowMillis: Long): Match {
+    fun acceptIllegalOpen(
+        match: Match,
+        nowMillis: Long,
+    ): Match {
         if (!isActiveFourteenOne(match)) return match
         if (!match.awaitingOpeningBreak) return match
         val last = match.history.lastOrNull() ?: return match
@@ -219,13 +259,14 @@ object FourteenOneEngine {
         val fouler = last.playerId
         if (match.currentShooterId != fouler) return match
 
-        val ended = endInning(
-            match = match,
-            playerId = fouler,
-            nextShooterId = nextShooterAfterVisit(match, fouler),
-            awaitingOpeningBreak = false,
-            historyEvent = MatchEvent(MatchEventType.ACCEPT_ILLEGAL_OPEN, fouler, nowMillis),
-        )
+        val ended =
+            endInning(
+                match = match,
+                playerId = fouler,
+                nextShooterId = nextShooterAfterVisit(match, fouler),
+                awaitingOpeningBreak = false,
+                historyEvent = MatchEvent(MatchEventType.ACCEPT_ILLEGAL_OPEN, fouler, nowMillis),
+            )
         return resolveInningsLimit(ended)
     }
 
@@ -237,16 +278,19 @@ object FourteenOneEngine {
         return when (last.type) {
             MatchEventType.POINTS -> {
                 val points = last.value
-                val reverted = when (last.playerId) {
-                    match.player1.id -> match.copy(
-                        score1 = match.score1 - points,
-                        currentRun = (match.currentRun - points).coerceAtLeast(0),
-                    )
-                    else -> match.copy(
-                        score2 = match.score2 - points,
-                        currentRun = (match.currentRun - points).coerceAtLeast(0),
-                    )
-                }
+                val reverted =
+                    when (last.playerId) {
+                        match.player1.id ->
+                            match.copy(
+                                score1 = match.score1 - points,
+                                currentRun = (match.currentRun - points).coerceAtLeast(0),
+                            )
+                        else ->
+                            match.copy(
+                                score2 = match.score2 - points,
+                                currentRun = (match.currentRun - points).coerceAtLeast(0),
+                            )
+                    }
                 reverted.copy(
                     foul1 = consecutiveFoulsFromHistory(withoutLast, match.player1.id),
                     foul2 = consecutiveFoulsFromHistory(withoutLast, match.player2.id),
@@ -300,16 +344,18 @@ object FourteenOneEngine {
                 // Reverse −15 and the inning / re-break state; FOUL remains last for next undo.
                 val scoreRestored = applyScoreDelta(match, last.playerId, -last.value)
                 scoreRestored.copy(
-                    innings1 = if (last.playerId == match.player1.id) {
-                        (match.innings1 - 1).coerceAtLeast(0)
-                    } else {
-                        match.innings1
-                    },
-                    innings2 = if (last.playerId == match.player2.id) {
-                        (match.innings2 - 1).coerceAtLeast(0)
-                    } else {
-                        match.innings2
-                    },
+                    innings1 =
+                        if (last.playerId == match.player1.id) {
+                            (match.innings1 - 1).coerceAtLeast(0)
+                        } else {
+                            match.innings1
+                        },
+                    innings2 =
+                        if (last.playerId == match.player2.id) {
+                            (match.innings2 - 1).coerceAtLeast(0)
+                        } else {
+                            match.innings2
+                        },
                     currentShooterId = last.playerId,
                     currentBreakerId = last.playerId,
                     awaitingOpeningBreak = false,
@@ -334,16 +380,18 @@ object FourteenOneEngine {
         playerId: PlayerId,
     ): Match =
         match.copy(
-            innings1 = if (playerId == match.player1.id) {
-                (match.innings1 - 1).coerceAtLeast(0)
-            } else {
-                match.innings1
-            },
-            innings2 = if (playerId == match.player2.id) {
-                (match.innings2 - 1).coerceAtLeast(0)
-            } else {
-                match.innings2
-            },
+            innings1 =
+                if (playerId == match.player1.id) {
+                    (match.innings1 - 1).coerceAtLeast(0)
+                } else {
+                    match.innings1
+                },
+            innings2 =
+                if (playerId == match.player2.id) {
+                    (match.innings2 - 1).coerceAtLeast(0)
+                } else {
+                    match.innings2
+                },
             currentShooterId = playerId,
             currentBreakerId = playerId,
             currentRun = currentRunFromHistory(withoutLast, playerId),
@@ -358,17 +406,22 @@ object FourteenOneEngine {
             history = withoutLast,
         )
 
-    private fun commitCurrentRun(match: Match, playerId: PlayerId): Match {
+    private fun commitCurrentRun(
+        match: Match,
+        playerId: PlayerId,
+    ): Match {
         val run = match.currentRun
         return when (playerId) {
-            match.player1.id -> match.copy(
-                highRun1 = maxOf(match.highRun1, run),
-                currentRun = 0,
-            )
-            else -> match.copy(
-                highRun2 = maxOf(match.highRun2, run),
-                currentRun = 0,
-            )
+            match.player1.id ->
+                match.copy(
+                    highRun1 = maxOf(match.highRun1, run),
+                    currentRun = 0,
+                )
+            else ->
+                match.copy(
+                    highRun2 = maxOf(match.highRun2, run),
+                    currentRun = 0,
+                )
         }
     }
 
@@ -387,11 +440,12 @@ object FourteenOneEngine {
             currentShooterId = nextShooterId,
             currentBreakerId = nextShooterId,
             awaitingOpeningBreak = awaitingOpeningBreak,
-            objectBallsOnTable = if (awaitingOpeningBreak) {
-                Match.OBJECT_BALLS_FULL_RACK
-            } else {
-                match.objectBallsOnTable
-            },
+            objectBallsOnTable =
+                if (awaitingOpeningBreak) {
+                    Match.OBJECT_BALLS_FULL_RACK
+                } else {
+                    match.objectBallsOnTable
+                },
             currentRun = 0,
             history = if (historyEvent != null) match.history + historyEvent else match.history,
         )
@@ -402,7 +456,10 @@ object FourteenOneEngine {
      * when only the keyball remains (1), the fourteen are re-racked → 15 on table again.
      * There is no “pocket through 0” cycle — re-rack happens at 1, not after 15 points.
      */
-    internal fun reduceObjectBalls(current: Int, points: Int): Int {
+    internal fun reduceObjectBalls(
+        current: Int,
+        points: Int,
+    ): Int {
         var balls = current
         repeat(points) {
             balls -= 1
@@ -425,21 +482,28 @@ object FourteenOneEngine {
         return balls
     }
 
-    private fun applyScoreDelta(match: Match, playerId: PlayerId, delta: Int): Match =
+    private fun applyScoreDelta(
+        match: Match,
+        playerId: PlayerId,
+        delta: Int,
+    ): Match =
         when (playerId) {
             match.player1.id -> match.copy(score1 = match.score1 + delta)
             else -> match.copy(score2 = match.score2 + delta)
         }
 
-    private fun nextShooterAfterVisit(match: Match, playerId: PlayerId): PlayerId =
-        if (match.solo) playerId else match.otherPlayerId(playerId)
+    private fun nextShooterAfterVisit(
+        match: Match,
+        playerId: PlayerId,
+    ): PlayerId = if (match.solo) playerId else match.otherPlayerId(playerId)
 
     private fun finishIfDistanceReached(match: Match): Match {
-        val reached = if (match.solo) {
-            match.score1 >= match.pointsToWin
-        } else {
-            match.score1 >= match.pointsToWin || match.score2 >= match.pointsToWin
-        }
+        val reached =
+            if (match.solo) {
+                match.score1 >= match.pointsToWin
+            } else {
+                match.score1 >= match.pointsToWin || match.score2 >= match.pointsToWin
+            }
         return if (reached) match.copy(status = MatchStatus.COMPLETED) else match
     }
 
@@ -453,10 +517,11 @@ object FourteenOneEngine {
             return finishIfDistanceReached(match)
         }
         return when {
-            match.score1 == match.score2 -> match.copy(
-                inningsLimit = limit + OVERTIME_INNINGS,
-                status = MatchStatus.IN_PROGRESS,
-            )
+            match.score1 == match.score2 ->
+                match.copy(
+                    inningsLimit = limit + OVERTIME_INNINGS,
+                    status = MatchStatus.IN_PROGRESS,
+                )
             else -> match.copy(status = MatchStatus.COMPLETED)
         }
     }
@@ -489,23 +554,27 @@ object FourteenOneEngine {
         if (history.isEmpty()) return true
         var awaiting: Boolean? = null
         for (event in history.asReversed()) {
-            awaiting = when (event.type) {
-                MatchEventType.THREE_FOUL_PENALTY,
-                MatchEventType.BREAK_FOUL,
-                -> true
-                MatchEventType.ACCEPT_ILLEGAL_OPEN,
-                MatchEventType.POINTS,
-                MatchEventType.PASS,
-                MatchEventType.FOUL,
-                -> false
-                else -> awaiting
-            }
+            awaiting =
+                when (event.type) {
+                    MatchEventType.THREE_FOUL_PENALTY,
+                    MatchEventType.BREAK_FOUL,
+                    -> true
+                    MatchEventType.ACCEPT_ILLEGAL_OPEN,
+                    MatchEventType.POINTS,
+                    MatchEventType.PASS,
+                    MatchEventType.FOUL,
+                    -> false
+                    else -> awaiting
+                }
             if (awaiting != null) break
         }
         return awaiting ?: true
     }
 
-    private fun currentRunFromHistory(history: List<MatchEvent>, playerId: PlayerId): Int {
+    private fun currentRunFromHistory(
+        history: List<MatchEvent>,
+        playerId: PlayerId,
+    ): Int {
         var run = 0
         for (event in history.asReversed()) {
             when (event.type) {
@@ -523,7 +592,10 @@ object FourteenOneEngine {
         return run
     }
 
-    private fun highRunFromHistory(history: List<MatchEvent>, playerId: PlayerId): Int {
+    private fun highRunFromHistory(
+        history: List<MatchEvent>,
+        playerId: PlayerId,
+    ): Int {
         var best = 0
         var run = 0
         for (event in history) {
@@ -533,13 +605,15 @@ object FourteenOneEngine {
                 MatchEventType.FOUL,
                 MatchEventType.ACCEPT_ILLEGAL_OPEN,
                 MatchEventType.THREE_FOUL_PENALTY,
-                -> if (event.playerId == playerId) {
-                    best = maxOf(best, run)
-                    run = 0
-                }
-                MatchEventType.BREAK_FOUL -> if (event.playerId == playerId) {
-                    // Penalty mid-open; visit not closed until accept / legal end.
-                }
+                ->
+                    if (event.playerId == playerId) {
+                        best = maxOf(best, run)
+                        run = 0
+                    }
+                MatchEventType.BREAK_FOUL ->
+                    if (event.playerId == playerId) {
+                        // Penalty mid-open; visit not closed until accept / legal end.
+                    }
                 else -> Unit
             }
         }
