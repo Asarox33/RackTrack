@@ -10,6 +10,7 @@ import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.MatchStatus
 import com.racktrack.domain.model.PauseSpan
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.i18n.AppLanguage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,8 +34,8 @@ class MatchCoordinator(
     private val _screen = MutableStateFlow<AppScreen>(AppScreen.Setup)
     val screen: StateFlow<AppScreen> = _screen.asStateFlow()
 
-    /** Screen to restore when leaving [AppScreen.Settings] (Setup or in-progress board). */
-    private var settingsReturnScreen: AppScreen = AppScreen.Setup
+    /** Screen to restore when leaving [AppScreen.Settings] or [AppScreen.About]. */
+    private var overlayReturnScreen: AppScreen = AppScreen.Setup
 
     /** Club break pause — freezes duration accounting; not an FFB player timeout. */
     private val _matchPaused = MutableStateFlow(false)
@@ -46,13 +47,27 @@ class MatchCoordinator(
     fun openSettings() {
         val current = _screen.value
         if (current is AppScreen.Settings) return
-        settingsReturnScreen = current
+        overlayReturnScreen = current
         _screen.value = AppScreen.Settings
     }
 
     fun closeSettings() {
-        _screen.value = settingsReturnScreen
-        settingsReturnScreen = AppScreen.Setup
+        _screen.value = overlayReturnScreen
+        overlayReturnScreen = AppScreen.Setup
+    }
+
+    fun openAbout() {
+        val current = _screen.value
+        if (current is AppScreen.About) return
+        // About is Setup-only chrome; never open from the live board.
+        if (current is AppScreen.MatchBoard) return
+        overlayReturnScreen = current
+        _screen.value = AppScreen.About
+    }
+
+    fun closeAbout() {
+        _screen.value = overlayReturnScreen
+        overlayReturnScreen = AppScreen.Setup
     }
 
     fun toggleMatchPause() {
@@ -80,6 +95,10 @@ class MatchCoordinator(
 
     fun setThemeMode(mode: AppThemeMode) {
         updateSettings { it.copy(themeMode = mode) }
+    }
+
+    fun setAppLanguage(language: AppLanguage) {
+        updateSettings { it.copy(appLanguage = language) }
     }
 
     fun setKeepScreenOn(enabled: Boolean) {

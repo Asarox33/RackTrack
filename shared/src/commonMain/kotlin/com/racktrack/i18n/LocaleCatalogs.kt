@@ -20,4 +20,13 @@ object LocaleCatalogs {
             else -> EnStrings
         }
     }
+
+    /**
+     * Resolves [preference]: forced language, or [systemLanguageTag] when
+     * [AppLanguage.SYSTEM].
+     */
+    fun resolve(
+        preference: AppLanguage,
+        systemLanguageTag: String?,
+    ): StringProvider = resolve(preference.languageTag ?: systemLanguageTag)
 }

@@ -36,6 +36,7 @@ import com.racktrack.domain.model.GameMode
 import com.racktrack.i18n.StringKey
 import com.racktrack.i18n.Strings
 import com.racktrack.presentation.MatchFormatOptions
+import com.racktrack.presentation.component.AboutHelpButton
 import com.racktrack.presentation.component.SettingsGearButton
 import com.racktrack.presentation.component.SwipeIntPicker
 import com.racktrack.presentation.component.TexturedActionButton
@@ -61,6 +62,7 @@ fun SetupScreen(
     onStart: () -> Unit,
     onOpenHistory: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenAbout: () -> Unit = {},
     rootModifier: Modifier = Modifier,
 ) {
     val landscape =
@@ -99,6 +101,13 @@ fun SetupScreen(
                     onOpenHistory = onOpenHistory,
                 )
             }
+            AboutHelpButton(
+                onClick = onOpenAbout,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .safeDrawingPadding()
+                    .padding(top = 6.dp, start = 10.dp),
+            )
             SettingsGearButton(
                 onClick = onOpenSettings,
                 modifier = Modifier

@@ -26,6 +26,22 @@ class LocaleCatalogsTest {
     }
 
     @Test
+    fun `app language preference overrides system locale`() {
+        assertSame(
+            FrStrings,
+            LocaleCatalogs.resolve(AppLanguage.FRENCH, "de"),
+        )
+        assertSame(
+            EnStrings,
+            LocaleCatalogs.resolve(AppLanguage.ENGLISH, "fr"),
+        )
+        assertSame(
+            DeStrings,
+            LocaleCatalogs.resolve(AppLanguage.SYSTEM, "de-AT"),
+        )
+    }
+
+    @Test
     fun `french catalog translates key settings copy`() {
         assertEquals("RÉGLAGES", FrStrings.get(StringKey.SETTINGS))
         assertEquals("Pool américain", FrStrings.get(StringKey.SETUP_TAGLINE))

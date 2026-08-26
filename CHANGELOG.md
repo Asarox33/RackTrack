@@ -17,7 +17,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
 - **KMP shared module** — pure domain lives in `:shared` (android + jvm); Compose UI stays
   on Android.
 - **i18n** — UI / summary / PDF / prose dialogs in **en** (default) + **fr / de / es / it /
-  nl / pt** from system locale; board action chips stay English abbreviations.
+  nl / pt**; unknown system locales fall back to English. Settings **Language** swipe
+  picker (Twemoji flags + endonyms; System follows the device). Board action chips stay
+  English abbreviations.
+- **About** — dedicated screen from Setup info control (not during live match); credits
+  fonts (SIL OFL) and Twemoji flags (CC BY 4.0).
 
 ### Notes
 

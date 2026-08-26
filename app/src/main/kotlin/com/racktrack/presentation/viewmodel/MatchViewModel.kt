@@ -15,6 +15,7 @@ import com.racktrack.domain.model.BreakRule
 import com.racktrack.domain.model.GameMode
 import com.racktrack.domain.model.Match
 import com.racktrack.domain.model.PlayerId
+import com.racktrack.i18n.AppLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -50,6 +51,7 @@ sealed interface AppScreen {
     data object History : AppScreen
     data class HistoryDetail(val matchId: String) : AppScreen
     data object Settings : AppScreen
+    data object About : AppScreen
 }
 
 /** Thin Android shell: preferences, history store, [MatchCoordinator]. */
@@ -102,9 +104,15 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     fun closeSettings() = coordinator.closeSettings()
 
+    fun openAbout() = coordinator.openAbout()
+
+    fun closeAbout() = coordinator.closeAbout()
+
     fun toggleMatchPause() = coordinator.toggleMatchPause()
 
     fun setThemeMode(mode: AppThemeMode) = coordinator.setThemeMode(mode)
+
+    fun setAppLanguage(language: AppLanguage) = coordinator.setAppLanguage(language)
 
     fun setKeepScreenOn(enabled: Boolean) = coordinator.setKeepScreenOn(enabled)
 

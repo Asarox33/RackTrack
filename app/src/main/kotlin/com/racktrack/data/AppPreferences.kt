@@ -2,6 +2,7 @@ package com.racktrack.data
 
 import android.content.Context
 import com.racktrack.domain.model.BreakRule
+import com.racktrack.i18n.AppLanguage
 import com.racktrack.presentation.theme.AppThemeMode
 
 class AppPreferences(context: Context) {
@@ -18,6 +19,7 @@ class AppPreferences(context: Context) {
                 if (value <= 0) null else value
             },
             defaultBreakRule = breakRule(),
+            appLanguage = appLanguage(),
         )
 
     fun save(settings: UserSettings) {
@@ -30,6 +32,7 @@ class AppPreferences(context: Context) {
             .putInt(KEY_DEFAULT_POINTS, settings.defaultPointsToWin)
             .putInt(KEY_DEFAULT_INNINGS, settings.defaultInningsLimit ?: 0)
             .putString(KEY_DEFAULT_BREAK_RULE, settings.defaultBreakRule.name)
+            .putString(KEY_APP_LANGUAGE, settings.appLanguage.name)
             .apply()
     }
 
@@ -47,6 +50,11 @@ class AppPreferences(context: Context) {
         return BreakRule.entries.firstOrNull { it.name == raw } ?: BreakRule.ALTERNATE
     }
 
+    private fun appLanguage(): AppLanguage {
+        val raw = prefs.getString(KEY_APP_LANGUAGE, AppLanguage.SYSTEM.name)
+        return AppLanguage.entries.firstOrNull { it.name == raw } ?: AppLanguage.SYSTEM
+    }
+
     private companion object {
         const val PREFS_NAME = "racktrack_prefs"
         const val KEY_THEME_MODE = "theme_mode"
@@ -57,6 +65,7 @@ class AppPreferences(context: Context) {
         const val KEY_DEFAULT_POINTS = "default_points_to_win"
         const val KEY_DEFAULT_INNINGS = "default_innings_limit"
         const val KEY_DEFAULT_BREAK_RULE = "default_break_rule"
+        const val KEY_APP_LANGUAGE = "app_language"
         const val DEFAULT_RACKS = 6
         const val DEFAULT_POINTS = 100
         const val DEFAULT_INNINGS = 30

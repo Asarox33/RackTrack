@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.racktrack.R
 import com.racktrack.appearance.LocalFeltPalette
+import com.racktrack.i18n.StringProvider
 import com.racktrack.i18n.Strings
 import com.racktrack.presentation.i18n.LocalStrings
 
@@ -104,6 +105,7 @@ private fun Typography.withContentColor(color: Color): Typography =
 fun RackTrackTheme(
     themeMode: AppThemeMode = AppThemeMode.BLUE_GLOSSY,
     hapticsEnabled: Boolean = true,
+    strings: StringProvider = Strings.provider,
     content: @Composable () -> Unit,
 ) {
     val theme = themeMode.palette
@@ -140,7 +142,7 @@ fun RackTrackTheme(
         LocalAppTheme provides theme,
         LocalFeltPalette provides theme.asFeltPalette(),
         LocalHapticsEnabled provides hapticsEnabled,
-        LocalStrings provides Strings.provider,
+        LocalStrings provides strings,
     ) {
         MaterialTheme(
             colorScheme = colors,

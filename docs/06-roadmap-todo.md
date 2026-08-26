@@ -146,9 +146,10 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
    adaptive launcher + splash wired. **Play screenshots deferred** to 2.0 store publish.
 3. ✅ **KMP shared scaffold (2026-08-26)** — `:shared` (android + jvm) holds domain +
    string-key skeleton; Compose UI stays on `:app`. iOS target deferred.
-4. ✅ **i18n (2026-08-26)** — en default + fr/de/es/it/nl/pt catalogs; system locale;
+4. ✅ **i18n (2026-08-26)** — en default + fr/de/es/it/nl/pt catalogs; system locale
+   by default + Settings **Language** swipe (flags / endonyms); unknown locales → EN;
    Setup / Settings / History / summary / PDF / prose dialogs extracted. Board jargon
-   chips stay English. Manual locale override deferred.
+   chips stay English. **About** moved to Setup info control (not on live board).
 5. ⬜ **Multi-ruleset** — selectable packs (WPA / Matchroom / APA / BCA & CSI) for
    scoreboard-relevant deltas only.
 6. ⬜ **Accounts / find players + shared post-match stats** — never remote live scoring.
@@ -161,10 +162,11 @@ UI language (i18n) ≠ rule authority (multi-ruleset).
   domain + `i18n` catalogs (android + jvm). Remaining: CMP UI where practical;
   **iOS target** later (Mac).
 - ✅ **i18n (localization) (2026-08-26)** — English default; also **fr, de, es, it, nl, pt**:
-  - Setup / Settings / About / History / match summary / PDF / prose dialogs +
+  - Setup / Settings / History / match summary / PDF / prose dialogs +
     `MatchSummaryReport` labels via `:shared` `StringKey` / locale catalogs
-  - Fallback: **English**; cold-start **system locale** (`LocaleCatalogs.resolve`);
-    Settings manual override **not** shipped yet
+  - Fallback: **English** for unknown system tags (`zh`, `fil`, …); default **System**;
+    Settings **Language** swipe (`AppLanguage` + Twemoji flags, CC BY 4.0)
+  - **About** screen from Setup (info glyph, top-start); live board keeps pause + gear only
   - Short board jargon chips (**+1 / PASS / FOUL / RUN OUT / GOLDEN / …**) stay English
   - CMP resources / iOS sharing deferred with CMP UI train
 - ⬜ **Multi-ruleset** — FFB today; later selectable packs (WPA / Matchroom / APA / BCA & CSI)
@@ -217,8 +219,8 @@ Only reopen with an explicit owner decision. Not a near-term train.
 ## Progress notes
 
 - 2026-08-26: **i18n** — `:shared` catalogs en/fr/de/es/it/nl/pt + `LocaleCatalogs` /
-  `format`; system locale at cold start; Setup/Settings/History/summary/PDF/prose
-  dialogs extracted; board jargon chips remain English; no Settings locale override yet.
+  `format`; system locale by default + Settings Language swipe (Twemoji flags);
+  unknown locales → EN; About via Setup info control; board jargon chips remain English.
 - 2026-08-26: **`rc/2.0.0` version bump** — `versionName` **2.0.0** / `versionCode`
   **200000** + CHANGELOG + Play notes (still merge-after-1.2-prod).
 - 2026-08-26: **KMP scaffold** — `:shared` (android+jvm) with domain + `StringKey` /

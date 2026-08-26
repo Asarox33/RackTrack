@@ -28,16 +28,16 @@ shared/src/commonMain/kotlin/com/racktrack/
 │   ├── FourteenOneEngine.kt
 │   ├── MatchStats.kt      # MatchSummary DTO + summarize()
 │   └── MatchSummaryReport.kt  # shared labels / filename stem for PDF (uses StringProvider)
-└── i18n/                  # StringKey + En/Fr/De/Es/It/Nl/Pt + LocaleCatalogs + Strings
+└── i18n/                  # StringKey + AppLanguage + En/Fr/De/Es/It/Nl/Pt + LocaleCatalogs
 
 app/src/main/kotlin/com/racktrack/
-├── MainActivity.kt            # resolves system locale → Strings.provider
+├── MainActivity.kt            # resolves AppLanguage / system → Strings.provider
 ├── appearance/            # FeltTone / FeltPalette (UI + prefs)
 ├── presentation/
 │   ├── i18n/              # LocalStrings CompositionLocal
-│   ├── screen/            # Setup, boards, Summary, History, SettingsScreen
+│   ├── screen/            # Setup, boards, Summary, History, Settings, About
 │   ├── share/             # MatchSummaryPdfWriter + MatchSummaryShare
-│   ├── component/         # BoardMetrics, SwipeIntPicker, icons, textured controls, haptics
+│   ├── component/         # BoardMetrics, SwipeIntPicker, SwipeLanguagePicker, icons, …
 │   ├── theme/             # Typography, AppThemeMode, RackTrackTheme
 │   ├── viewmodel/         # MatchViewModel + MatchCoordinator
 │   └── MatchFormatOptions.kt
@@ -65,8 +65,9 @@ app/src/main/kotlin/com/racktrack/
 Pool scoring rules stay in pure engines so JVM unit tests stay fast (`:shared:jvmTest`).
 The UI is a split scoreboard on Android. Completed matches are snapshotted as
 `MatchSummary` for history replay and PDF share. Locale catalogs live in `:shared`
-(`LocaleCatalogs` + `Strings`); Compose reads them via `LocalStrings` / `Strings.get`.
-Compose Multiplatform UI / iOS targets come later.
+(`LocaleCatalogs` + `AppLanguage` + `Strings`); Compose reads them via `LocalStrings` /
+`Strings.get`. Settings can override the system language. Compose Multiplatform UI /
+iOS targets come later.
 
 ## 4. Data flow (example: race +1)
 

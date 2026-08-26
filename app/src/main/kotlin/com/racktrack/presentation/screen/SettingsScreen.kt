@@ -40,23 +40,20 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.racktrack.BuildConfig
 import com.racktrack.data.UserSettings
 import com.racktrack.domain.model.BreakRule
+import com.racktrack.i18n.AppLanguage
 import com.racktrack.i18n.StringKey
 import com.racktrack.i18n.Strings
 import com.racktrack.presentation.MatchFormatOptions
 import com.racktrack.presentation.component.ScrollMoreHint
 import com.racktrack.presentation.component.SwipeIntPicker
+import com.racktrack.presentation.component.SwipeLanguagePicker
 import com.racktrack.presentation.component.TexturedActionButton
 import com.racktrack.presentation.component.TexturedChip
 import com.racktrack.presentation.theme.AppThemeBackground
 import com.racktrack.presentation.theme.AppThemeMode
 import com.racktrack.presentation.theme.LocalAppTheme
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 @Composable
 fun SettingsScreen(
@@ -65,6 +62,7 @@ fun SettingsScreen(
     onRemoveAds: () -> Unit = {},
     onRestorePurchases: () -> Unit = {},
     onThemeSelected: (AppThemeMode) -> Unit,
+    onAppLanguageSelected: (AppLanguage) -> Unit = {},
     onKeepScreenOnChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
     onDefaultRacksChange: (Int) -> Unit,
@@ -121,6 +119,14 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionLabel(Strings.get(StringKey.SECTION_LANGUAGE))
+            Spacer(modifier = Modifier.height(8.dp))
+            SwipeLanguagePicker(
+                language = settings.appLanguage,
+                onLanguageChange = onAppLanguageSelected,
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionLabel(Strings.get(StringKey.SECTION_DEVICE))
@@ -269,15 +275,6 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel(Strings.get(StringKey.SECTION_ABOUT))
-            Spacer(modifier = Modifier.height(8.dp))
-            AboutPanel(onOpenRepo = {
-                context.startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.REPO_URL)),
-                )
-            })
-
-            Spacer(modifier = Modifier.height(16.dp))
             TexturedActionButton(
                 label = Strings.get(StringKey.BACK),
                 base = chrome.accent,
@@ -295,74 +292,6 @@ fun SettingsScreen(
                 fadeColor = chrome.background,
             )
         }
-    }
-}
-
-@Composable
-private fun AboutPanel(onOpenRepo: () -> Unit) {
-    val chrome = LocalAppTheme.current
-    val buildKind = if (BuildConfig.DEBUG) "debug" else "release"
-    val builtAt = remember {
-        SimpleDateFormat("yyyy-MM-dd HH:mm 'UTC'", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }.format(Date(BuildConfig.BUILD_EPOCH_MS))
-    }
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        AboutMetaRow(label = Strings.get(StringKey.ABOUT_APP), value = Strings.get(StringKey.APP_NAME))
-        AboutMetaRow(
-            label = Strings.get(StringKey.ABOUT_VERSION),
-            value = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-        )
-        AboutMetaRow(label = Strings.get(StringKey.ABOUT_BUILD), value = buildKind)
-        AboutMetaRow(label = Strings.get(StringKey.ABOUT_BUILT), value = builtAt)
-        Text(
-            text = Strings.get(StringKey.ABOUT_FONTS),
-            style = MaterialTheme.typography.bodyLarge,
-            color = chrome.textSecondary,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            text = Strings.get(StringKey.ABOUT_GITHUB),
-            style = MaterialTheme.typography.bodyLarge,
-            color = chrome.accentLight,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpenRepo)
-                .padding(vertical = 4.dp),
-        )
-        Text(
-            text = Strings.get(StringKey.ABOUT_BLURB),
-            style = MaterialTheme.typography.bodyLarge,
-            color = chrome.textSecondary,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
-@Composable
-private fun AboutMetaRow(label: String, value: String) {
-    val chrome = LocalAppTheme.current
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = chrome.textSecondary,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            color = chrome.textPrimary,
-            textAlign = TextAlign.End,
-            modifier = Modifier.padding(start = 12.dp),
-        )
     }
 }
 

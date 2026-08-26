@@ -1,6 +1,6 @@
 <fr-FR>
-RackTrack 2.0.0 — train 2.0 (rc). Design System, identité visuelle, module KMP, i18n (en/fr/de/es/it/nl/pt, locale système). Pas encore le Play production 1.2.
+RackTrack 2.0.0 — train 2.0 (rc). DS + marque, KMP, i18n (en/fr/de/es/it/nl/pt, Système ou choix, drapeaux Twemoji). À propos hors match. Pas encore le Play production 1.2.
 </fr-FR>
 <en-US>
-RackTrack 2.0.0 — 2.0 train (rc). Design System, brand, KMP shared module, i18n (en/fr/de/es/it/nl/pt, system locale). Not the 1.2 Play production gate yet.
+RackTrack 2.0.0 — 2.0 train (rc). DS + brand, KMP, i18n (en/fr/de/es/it/nl/pt, System or pick, Twemoji flags). About off-board. Not the 1.2 Play production gate yet.
 </en-US>
