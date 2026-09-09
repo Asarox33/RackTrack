@@ -44,7 +44,7 @@ class MatchCoordinatorTest {
         c.updatePlayer2Name("Sam")
         c.updateGameMode(GameMode.NINE_BALL)
         c.updateRacksToWin(5)
-        c.setPlayer1BreaksFirst(false)
+        c.setPlayer1BreaksFirst(true)
 
         c.startMatch()
 
@@ -53,7 +53,43 @@ class MatchCoordinatorTest {
         assertEquals("Sam", match.player2.name)
         assertEquals(GameMode.NINE_BALL, match.gameMode)
         assertEquals(5, match.racksToWin)
-        assertEquals(match.player2.id, match.currentBreakerId)
+        assertEquals(match.player1.id, match.currentBreakerId)
+        assertEquals(match.player1.id, match.openingBreakerId)
+    }
+
+    @Test
+    fun `given setup player2 breaks first, when startMatch, then opener sits top-left as player1`() {
+        val c = coordinator()
+        c.updatePlayer1Name("Alex")
+        c.updatePlayer2Name("Sam")
+        c.updateGameMode(GameMode.NINE_BALL)
+        c.setPlayer1BreaksFirst(false)
+
+        c.startMatch()
+
+        val match = c.board().match
+        assertEquals("Sam", match.player1.name)
+        assertEquals("Alex", match.player2.name)
+        assertEquals(match.player1.id, match.openingBreakerId)
+        assertEquals(match.player1.id, match.currentBreakerId)
+        assertEquals(match.player1.id, match.currentShooterId)
+    }
+
+    @Test
+    fun `given 14-1 player2 starts, when startMatch, then opener sits as player1`() {
+        val c = coordinator()
+        c.updatePlayer1Name("Alex")
+        c.updatePlayer2Name("Sam")
+        c.updateGameMode(GameMode.FOURTEEN_ONE)
+        c.setPlayer1BreaksFirst(false)
+
+        c.startMatch()
+
+        val match = c.board().match
+        assertEquals("Sam", match.player1.name)
+        assertEquals("Alex", match.player2.name)
+        assertEquals(match.player1.id, match.openingBreakerId)
+        assertEquals(match.player1.id, match.currentShooterId)
     }
 
     @Test
