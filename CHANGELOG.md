@@ -6,6 +6,15 @@ CI (`cut-release.yml` / `release.yml`) copies that section into the GitHub Relea
 
 Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under each version.
 
+## 1.2.3 — 2026-09-09
+
+### Fixes
+
+- **Opening breaker seat** — the player who breaks first is always shown top (portrait) or
+  left (landscape), regardless of name order on setup.
+- **New match confirm** — leaving an in-progress match or training asks for confirmation so
+  a mis-tap does not discard the live board.
+
 ## 1.2.2 — 2026-08-21
 
 ### Improvements

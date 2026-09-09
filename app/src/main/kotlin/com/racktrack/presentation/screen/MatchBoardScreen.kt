@@ -24,11 +24,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -112,6 +116,14 @@ fun MatchBoardScreen(
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val felt = LocalFeltPalette.current
     val playEnabled = match.status == MatchStatus.IN_PROGRESS && !matchPaused
+    var pendingNewMatch by remember { mutableStateOf(false) }
+    val requestNewMatch = {
+        if (match.status == MatchStatus.IN_PROGRESS) {
+            pendingNewMatch = true
+        } else {
+            onNewMatch()
+        }
+    }
 
     FeltBackground(modifier = modifier) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -224,7 +236,7 @@ fun MatchBoardScreen(
                     Spacer(modifier = Modifier.width(chrome.footerGap))
                     TexturedOutlineAction(
                         label = if (match.solo) "NEW TRAINING" else "NEW MATCH",
-                        onClick = onNewMatch,
+                        onClick = requestNewMatch,
                         enabled = true,
                         height = chrome.footerActionHeight,
                     )
@@ -291,6 +303,17 @@ fun MatchBoardScreen(
                 MatchSummaryModal(
                     summary = MatchStats.summarize(match),
                     onNewMatch = onNewMatch,
+                )
+            }
+
+            if (pendingNewMatch) {
+                DiscardInProgressConfirmDialog(
+                    solo = match.solo,
+                    onConfirm = {
+                        pendingNewMatch = false
+                        onNewMatch()
+                    },
+                    onDismiss = { pendingNewMatch = false },
                 )
             }
 
@@ -861,6 +884,39 @@ private fun RaceModeExtraButtons(
             )
         }
     }
+}
+
+@Composable
+private fun DiscardInProgressConfirmDialog(
+    solo: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(if (solo) "Leave training?" else "Leave match?")
+        },
+        text = {
+            Text(
+                if (solo) {
+                    "The current training will be lost."
+                } else {
+                    "The current match will be lost."
+                },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(if (solo) "NEW TRAINING" else "NEW MATCH")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("CANCEL")
+            }
+        },
+    )
 }
 
 private fun BreakAnchor.alignment(): Alignment =

@@ -1,10 +1,10 @@
 <fr-FR>
-RackTrack 1.2.2
+RackTrack 1.2.3
 
-Tableau des reprises 14/1 plus lisible : scores cumulés au centre (récap + PDF), y compris en solo.
+Casse d’ouverture toujours en haut / à gauche. Confirmation avant Nouveau match si la partie est en cours.
 </fr-FR>
 <en-US>
-RackTrack 1.2.2
+RackTrack 1.2.3
 
-Clearer 14/1 innings table: cumulative totals centered (summary + PDF), including solo training.
+Opening breaker always top / left. Confirm before New match when a game is in progress.
 </en-US>
