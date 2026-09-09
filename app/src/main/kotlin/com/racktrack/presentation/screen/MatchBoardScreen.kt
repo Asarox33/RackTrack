@@ -23,11 +23,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -103,6 +107,14 @@ fun MatchBoardScreen(
     val actions = theme.actions
     val felt = LocalFeltPalette.current
     val playEnabled = match.status == MatchStatus.IN_PROGRESS && !matchPaused
+    var pendingNewMatch by remember { mutableStateOf(false) }
+    val requestNewMatch = {
+        if (match.status == MatchStatus.IN_PROGRESS) {
+            pendingNewMatch = true
+        } else {
+            onNewMatch()
+        }
+    }
 
     AppThemeBackground(modifier = modifier) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -222,7 +234,7 @@ fun MatchBoardScreen(
                         } else {
                             Strings.get(StringKey.NEW_MATCH)
                         },
-                        onClick = onNewMatch,
+                        onClick = requestNewMatch,
                         enabled = true,
                         height = chrome.footerActionHeight,
                     )
@@ -289,6 +301,17 @@ fun MatchBoardScreen(
                 MatchSummaryModal(
                     summary = MatchStats.summarize(match),
                     onNewMatch = onNewMatch,
+                )
+            }
+
+            if (pendingNewMatch) {
+                DiscardInProgressConfirmDialog(
+                    solo = match.solo,
+                    onConfirm = {
+                        pendingNewMatch = false
+                        onNewMatch()
+                    },
+                    onDismiss = { pendingNewMatch = false },
                 )
             }
 
@@ -904,6 +927,51 @@ private fun RaceModeExtraButtons(
             )
         }
     }
+}
+
+@Composable
+private fun DiscardInProgressConfirmDialog(
+    solo: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                if (solo) {
+                    Strings.get(StringKey.DISCARD_TRAINING_Q)
+                } else {
+                    Strings.get(StringKey.DISCARD_MATCH_Q)
+                },
+            )
+        },
+        text = {
+            Text(
+                if (solo) {
+                    Strings.get(StringKey.DISCARD_TRAINING_BODY)
+                } else {
+                    Strings.get(StringKey.DISCARD_MATCH_BODY)
+                },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    if (solo) {
+                        Strings.get(StringKey.NEW_TRAINING)
+                    } else {
+                        Strings.get(StringKey.NEW_MATCH)
+                    },
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(Strings.get(StringKey.CANCEL))
+            }
+        },
+    )
 }
 
 private fun BreakAnchor.alignment(): Alignment =

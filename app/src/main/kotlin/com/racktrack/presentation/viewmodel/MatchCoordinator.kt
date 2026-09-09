@@ -241,12 +241,17 @@ class MatchCoordinator(
         val s = _setup.value
         val now = clock()
         val pack = _settings.value.rulesetPack.forMode(s.gameMode)
+        // Board seat player1 is always top (portrait) / left (landscape). Put the
+        // opening breaker in that seat regardless of setup field order.
+        val openerIsSetupPlayer1 = s.soloTraining || s.player1BreaksFirst
+        val seat1Name = if (openerIsSetupPlayer1) s.player1Name else s.player2Name
+        val seat2Name = if (openerIsSetupPlayer1) s.player2Name else s.player1Name
         val match = if (s.gameMode.isPointScoring) {
             Match.start(
-                player1Name = s.player1Name,
-                player2Name = s.player2Name,
+                player1Name = seat1Name,
+                player2Name = seat2Name,
                 racksToWin = 1,
-                initialBreakerIsPlayer1 = if (s.soloTraining) true else s.player1BreaksFirst,
+                initialBreakerIsPlayer1 = true,
                 startedAtMillis = now,
                 gameMode = s.gameMode,
                 pointsToWin = s.pointsToWin,
@@ -256,10 +261,10 @@ class MatchCoordinator(
             )
         } else {
             Match.start(
-                player1Name = s.player1Name,
-                player2Name = s.player2Name,
+                player1Name = seat1Name,
+                player2Name = seat2Name,
                 racksToWin = s.racksToWin,
-                initialBreakerIsPlayer1 = s.player1BreaksFirst,
+                initialBreakerIsPlayer1 = true,
                 startedAtMillis = now,
                 gameMode = s.gameMode,
                 breakRule = s.breakRule,
