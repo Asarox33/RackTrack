@@ -32,6 +32,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/)-style headings under eac
   selected mode’s defaults; legacy single race / break prefs migrate until edited.
   Remove-ads + Restore sit on one row.
 
+### Fixes
+
+- **Opening breaker seat** — the player who breaks first is always shown top (portrait) or
+  left (landscape), regardless of name order on setup.
+- **New match confirm** — leaving an in-progress match or training asks for confirmation so
+  a mis-tap does not discard the live board.
+
 ### Notes
 
 - Developed on **`rc/2.0.0`**. Do **not** merge to `main` / ship Play production as 2.0 until
